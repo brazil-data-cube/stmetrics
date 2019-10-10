@@ -1,7 +1,3 @@
-import numpy
-
-from.utils import fixseries
-
 def ts_basics(timeseries):
     
     """
