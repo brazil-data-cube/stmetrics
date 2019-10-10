@@ -1,3 +1,8 @@
+import numpy
+import math
+from shapely import geometry
+from shapely.geometry import MultiPolygon, Polygon, mapping, shape
+from shapely.geometry.polygon import LinearRing
 
 def fixseries(time_series):
     
@@ -38,7 +43,7 @@ def fixseries(time_series):
     return time_series2
 
 def create_polygon(timeseries):
-    
+    import math
     """
     
     This function converts the time series to the polar space.

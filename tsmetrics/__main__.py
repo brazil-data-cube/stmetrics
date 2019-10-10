@@ -6,7 +6,9 @@ from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
 
-from.utils import *
+from .utils import *
+from .basics import *
+from .polar import *
 
 if __name__ == "__main__":
 
