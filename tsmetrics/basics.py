@@ -1,5 +1,7 @@
 import numpy
 
+from.utils import fixseries
+
 def ts_basics(timeseries):
     
     """
@@ -164,6 +166,6 @@ def first_slop(timeseries):
     	The maximum value of the first slope of time series.
     """
     
-    return numpy.max(abs(numpy.diff(ts)))
+    return numpy.max(abs(numpy.diff(timeseries)))
 
     
