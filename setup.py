@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tsmetrics",
-    version="0.0.0.1",
-    author="Anderson Soares",
+    version="0.0.0.2",
+    author="Anderson Soares, Thales Körting",
     author_email="andersonreis.geo@gmail.com",
     description="A demo package to compute time series metrics",
     long_description=long_description,
