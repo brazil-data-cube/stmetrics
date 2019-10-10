@@ -6,6 +6,65 @@ from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
 
+def symmetric_distance(time_series_1, time_series_2):
+
+    """
+    
+    This function computes the difference between two time series considering the
+    polar space.
+
+    Keyword arguments:
+        timeseries1 : numpy array
+        timeseries2 : numpy array    
+
+    Returns
+    -------
+    numpy.float64:
+        distance
+    
+    """
+
+    dist = math.inf
+    pos = math.inf
+    polygon_1 = create_polygon(time_series_1)
+    
+    if polygon_1.is_valid == False:
+        polygon_1 = polygon_1.buffer(0)
+    
+    if min(time_series_1) > max(time_series_2) or min(time_series_2) > max(time_series_1):
+        polygon_2 = create_polygon(time_series_2)
+        polygons_symmetric_difference = polygon_1.symmetric_difference(polygon_2)
+        dist = polygons_symmetric_difference.area
+        
+    else:
+        for i in range(len(time_series_1)):
+            shifted_time_series_2 = numpy.roll(time_series_2, i)
+            temp = numpy.linalg.norm(time_series_1-shifted_time_series_2)
+
+            if temp<dist:
+                dist = temp
+                pos = i
+               
+        time_series_2 = numpy.roll(time_series_2,pos)
+
+        polygon_2 = create_polygon(time_series_2)
+
+        if polygon_2.is_valid:
+
+            polygons_symmetric_difference = polygon_1.symmetric_difference(polygon_2)
+
+            dist = polygons_symmetric_difference.area
+
+        else:
+
+            polygon_2 = polygon_2.buffer(0)
+
+            polygons_symmetric_difference = polygon_1.symmetric_difference(polygon_2)
+
+            dist = polygons_symmetric_difference.area
+        
+    return dist
+
 
 def plot_polar(ts):
     
