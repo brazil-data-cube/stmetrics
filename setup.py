@@ -13,6 +13,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/andersonreisoares/tsmetrics/",
     packages=['tsmetrics'],
+    install_requires=[
+    'numpy',
+    'matplotlib',
+    'shapely',
+    'descartes'
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
