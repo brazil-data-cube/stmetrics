@@ -8,7 +8,9 @@ from shapely.geometry.polygon import LinearRing
 from.utils import *
 
 def symmetric_distance(time_series_1, time_series_2):
-    import math
+
+    
+
     """
     
     This function computes the difference between two time series considering the
@@ -24,7 +26,8 @@ def symmetric_distance(time_series_1, time_series_2):
         distance
     
     """
-
+    import math
+    
     dist = math.inf
     pos = math.inf
     polygon_1 = create_polygon(time_series_1)
