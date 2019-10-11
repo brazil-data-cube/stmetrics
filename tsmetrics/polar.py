@@ -67,7 +67,7 @@ def symmetric_distance(time_series_1, time_series_2):
     return dist
 
 
-def plot_polar(ts):
+def polar_plot(ts):
     
     """
     
@@ -206,7 +206,7 @@ def area_season(ts):
     area3 =  quaterPolyBottomLeft.area
     area4 =  quaterPolyBottomRight.area
     
-    return area1,area2,area3,area4 
+    return area1,area2,area3,area4
 
 def circle_metric(ts):
     
@@ -235,7 +235,7 @@ def circle_metric(ts):
     axis1 = maxx - minx
     axis2 = maxy - miny
     stats = numpy.array([axis1, axis2])
-    ecc = stats.min() / stats.max()
+    ecc = 1 - (stats.min() / stats.max())
     
     return ecc
 
@@ -313,7 +313,7 @@ def polar_balance(ts):
     Keyword arguments:
         timeseries : numpy array
             Your time series.
-
+    
     Returns
     -------
     numpy.float64
@@ -406,6 +406,6 @@ def ts_polar(timeseries,show = False):
     ang = angle(timeseries)
     
     if show==True:
-        plot_polar(timeseries)
+        polar_plot(timeseries)
     
     return numpy.array([area,areas1,areas2,areas3,areas4,circle,gyro,balance,ang])
