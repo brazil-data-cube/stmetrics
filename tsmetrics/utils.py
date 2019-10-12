@@ -14,15 +14,17 @@ def fixseries(time_series):
     it may produce inconsistent polygons. To avoid this, this function remove this spikes.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
     -------
-    numpy.array:
-	Numpy array of time series without spikes.
+    numpy.ndarray:
+	   Numpy array of time series without spikes.
     
     """
+
+    check_input(time_series)
     
     time_series2 = time_series
     
@@ -43,7 +45,7 @@ def fixseries(time_series):
     return time_series2
 
 def create_polygon(timeseries):
-    import math
+    
     """
     
     This function converts the time series to the polar space.
@@ -51,18 +53,17 @@ def create_polygon(timeseries):
     to polar space.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
     -------
-    Polygon
+        Shapely.Polygon
     
     """
     
-    if len(timeseries) < 3:
-        raise TypeError("Your time series is too short!")
-    
+    import math
+
     #remove weird spikes on timeseries
     ts = fixseries(timeseries)
      
@@ -96,13 +97,13 @@ def get_list_of_points(ts):
     This list is used for convert the time series to a polygon.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
     -------
     lists:
-    Lists of observations and angles, that are used to create a polygon.
+        Lists of observations and angles, that are used to create a polygon.
     
     """
     
@@ -111,3 +112,32 @@ def get_list_of_points(ts):
     list_of_angles = numpy.linspace(0, 2 * numpy.pi, len(list_of_observations))
     
     return list_of_observations, list_of_angles
+
+def check_input(timeseries):
+
+    """
+    
+    This function check the input and raise exception if it is too short or 
+    has the wrong type. 
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+
+    Returns
+    -------
+        timeseries
+    
+    """
+
+    if isinstance(timeseries,numpy.ndarray):
+
+        if len(timeseries) < 3:
+            raise TypeError("Your time series is too short!")
+        else:
+            return timeseries
+    else:
+        raise Exception('Incorrect type: Please use numpy.array as input.')
+
+
+    

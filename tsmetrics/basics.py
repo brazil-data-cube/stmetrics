@@ -20,7 +20,7 @@ def ts_basics(timeseries):
 
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -53,7 +53,7 @@ def mean_ts(timeseries):
     "Mean" - Average value of the curve along one cycle.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -62,8 +62,8 @@ def mean_ts(timeseries):
 	Mean value of time series.
 
     """
-    
-    return numpy.mean(timeseries)
+    ts = fixseries(timeseries)
+    return numpy.mean(ts)
     
 def max_ts(timeseries):
 
@@ -71,7 +71,7 @@ def max_ts(timeseries):
     "Max" - Maximum value of the cycle.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -79,8 +79,8 @@ def max_ts(timeseries):
     numpy.float64:
     	Maximum value of time series.
     """
-    
-    return numpy.max(timeseries)
+    ts = fixseries(timeseries)
+    return numpy.max(ts)
 
 def min_ts(timeseries):
 
@@ -88,7 +88,7 @@ def min_ts(timeseries):
     "Min" - Minimum value of the curve along one cycle.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -96,15 +96,15 @@ def min_ts(timeseries):
     numpy.float64:
     	Minimum value of time series.
     """
-    
-    return numpy.min(timeseries)
+    ts = fixseries(timeseries)
+    return numpy.min(ts)
 
 def std_ts(timeseries):
     """
     "Std" - Standard deviation of the cycle’s values. 
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -112,8 +112,8 @@ def std_ts(timeseries):
     numpy.float64:
     	Standard deviation of time series.
     """
-    
-    return numpy.std(timeseries)
+    ts = fixseries(timeseries)
+    return numpy.std(ts)
 
 def sum_ts(timeseries):
 
@@ -122,7 +122,7 @@ def sum_ts(timeseries):
     Usually is an indicator of the annual production of vegetation.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -130,8 +130,8 @@ def sum_ts(timeseries):
     numpy.float64:
     	Sum of values of time series.
     """
-    
-    return numpy.sum(timeseries)
+    ts = fixseries(timeseries)
+    return numpy.sum(ts)
     
 def amplitude(timeseries):
 
@@ -139,7 +139,7 @@ def amplitude(timeseries):
     "Amplitude" - The difference between the cycle’s maximum and minimum values.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -147,8 +147,8 @@ def amplitude(timeseries):
     numpy.float64:
     	Amplitude of values of time series.
     """
-    
-    return numpy.max(timeseries) - numpy.min(timeseries)
+    ts = fixseries(timeseries)
+    return numpy.max(ts) - numpy.min(ts)
     
 def first_slop(timeseries):
 
@@ -157,7 +157,7 @@ def first_slop(timeseries):
     It indicates when the cycle presents some abrupt change in the curve.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -165,7 +165,7 @@ def first_slop(timeseries):
     numpy.float64:
     	The maximum value of the first slope of time series.
     """
-    
-    return numpy.max(abs(numpy.diff(timeseries)))
+    ts = fixseries(timeseries)
+    return numpy.max(abs(numpy.diff(ts)))
 
     

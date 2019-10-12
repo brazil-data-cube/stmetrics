@@ -5,11 +5,9 @@ from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
 
-from.utils import *
+from .utils import *
 
 def symmetric_distance(time_series_1, time_series_2):
-
-    
 
     """
     
@@ -17,8 +15,8 @@ def symmetric_distance(time_series_1, time_series_2):
     polar space.
 
     Keyword arguments:
-        timeseries1 : numpy array
-        timeseries2 : numpy array    
+        time_series_1 : numpy.ndarray
+        time_series_2 : numpy.ndarray    
 
     Returns
     -------
@@ -27,9 +25,14 @@ def symmetric_distance(time_series_1, time_series_2):
     
     """
     import math
-    
+
     dist = math.inf
     pos = math.inf
+
+
+    time_series_1 = fixseries(time_series_1)
+    time_series_2 = fixseries(time_series_2)
+
     polygon_1 = create_polygon(time_series_1)
     
     if polygon_1.is_valid == False:
@@ -70,14 +73,14 @@ def symmetric_distance(time_series_1, time_series_2):
     return dist
 
 
-def polar_plot(ts):
+def polar_plot(timeseries):
     
     """
     
     This function create a plot of time series in polar space.
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -86,7 +89,7 @@ def polar_plot(ts):
     Plot of time series in polar space.
     
     """
-        
+    ts = fixseries(timeseries)
     polygon = create_polygon(ts)
     
     x,y = polygon.envelope.exterior.coords.xy
@@ -165,7 +168,7 @@ def get_seasons(x,y):
     
     return polyTopLeft,polyTopRight,polyBottomLeft,polyBottomRight
 
-def area_season(ts):
+def area_season(timeseries):
     
     """
 
@@ -176,7 +179,7 @@ def area_season(ts):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -185,7 +188,8 @@ def area_season(ts):
     	The area of the time series that intersected each quadrant that represents a season.
     
     """
-    
+    ts = fixseries(timeseries)
+
     #create polygon
     polygon = create_polygon(ts) 
     
@@ -211,7 +215,7 @@ def area_season(ts):
     
     return area1,area2,area3,area4
 
-def circle_metric(ts):
+def circle_metric(timeseries):
     
     """
 
@@ -221,7 +225,7 @@ def circle_metric(ts):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -230,7 +234,9 @@ def circle_metric(ts):
 	Eccentricity of time series.
     
     """
-    
+
+
+    ts = fixseries(timeseries)
     #create polygon
     polygon = create_polygon(ts)     
     rrec = polygon.minimum_rotated_rectangle
@@ -242,7 +248,7 @@ def circle_metric(ts):
     
     return ecc
 
-def angle(ts):
+def angle(timeseries):
     
     """
     Angle - The main angle of the closed shape created by the polar visualization.
@@ -251,7 +257,7 @@ def angle(ts):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -260,14 +266,15 @@ def angle(ts):
     	The main angle of time series.
     
     """
-    
+    ts = fixseries(timeseries)
+
     list_of_radius, list_of_angles = get_list_of_points(ts)
     index = numpy.argmax(list_of_radius)
     angle = list_of_angles[index]
     
     return angle
 
-def gyration_radius(ts):
+def gyration_radius(timeseries):
     
     """
     Gyration_radius - Equals the average distance between each point inside the shape and the shape’s centroid.
@@ -276,7 +283,7 @@ def gyration_radius(ts):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -286,6 +293,7 @@ def gyration_radius(ts):
     
     """
     
+    ts = fixseries(timeseries)
     #create polygon
     polygon = create_polygon(ts)   
     
@@ -305,7 +313,7 @@ def gyration_radius(ts):
     
     return gyro
 
-def polar_balance(ts):
+def polar_balance(timeseries):
     
     """
     Polar_balance - The standard deviation of the areas per season, considering the 4 seasons. 
@@ -314,7 +322,7 @@ def polar_balance(ts):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
     
     Returns
@@ -323,7 +331,9 @@ def polar_balance(ts):
 	Standard deviation of the areas per season.
     
     """
-    
+
+    ts = fixseries(timeseries)
+
     areas = area_season(ts)
     
     balance = numpy.std(areas)
@@ -340,7 +350,7 @@ def area_ts(timeseries):
     
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 
     Returns
@@ -349,9 +359,11 @@ def area_ts(timeseries):
 	Area of polygon.
     
     """
-    
+
+    ts = fixseries(timeseries)
+
     #create polygon
-    polygon = create_polygon(timeseries)   
+    polygon = create_polygon(ts)   
     
     return polygon.area
 
@@ -374,7 +386,7 @@ def ts_polar(timeseries,show = False):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
-        timeseries : numpy array
+        timeseries : numpy.ndarray
             Your time series.
 	show: boolean
 	     This inform that the polar plot must be presented.
@@ -388,27 +400,29 @@ def ts_polar(timeseries,show = False):
     #define header for polar dataframe
     #header_polar=["Area", "Area_q1", "Area_q2", "Area_q3", "Area_q4","Circle","Gyration_radius","Polar_balance"]
     
-    #Compute two metrics
+    #Compute metrics
+
+    ts = fixseries(timeseries)
     
     #Eccentricity    
-    circle = circle_metric(timeseries)
+    circle = circle_metric(ts)
     
     #gyration_radius
-    gyro = gyration_radius(timeseries)
+    gyro = gyration_radius(ts)
     
     #Get Area
-    area = area_ts(timeseries)
+    area = area_ts(ts)
     
     #Seasonal area
-    areas1,areas2,areas3,areas4 = area_season(timeseries)  
+    areas1,areas2,areas3,areas4 = area_season(ts)  
     
     #Polar Balance
-    balance = polar_balance(timeseries)
+    balance = polar_balance(ts)
     
     #Angle    
-    ang = angle(timeseries)
+    ang = angle(ts)
     
     if show==True:
-        polar_plot(timeseries)
+        polar_plot(ts)
     
     return numpy.array([area,areas1,areas2,areas3,areas4,circle,gyro,balance,ang])
