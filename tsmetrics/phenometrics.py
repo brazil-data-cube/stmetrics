@@ -1,3 +1,11 @@
+import math
+import numpy
+import pandas
+import matplotlib.pyplot as plt
+from sklearn.metrics import auc
+from scipy.signal import savgol_filter,medfilt,find_peaks
+
+
 def get_filtered_series(timeseries,window,treshold):
     
     """
@@ -62,10 +70,7 @@ def get_ts_metrics(y,a,c,l_mi,b,d,r_mi,tresh):
     numpy.ndarray:
         array of peaks
     """
-    
-    header_timesat=["Start","End","Length","Base val.","Peak t.","Peak val.","Ampl.","L. Deriv.","R. Deriv","L.integra","S.integral","Start val.","End val."]
-    dfp_tss = pandas.DataFrame(columns=header_timesat)
-    
+
     #Interpolate a, b, c and d positions
     #Fine adjustment
     xp = numpy.arange(0,len(y))
@@ -90,9 +95,7 @@ def get_ts_metrics(y,a,c,l_mi,b,d,r_mi,tresh):
     h = auc(xx,yy)
     i = auc(xx,yy2)
     
-    dfp_tss.loc[0] = a,b,lenght,Base_val,Peak_t,Peak_val,ampl,l_derivada,r_derivada,h,i,start_val,end_val
-    
-    return dfp_tss
+    return numpy.array([a,b,lenght,Base_val,Peak_t,Peak_val,ampl,l_derivada,r_derivada,h,i,start_val,end_val])
 
 def get_greenness(series,start,minimum_up):
 
@@ -127,8 +130,8 @@ def get_greenness(series,start,minimum_up):
     #get cummulative sum from left side
     ret = ((series - l_mi)/ma)
     xp = numpy.arange(0,len(ret))    
-    c = numpy.interp(1-tresh, ret, xp) + start 
-    a = numpy.interp(tresh, ret, xp) + start
+    c = numpy.interp(1-minimum_up, ret, xp) + start 
+    a = numpy.interp(minimum_up, ret, xp) + start
     
     return a,c,l_mi
 
@@ -174,7 +177,7 @@ def get_brownness(series,start,minimum_up):
     
     return b,d,r_mi
 
-def get_peaks(timeseries,window):
+def get_peaks(timeseries,window,minimum_up):
     
     """
     
@@ -187,6 +190,8 @@ def get_peaks(timeseries,window):
             Your time series.
         window: integer (odd number) default 7
             Size of the window used for filtering with the Savitzky-Golay 
+        minimum_up : float
+            Minimum growing that will be used to detect a new cycle.
     Returns
     -------
     numpy.ndarray:
@@ -194,13 +199,13 @@ def get_peaks(timeseries,window):
     """
     
 
-    b = (diff(sign(diff(timeseries))) > 0).nonzero()[0] +1# local min
-    c = (diff(sign(diff(timeseries))) < 0).nonzero()[0] +1# local max
+    b = (numpy.diff(numpy.sign(numpy.diff(timeseries))) > 0).nonzero()[0] +1# local min
+    c = (numpy.diff(numpy.sign(numpy.diff(timeseries))) < 0).nonzero()[0] +1# local max
 
     picos = []
     for vale, pic in zip(b,c):
-        #print(y[vale],y[pic])
-        if abs(timeseries[vale] - timeseries[pic]) <= 0.01:
+        
+        if abs(timeseries[vale] - timeseries[pic]) <= minimum_up:
             continue
         else:
             picos.append(vale)
@@ -209,7 +214,7 @@ def get_peaks(timeseries,window):
     return numpy.sort(numpy.asarray(picos))
 
 
-def domain(y,peaks,minimum_up,time_series):
+def domain(y,peaks,minimum_up):
 
     """
     
@@ -253,9 +258,9 @@ def domain(y,peaks,minimum_up,time_series):
         elif (y[midle] - y[start]) <= minimum_up:
             continue    
            
-        elif (y[midle] - y[end]) < minimum_up :
+        elif (y[midle] - y[end]) <= minimum_up :
             
-            cond = (y[midle] - y[end]) > minimum_up
+            cond = (y[midle] - y[end]) >= minimum_up
             pp=peak+1
             
             while cond != True and pp <= peaks.shape[0]-1:
@@ -280,7 +285,7 @@ def domain(y,peaks,minimum_up,time_series):
                 
         b,d,r_mi = get_brownness(series,midle,minimum_up)
     
-        dfp.loc[pos] = get_ts_metrics(time_series,a,c,l_mi,b,d,r_mi,minimum_up).values[0]
+        dfp.loc[pos] = get_ts_metrics(y,a,c,l_mi,b,d,r_mi,minimum_up)
         
         dfp = dfp.dropna()        
 
@@ -315,13 +320,13 @@ def metrics(time_series, minimum_up, max_dist_fitting = 0.125, window = 7, show=
     """
     
     #This function perform the filtering with the savitky-golay mehtod
-    y = get_filtered_series(time_series,window,treshold)
+    y = get_filtered_series(time_series,window,max_dist_fitting)
     
     #This function detect peaks on the timesries
-    peaks = get_peaks(y,window) 
+    peaks = get_peaks(y,window,minimum_up) 
     
     #This functions detect cycles and compute phenometrics from each of them
-    dfp = domain(y,peaks,minimum_up,treshold,time_series)
+    dfp = domain(y,peaks,minimum_up)
     
     #This show the plot with the timeseries
     if show == True:
