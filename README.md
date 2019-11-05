@@ -7,5 +7,6 @@ This package will has functions to compute polar and basic metrics [1] of Satell
   Please before install the package please make sure that you have correctly installed shapely package.
   
 ###### Using conda do this:
-  conda config --add channels conda-forge
-  conda install shapely
+conda config --add channels conda-forge
+
+conda install shapely
