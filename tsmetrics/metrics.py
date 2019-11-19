@@ -1,8 +1,7 @@
 import numpy
-from . import basics
+from basics import ts_basics
 from . import polar
 from . import utils
-from . import phenometrics
 
 def get_metrics(series,show=False):
     
@@ -13,7 +12,7 @@ def get_metrics(series,show=False):
         return numpy.zeros((1,16))
         
     #call functions
-    basicas = basics.ts_basics(ts)
+    basicas = ts_basics(ts)
     polares = polar.ts_polar(ts,show)
 
     return numpy.concatenate((basicas, polares), axis=None)
