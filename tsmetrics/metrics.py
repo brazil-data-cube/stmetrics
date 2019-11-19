@@ -1,3 +1,4 @@
+import numpy
 
 def get_metrics(series,show=False):
     
