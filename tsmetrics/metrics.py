@@ -1,7 +1,4 @@
 import numpy
-from basics import ts_basics
-from . import polar
-from . import utils
 
 def get_metrics(series,show=False):
     
@@ -16,3 +13,4 @@ def get_metrics(series,show=False):
     polares = polar.ts_polar(ts,show)
 
     return numpy.concatenate((basicas, polares), axis=None)
+    

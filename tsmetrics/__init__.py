@@ -4,8 +4,9 @@ from . import basics
 from . import polar
 from . import utils
 from . import phenometrics
+from . import metrics
 
 # Version of the package
-__version__ = "0.0.1.0"
+__version__ = "0.0.1.2"
 
 name = "tsmetrics"
