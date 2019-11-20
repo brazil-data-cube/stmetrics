@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tsmetrics",
-    version="0.0.1.3",
+    version="0.0.1.6",
     author="Anderson Soares, Thales Körting",
     author_email="andersonreis.geo@gmail.com",
     description="A package to compute metrics from Satellite Image Time Series (SITS).",
