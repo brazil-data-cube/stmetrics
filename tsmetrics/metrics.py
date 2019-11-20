@@ -12,8 +12,8 @@ def get_metrics(series,show=False):
 	"""
     
     #Remove eventual nans from timeseries
-    ts = series[~numpy.isnan(series)]
-    
+    ts = series[~numpy.isnan(series)]   
+
     if (not numpy.any(ts)) == True:
         return numpy.zeros((1,16))
         
@@ -21,5 +21,4 @@ def get_metrics(series,show=False):
     basicas = basics.ts_basics(ts)
     polares = polar.ts_polar(ts,show)
 
-    return numpy.concatenate((basicas, polares), axis=None)
-    
+    return numpy.concatenate((basicas, polares), axis=None)   

@@ -375,7 +375,7 @@ def ts_polar(timeseries,show = False):
     
     Area - Area of the closed shape.
     Area_q1 - "Area_q4" - Partial area of the shape, proportional to some quadrant of the polar representation
-    Circle - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.
+    Eccentricity - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.
     Gyration_radius - Equals the average distance between each point inside the shape and the shape’s centroid.
     Polar_balance - The standard deviation of the areas per season, considering the 4 seasons. 
     Angle - The main angle of the closed shape created by the polar visualization.
