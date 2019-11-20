@@ -12,5 +12,4 @@ def get_metrics(series,show=False):
     basicas = ts_basics(ts)
     polares = polar.ts_polar(ts,show)
 
-    return numpy.concatenate((basicas, polares), axis=None)
-    
+    return numpy.concatenate((basicas, polares), axis=None)  
