@@ -12,7 +12,7 @@ def get_metrics(series,show=False):
 	"""
     
     #Remove eventual nans from timeseries
-    ts = series[~numpy.isnan(series)]   
+    ts = series[~numpy.isnan(series)]
 
     if (not numpy.any(ts)) == True:
         return numpy.zeros((1,16))
