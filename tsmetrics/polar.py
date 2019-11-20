@@ -215,11 +215,11 @@ def area_season(timeseries):
     
     return area1,area2,area3,area4
 
-def ecc_metric(timeseries):
+def circle_metric(timeseries):
     
     """
 
-    Eccentricity - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.    
+    Circle - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.    
     
     Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
@@ -244,7 +244,7 @@ def ecc_metric(timeseries):
     axis1 = maxx - minx
     axis2 = maxy - miny
     stats = numpy.array([axis1, axis2])
-    ecc = (stats.min() / stats.max())
+    ecc = 1 - (stats.min() / stats.max())
     
     return ecc
 
@@ -375,7 +375,7 @@ def ts_polar(timeseries,show = False):
     
     Area - Area of the closed shape.
     Area_q1 - "Area_q4" - Partial area of the shape, proportional to some quadrant of the polar representation
-    Eccentricity - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.
+    Circle - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.
     Gyration_radius - Equals the average distance between each point inside the shape and the shape’s centroid.
     Polar_balance - The standard deviation of the areas per season, considering the 4 seasons. 
     Angle - The main angle of the closed shape created by the polar visualization.
@@ -405,7 +405,7 @@ def ts_polar(timeseries,show = False):
     ts = fixseries(timeseries)
     
     #Eccentricity    
-    circle = ecc_metric(ts)
+    circle = circle_metric(ts)
     
     #gyration_radius
     gyro = gyration_radius(ts)
