@@ -3,6 +3,13 @@ from . import basics
 from . import polar
 
 def get_metrics(series,show=False):
+
+	"""
+	This function return all polar and basic metrics in the following order:
+
+	mean, maximum, minimum, std, sum, amplitude, first slope, area, area 1st quarter,area of 2nd quarter,area of 3th quarter, area of 4th quarter, circle, gyration, polar balance e a angle.
+
+	"""
     
     #Remove eventual nans from timeseries
     ts = series[~numpy.isnan(series)]
