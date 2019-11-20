@@ -1,9 +1,8 @@
-
+import numpy
+from . import basics
+from . import polar
 
 def get_metrics(series,show=False):
-	import numpy
-	from . import basics
-	from . import polar
     
     #Remove eventual nans from timeseries
     ts = series[~numpy.isnan(series)]
