@@ -215,7 +215,7 @@ def area_season(timeseries):
     
     return area1,area2,area3,area4
 
-def circle_metric(timeseries):
+def ecc_metric(timeseries):
     
     """
 
@@ -244,7 +244,7 @@ def circle_metric(timeseries):
     axis1 = maxx - minx
     axis2 = maxy - miny
     stats = numpy.array([axis1, axis2])
-    ecc = 1 - (stats.min() / stats.max())
+    ecc = (stats.min() / stats.max())
     
     return ecc
 
@@ -405,7 +405,7 @@ def ts_polar(timeseries,show = False):
     ts = fixseries(timeseries)
     
     #Eccentricity    
-    circle = circle_metric(ts)
+    circle = ecc_metric(ts)
     
     #gyration_radius
     gyro = gyration_radius(ts)
