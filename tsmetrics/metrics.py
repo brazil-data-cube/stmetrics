@@ -1,6 +1,9 @@
-import numpy
+
 
 def get_metrics(series,show=False):
+	import numpy
+	from . import basics
+	from . import polar
     
     #Remove eventual nans from timeseries
     ts = series[~numpy.isnan(series)]
@@ -9,7 +12,7 @@ def get_metrics(series,show=False):
         return numpy.zeros((1,16))
         
     #call functions
-    basicas = ts_basics(ts)
+    basicas = basics.ts_basics(ts)
     polares = polar.ts_polar(ts,show)
 
     return numpy.concatenate((basicas, polares), axis=None)
