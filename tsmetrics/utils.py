@@ -24,7 +24,7 @@ def fixseries(time_series):
     
     """
 
-    check_input(time_series)
+    #check_input(time_series)
     
     time_series2 = time_series
     

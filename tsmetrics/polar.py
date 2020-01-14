@@ -252,6 +252,7 @@ def angle(timeseries):
     
     """
     Angle - The main angle of the closed shape created by the polar visualization.
+    If two angle are the same, the first one is presented
     
     Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
