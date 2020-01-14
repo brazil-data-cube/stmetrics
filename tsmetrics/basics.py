@@ -62,8 +62,8 @@ def mean_ts(timeseries):
 	Mean value of time series.
 
     """
-    ts = fixseries(timeseries)
-    return numpy.mean(ts)
+    #ts = fixseries(timeseries)
+    return numpy.mean(timeseries)
     
 def max_ts(timeseries):
 
@@ -79,8 +79,8 @@ def max_ts(timeseries):
     numpy.float64:
     	Maximum value of time series.
     """
-    ts = fixseries(timeseries)
-    return numpy.max(ts)
+    #ts = fixseries(timeseries)
+    return numpy.max(timeseries)
 
 def min_ts(timeseries):
 
@@ -96,8 +96,8 @@ def min_ts(timeseries):
     numpy.float64:
     	Minimum value of time series.
     """
-    ts = fixseries(timeseries)
-    return numpy.min(ts)
+    #ts = fixseries(timeseries)
+    return numpy.min(timeseries)
 
 def std_ts(timeseries):
     """
@@ -112,8 +112,8 @@ def std_ts(timeseries):
     numpy.float64:
     	Standard deviation of time series.
     """
-    ts = fixseries(timeseries)
-    return numpy.std(ts)
+    #ts = fixseries(timeseries)
+    return numpy.std(timeseries)
 
 def sum_ts(timeseries):
 
@@ -130,8 +130,8 @@ def sum_ts(timeseries):
     numpy.float64:
     	Sum of values of time series.
     """
-    ts = fixseries(timeseries)
-    return numpy.sum(ts)
+    #ts = fixseries(timeseries)
+    return numpy.sum(timeseries)
     
 def amplitude(timeseries):
 
@@ -147,8 +147,8 @@ def amplitude(timeseries):
     numpy.float64:
     	Amplitude of values of time series.
     """
-    ts = fixseries(timeseries)
-    return numpy.max(ts) - numpy.min(ts)
+    #ts = fixseries(timeseries)
+    return numpy.max(timeseries) - numpy.min(timeseries)
     
 def first_slop(timeseries):
 
@@ -165,7 +165,7 @@ def first_slop(timeseries):
     numpy.float64:
     	The maximum value of the first slope of time series.
     """
-    ts = fixseries(timeseries)
-    return numpy.max(abs(numpy.diff(ts)))
+    #ts = fixseries(timeseries)
+    return numpy.max(abs(numpy.diff(timeseries)))
 
     

@@ -66,6 +66,7 @@ def create_polygon(timeseries):
 
     #remove weird spikes on timeseries
     ts = fixseries(timeseries)
+    ts = timeseries
      
     list_of_radius, list_of_angles = get_list_of_points(ts)
 
