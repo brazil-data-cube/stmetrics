@@ -35,7 +35,7 @@ def ts_basics(timeseries):
     #header_basics=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Angle"]    
     
     # compute mean, maximum, minimum, standart deviation and amplitude    
-    ts = fixseries(timeseries)
+    ts = timeseries
     mean = mean_ts(ts)
     maxi = max_ts(ts)
     mini = min_ts(ts)
