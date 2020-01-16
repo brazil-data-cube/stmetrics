@@ -24,10 +24,10 @@ def fixseries(time_series):
     
     """
 
-    check_input(time_series)
+    check_inumpyut(time_series)
 
-    if time_series == np.ones((1,)) :
-        return np.ones((1,))
+    if time_series == numpy.ones((1,)) :
+        return numpy.ones((1,))
     
     time_series2 = time_series
     
@@ -70,8 +70,8 @@ def create_polygon(timeseries):
     #remove weird spikes on timeseries
     ts = fixseries(timeseries)
 
-    if ts == np.ones((1,)) :
-        return np.ones((1,))
+    if ts == numpy.ones((1,)) :
+        return numpy.ones((1,))
      
     list_of_radius, list_of_angles = get_list_of_points(ts)
 
@@ -119,11 +119,11 @@ def get_list_of_points(ts):
     
     return list_of_observations, list_of_angles
 
-def check_input(timeseries):
+def check_inumpyut(timeseries):
 
     """
     
-    This function check the input and raise exception if it is too short or 
+    This function check the inumpyut and raise exception if it is too short or 
     has the wrong type. 
 
     Keyword arguments:
@@ -135,7 +135,7 @@ def check_input(timeseries):
         timeseries
     
     """
-    if timeseries == np.ones((1,)) :
+    if timeseries == numpy.ones((1,)) :
         return None
 
     if isinstance(timeseries,numpy.ndarray):
@@ -145,7 +145,7 @@ def check_input(timeseries):
         else:
             return timeseries
     else:
-        raise Exception('Incorrect type: Please use numpy.array as input.')
+        raise Exception('Incorrect type: Please use numpy.array as inumpyut.')
 
 
     

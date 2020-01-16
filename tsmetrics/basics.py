@@ -37,7 +37,7 @@ def ts_basics(timeseries):
     # compute mean, maximum, minimum, standart deviation and amplitude    
     ts = fixseries(timeseries)
 
-    if ts == np.ones((1,)) :
+    if ts == numpy.ones((1,)) :
         return 1
 
 
@@ -69,7 +69,7 @@ def mean_ts(timeseries):
     """
     ts = fixseries(timeseries)
 
-    if ts == np.ones((1,)) :
+    if ts == numpy.ones((1,)) :
         return 1
 
     return numpy.mean(ts)
@@ -90,7 +90,7 @@ def max_ts(timeseries):
     """
     ts = fixseries(timeseries)
 
-    if ts == np.ones((1,)) :
+    if ts == numpy.ones((1,)) :
         return 1
 
     return numpy.max(ts)
@@ -111,7 +111,7 @@ def min_ts(timeseries):
     """
     ts = fixseries(timeseries)
 
-    if ts == np.ones((1,)) :
+    if ts == numpy.ones((1,)) :
         return 1
 
     return numpy.min(ts)
@@ -131,7 +131,7 @@ def std_ts(timeseries):
     """
     ts = fixseries(timeseries)
 
-    if ts == np.ones((1,)) :
+    if ts == numpy.ones((1,)) :
         return 1
 
     return numpy.std(ts)
@@ -153,7 +153,7 @@ def sum_ts(timeseries):
     """
     ts = fixseries(timeseries)
 
-    if ts == np.ones((1,)) :
+    if ts == numpy.ones((1,)) :
         return 1
 
     return numpy.sum(ts)
@@ -174,7 +174,7 @@ def amplitude(timeseries):
     """
     ts = fixseries(timeseries)
 
-    if ts == np.ones((1,)) :
+    if ts == numpy.ones((1,)) :
         return 1
 
     return numpy.max(ts) - numpy.min(ts)
@@ -196,7 +196,7 @@ def first_slop(timeseries):
     """
     ts = fixseries(timeseries)
     
-    if ts == np.ones((1,)) :
+    if ts == numpy.ones((1,)) :
         return 1
 
     return numpy.max(abs(numpy.diff(ts)))
