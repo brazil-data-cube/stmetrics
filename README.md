@@ -15,3 +15,12 @@ pip install git+https://github.com/andersonreisoares/tsmetrics.git
 conda config --add channels conda-forge
 
 conda install shapely
+
+
+## Collaborators
+
+Thales Körting
+Hugo Bendini
+Daiane Vaz
+Tatiana Uehara
+Michel Chaves
