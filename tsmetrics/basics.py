@@ -70,7 +70,7 @@ def mean_ts(timeseries):
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return 1
+        return numpy.array([1])
 
     return numpy.mean(ts)
     
@@ -91,7 +91,7 @@ def max_ts(timeseries):
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return 1
+        return numpy.array([1])
 
     return numpy.max(ts)
 
@@ -112,7 +112,7 @@ def min_ts(timeseries):
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return 1
+        return numpy.array([1])
 
     return numpy.min(ts)
 
@@ -132,7 +132,7 @@ def std_ts(timeseries):
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return 1
+        return numpy.array([1])
 
     return numpy.std(ts)
 
@@ -154,7 +154,7 @@ def sum_ts(timeseries):
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return 1
+        return numpy.array([1])
 
     return numpy.sum(ts)
     
@@ -175,7 +175,7 @@ def amplitude(timeseries):
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return 1
+        return numpy.array([1])
 
     return numpy.max(ts) - numpy.min(ts)
     
@@ -197,7 +197,7 @@ def first_slop(timeseries):
     ts = fixseries(timeseries)
     
     if ts.size == numpy.ones((1,)).size :
-        return 1
+        return numpy.array([1])
 
     return numpy.max(abs(numpy.diff(ts)))
 
