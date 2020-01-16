@@ -38,7 +38,7 @@ def ts_basics(timeseries):
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return 1
+        return numpy.array([1,1,1,1,1,1,1])
 
 
     mean = mean_ts(ts)
