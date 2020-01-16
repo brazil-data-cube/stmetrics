@@ -27,7 +27,7 @@ def fixseries(time_series):
     check_inumpyut(time_series)
 
     if time_series.size == numpy.ones((1,)).size :
-        return numpy.ones((1,))
+        return numpy.array([1])
     
     time_series2 = time_series
     
@@ -71,7 +71,7 @@ def create_polygon(timeseries):
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return 1
+        return numpy.array([1])
      
     list_of_radius, list_of_angles = get_list_of_points(ts)
 
