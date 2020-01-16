@@ -24,7 +24,10 @@ def fixseries(time_series):
     
     """
 
-    #check_input(time_series)
+    check_input(time_series)
+
+    if time_series == np.ones((1,)) :
+        return np.ones((1,))
     
     time_series2 = time_series
     
@@ -38,7 +41,7 @@ def fixseries(time_series):
     for pos in range(len(spikes)):
         idx = spikes[pos]
         time_series2[idx]=0
-        
+    
     if len(time_series2) <= 3:
         raise TypeError("Your time series has too much noise we cant compute metrics!")
     
@@ -66,7 +69,9 @@ def create_polygon(timeseries):
 
     #remove weird spikes on timeseries
     ts = fixseries(timeseries)
-    ts = timeseries
+
+    if ts == np.ones((1,)) :
+        return np.ones((1,))
      
     list_of_radius, list_of_angles = get_list_of_points(ts)
 
@@ -130,6 +135,8 @@ def check_input(timeseries):
         timeseries
     
     """
+    if timeseries == np.ones((1,)) :
+        return None
 
     if isinstance(timeseries,numpy.ndarray):
 
