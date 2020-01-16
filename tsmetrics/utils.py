@@ -26,7 +26,7 @@ def fixseries(time_series):
 
     check_inumpyut(time_series)
 
-    if time_series.shape == numpy.ones((1,)).shape :
+    if time_series.size == numpy.ones((1,)).size :
         return numpy.ones((1,))
     
     time_series2 = time_series
@@ -70,7 +70,7 @@ def create_polygon(timeseries):
     #remove weird spikes on timeseries
     ts = fixseries(timeseries)
 
-    if ts.shape == numpy.ones((1,)).shape :
+    if ts.size == numpy.ones((1,)).size :
         return 1
      
     list_of_radius, list_of_angles = get_list_of_points(ts)
@@ -135,7 +135,7 @@ def check_inumpyut(timeseries):
         timeseries
     
     """
-    if timeseries.shape == numpy.ones((1,)).shape :
+    if timeseries.size == numpy.ones((1,)).size :
         return None
 
     if isinstance(timeseries,numpy.ndarray):

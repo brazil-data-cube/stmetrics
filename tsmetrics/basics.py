@@ -37,7 +37,7 @@ def ts_basics(timeseries):
     # compute mean, maximum, minimum, standart deviation and amplitude    
     ts = fixseries(timeseries)
 
-    if ts == numpy.ones((1,)) :
+    if ts.size == numpy.ones((1,)).size :
         return 1
 
 
