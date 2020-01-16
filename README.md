@@ -6,7 +6,7 @@ This package will has functions to compute polar and basic metrics [1] of Satell
 ## Installation
 You can pip install it straight from git:
 
-pip install git+git://github.com:andersonreisoares/tsmetrics.git
+pip install git+https://github.com/andersonreisoares/tsmetrics.git
 
 #### For windows users:
   Please before installing the package make sure that you have correctly installed the Shapely package.
