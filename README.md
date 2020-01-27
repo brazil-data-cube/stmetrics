@@ -21,6 +21,7 @@ conda install shapely
 
   Thales Körting
   Hugo Bendini
+  Leila Fonseca
   Daiane Vaz
   Tatiana Uehara
   Michel Chaves
