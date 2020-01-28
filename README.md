@@ -19,9 +19,10 @@ conda install shapely
 
 ## Collaborators
 
-  Thales Körting
-  Hugo Bendini
-  Leila Fonseca
-  Daiane Vaz
-  Tatiana Uehara
-  Michel Chaves
+  Thales Körting\
+  Hugo Bendini\
+  Leila Fonseca\
+  Daiane Vaz\
+  Tatiana Uehara\
+  Michel Chaves\
+  Sarah Lechler
