@@ -36,6 +36,7 @@ def _linear_regression(x, y):
     intercept = np.mean(y) - slope * np.mean(x)
     return slope, intercept
 
+@jit('i8[:](f8, f8, f8)', nopython=True)
 def _log_n(min_n, max_n, factor):
     """
     Creates a list of integer values by successively multiplying a minimum
@@ -57,34 +58,13 @@ def _log_n(min_n, max_n, factor):
         min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
         without duplicates
     """
-    """
-  Creates a list of values by successively multiplying a minimum value min_n by
-  a factor > 1 until a maximum value max_n is reached.
-  Non-integer results are rounded down.
-  Args:
-    min_n (float):
-      minimum value (must be < max_n)
-    max_n (float):
-      maximum value (must be > min_n)
-    factor (float):
-      factor used to increase min_n (must be > 1)
-  Returns:
-    list of integers:
-      min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
-      without duplicates
-  """
-  assert max_n > min_n
-  assert factor > 1
-  # stop condition: min * f^x = max
-  # => f^x = max/min
-  # => x = log(max/min) / log(f)
-  max_i = int(np.floor(np.log(1.0 * max_n / min_n) / np.log(factor)))
-  ns = [min_n]
-  for i in range(max_i + 1):
-    n = int(np.floor(min_n * (factor ** i)))
-    if n > ns[-1]:
-      ns.append(n)
-  return ns
+    max_i = int(floor(log(1.0 * max_n / min_n) / log(factor)))
+    ns = [min_n]
+    for i in range(max_i + 1):
+        n = int(floor(min_n * (factor ** i)))
+        if n > ns[-1]:
+            ns.append(n)
+    return np.array(ns, dtype=np.int64)
 
 def fixseries(time_series):
     
