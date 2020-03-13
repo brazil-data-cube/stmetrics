@@ -44,7 +44,7 @@ def hurst(series):
     This property makes the Hurst exponent especially interesting for the analysis of stock data.
     """
 
-    h = nolds.hurst(series)
+    h = nolds.hurst_rs(series)
     return h
 
 def petrosian_fd(series):
@@ -196,4 +196,4 @@ def higuchi_fd(series, kmax=10):
     """
     x = numpy.asarray(series, dtype=numpy.float64)
     kmax = int(kmax)
-    return _higuchi_fd(x, kmax)
+    return _higuchi_fd(series, kmax)
