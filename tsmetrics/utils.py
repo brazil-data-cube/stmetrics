@@ -58,7 +58,7 @@ def _log_n(min_n, max_n, factor):
         min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
         without duplicates
     """
-    max_i = int(numpy.floor(log(1.0 * max_n / min_n) / log(factor)))
+    max_i = int(numpy.floor(numpy.log(1.0 * max_n / min_n) / numpy.log(factor)))
     ns = [min_n]
     for i in range(max_i + 1):
         n = int(numpy.floor(min_n * (factor ** i)))
