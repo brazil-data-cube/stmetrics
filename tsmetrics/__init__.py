@@ -5,9 +5,10 @@ from . import polar
 from . import utils
 from . import phenometrics
 from . import metrics
+from . import fractal
 
 # Version of the package
 
-__version__ = "0.0.1.6"
+__version__ = "0.0.1.7"
 
 name = "tsmetrics"
