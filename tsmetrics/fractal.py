@@ -126,7 +126,7 @@ def _higuchi_fd(x, kmax):
         lk[k - 1] = m_lm
         x_reg[k - 1] = log(1. / k)
         y_reg[k - 1] = log(m_lm)
-    higuchi, _ = _linear_regression(x_reg, y_reg)
+    higuchi, _ = utils._linear_regression(x_reg, y_reg)
     return higuchi
 
 
@@ -171,7 +171,7 @@ def _dfa(x):
     Utility function for detrended fluctuation analysis
     """
     N = len(x)
-    nvals = _log_n(4, 0.1 * N, 1.2)
+    nvals = utils._log_n(4, 0.1 * N, 1.2)
     walk = numpy.cumsum(x - x.mean())
     fluctuations = numpy.zeros(len(nvals))
 
@@ -183,7 +183,7 @@ def _dfa(x):
         intercept = numpy.empty(d_len)
         trend = numpy.empty((d_len, ran_n.size))
         for i in range(d_len):
-            slope[i], intercept[i] = _linear_regression(ran_n, d[i])
+            slope[i], intercept[i] = utils._linear_regression(ran_n, d[i])
             y = numpy.zeros_like(ran_n)
             # Equivalent to numpy.polyval function
             for p in [slope[i], intercept[i]]:
@@ -202,7 +202,7 @@ def _dfa(x):
         # all fluctuations are zero => we cannot fit a line
         dfa = numpy.nan
     else:
-        dfa, _ = _linear_regression(numpy.log(nvals), numpy.log(fluctuations))
+        dfa, _ = utils._linear_regression(numpy.log(nvals), numpy.log(fluctuations))
     return dfa
 
 
