@@ -11,7 +11,7 @@ def petrosian_fd(x):
     """Petrosian fractal dimension.
     Parameters
     ----------
-    x : list or np.array
+    x : list or numpy.array
         One dimensional time series.
     Returns
     -------
@@ -40,23 +40,23 @@ def petrosian_fd(x):
     --------
     >>> import numpy as np
     >>> from entropy import petrosian_fd
-    >>> np.random.seed(123)
-    >>> x = np.random.rand(100)
+    >>> numpy.random.seed(123)
+    >>> x = numpy.random.rand(100)
     >>> print(petrosian_fd(x))
     1.0505385662721405
     """
     n = len(x)
     # Number of sign changes in the first derivative of the signal
-    diff = np.ediff1d(x)
+    diff = numpy.ediff1d(x)
     N_delta = (diff[1:-1] * diff[0:-2] < 0).sum()
-    return np.log10(n) / (np.log10(n) + np.log10(n / (n + 0.4 * N_delta)))
+    return numpy.log10(n) / (numpy.log10(n) + numpy.log10(n / (n + 0.4 * N_delta)))
 
 
 def katz_fd(x):
     """Katz Fractal Dimension.
     Parameters
     ----------
-    x : list or np.array
+    x : list or numpy.array
         One dimensional time series.
     Returns
     -------
@@ -86,30 +86,29 @@ def katz_fd(x):
     --------
     >>> import numpy as np
     >>> from entropy import katz_fd
-    >>> np.random.seed(123)
-    >>> x = np.random.rand(100)
+    >>> numpy.random.seed(123)
+    >>> x = numpy.random.rand(100)
     >>> print(katz_fd(x))
     5.121395665678078
     """
-    x = np.array(x)
-    dists = np.abs(np.ediff1d(x))
+    x = numpy.array(x)
+    dists = numpy.abs(numpy.ediff1d(x))
     ll = dists.sum()
-    ln = np.log10(np.divide(ll, dists.mean()))
+    ln = numpy.log10(numpy.divide(ll, dists.mean()))
     aux_d = x - x[0]
-    d = np.max(np.abs(aux_d[1:]))
-    return np.divide(ln, np.add(ln, np.log10(np.divide(d, ll))))
+    d = numpy.max(numpy.abs(aux_d[1:]))
+    return numpy.divide(ln, numpy.add(ln, numpy.log10(numpy.divide(d, ll))))
 
 
-@jit('float64(float64[:], int32)')
 def _higuchi_fd(x, kmax):
     """Utility function for `higuchi_fd`.
     """
     n_times = x.size
-    lk = np.empty(kmax)
-    x_reg = np.empty(kmax)
-    y_reg = np.empty(kmax)
+    lk = numpy.empty(kmax)
+    x_reg = numpy.empty(kmax)
+    y_reg = numpy.empty(kmax)
     for k in range(1, kmax + 1):
-        lm = np.empty((k,))
+        lm = numpy.empty((k,))
         for m in range(k):
             ll = 0
             n_max = floor((n_times - m - 1) / k)
@@ -135,7 +134,7 @@ def higuchi_fd(x, kmax=10):
     """Higuchi Fractal Dimension.
     Parameters
     ----------
-    x : list or np.array
+    x : list or numpy.array
         One dimensional time series.
     kmax : int
         Maximum delay/offset (in number of samples).
@@ -157,54 +156,53 @@ def higuchi_fd(x, kmax=10):
     --------
     >>> import numpy as np
     >>> from entropy import higuchi_fd
-    >>> np.random.seed(123)
-    >>> x = np.random.rand(100)
+    >>> numpy.random.seed(123)
+    >>> x = numpy.random.rand(100)
     >>> print(higuchi_fd(x))
     2.0511793572134467
     """
-    x = np.asarray(x, dtype=np.float64)
+    x = numpy.asarray(x, dtype=numpy.float64)
     kmax = int(kmax)
     return _higuchi_fd(x, kmax)
 
 
-@jit('f8(f8[:])', nopython=True)
 def _dfa(x):
     """
     Utility function for detrended fluctuation analysis
     """
     N = len(x)
     nvals = _log_n(4, 0.1 * N, 1.2)
-    walk = np.cumsum(x - x.mean())
-    fluctuations = np.zeros(len(nvals))
+    walk = numpy.cumsum(x - x.mean())
+    fluctuations = numpy.zeros(len(nvals))
 
     for i_n, n in enumerate(nvals):
-        d = np.reshape(walk[:N - (N % n)], (N // n, n))
-        ran_n = np.array([float(na) for na in range(n)])
+        d = numpy.reshape(walk[:N - (N % n)], (N // n, n))
+        ran_n = numpy.array([float(na) for na in range(n)])
         d_len = len(d)
-        slope = np.empty(d_len)
-        intercept = np.empty(d_len)
-        trend = np.empty((d_len, ran_n.size))
+        slope = numpy.empty(d_len)
+        intercept = numpy.empty(d_len)
+        trend = numpy.empty((d_len, ran_n.size))
         for i in range(d_len):
             slope[i], intercept[i] = _linear_regression(ran_n, d[i])
-            y = np.zeros_like(ran_n)
-            # Equivalent to np.polyval function
+            y = numpy.zeros_like(ran_n)
+            # Equivalent to numpy.polyval function
             for p in [slope[i], intercept[i]]:
                 y = y * ran_n + p
             trend[i, :] = y
         # calculate standard deviation (fluctuation) of walks in d around trend
-        flucs = np.sqrt(np.sum((d - trend) ** 2, axis=1) / n)
+        flucs = numpy.sqrt(numpy.sum((d - trend) ** 2, axis=1) / n)
         # calculate mean fluctuation over all subsequences
         fluctuations[i_n] = flucs.sum() / flucs.size
 
     # Filter zero
-    nonzero = np.nonzero(fluctuations)[0]
+    nonzero = numpy.nonzero(fluctuations)[0]
     fluctuations = fluctuations[nonzero]
     nvals = nvals[nonzero]
     if len(fluctuations) == 0:
         # all fluctuations are zero => we cannot fit a line
-        dfa = np.nan
+        dfa = numpy.nan
     else:
-        dfa, _ = _linear_regression(np.log(nvals), np.log(fluctuations))
+        dfa, _ = _linear_regression(numpy.log(nvals), numpy.log(fluctuations))
     return dfa
 
 
@@ -213,7 +211,7 @@ def detrended_fluctuation(x):
     Detrended fluctuation analysis (DFA).
     Parameters
     ----------
-    x : list or np.array
+    x : list or numpy.array
         One-dimensional time-series.
     Returns
     -------
@@ -261,10 +259,10 @@ def detrended_fluctuation(x):
     --------
     >>> import numpy as np
     >>> from entropy import detrended_fluctuation
-    >>> np.random.seed(123)
-    >>> x = np.random.rand(100)
+    >>> numpy.random.seed(123)
+    >>> x = numpy.random.rand(100)
     >>> print(detrended_fluctuation(x))
     0.761647725305623
     """
-    x = np.asarray(x, dtype=np.float64)
+    x = numpy.asarray(x, dtype=numpy.float64)
     return _dfa(x)

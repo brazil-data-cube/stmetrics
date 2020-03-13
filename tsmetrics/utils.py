@@ -6,7 +6,6 @@ from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
 
 
-@jit('UniTuple(float64, 2)(float64[:], float64[:])', nopython=True)
 def _linear_regression(x, y):
     """Fast linear regression using Numba.
     Parameters
@@ -36,6 +35,7 @@ def _linear_regression(x, y):
     intercept = numpy.mean(y) - slope * numpy.mean(x)
     return slope, intercept
 
+
 def _log_n(min_n, max_n, factor):
     """
     Creates a list of values by successively multiplying a minimum value min_n by
@@ -58,10 +58,10 @@ def _log_n(min_n, max_n, factor):
     # stop condition: min * f^x = max
     # => f^x = max/min
     # => x = log(max/min) / log(f)
-    max_i = int(np.floor(np.log(1.0 * max_n / min_n) / np.log(factor)))
+    max_i = int(numpy.floor(numpy.log(1.0 * max_n / min_n) / numpy.log(factor)))
     ns = [min_n]
     for i in range(max_i + 1):
-        n = int(np.floor(min_n * (factor ** i)))
+        n = int(numpy.floor(min_n * (factor ** i)))
         if n > ns[-1]:
             ns.append(n)
 
