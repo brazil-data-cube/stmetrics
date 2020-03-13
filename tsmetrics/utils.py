@@ -37,7 +37,7 @@ def _linear_regression(x, y):
     return slope, intercept
 
 def _log_n(min_n, max_n, factor):
-     """
+    """
     Creates a list of values by successively multiplying a minimum value min_n by
     a factor > 1 until a maximum value max_n is reached.
     Non-integer results are rounded down.
@@ -52,7 +52,7 @@ def _log_n(min_n, max_n, factor):
         list of integers:
             min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
             without duplicates
-  """
+    """
     assert max_n > min_n
     assert factor > 1
     # stop condition: min * f^x = max
@@ -64,7 +64,8 @@ def _log_n(min_n, max_n, factor):
         n = int(np.floor(min_n * (factor ** i)))
         if n > ns[-1]:
         ns.append(n)
-  return ns
+
+    return ns
 
 def fixseries(time_series):
     
