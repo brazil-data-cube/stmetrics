@@ -1,6 +1,7 @@
 import numpy as np
 from numba import jit
 from math import log, floor
+
 from .utils import *
 
 all = ['petrosian_fd', 'katz_fd', 'higuchi_fd', 'detrended_fluctuation']
@@ -100,7 +101,7 @@ def katz_fd(x):
 
 
 @jit('float64(float64[:], int32)')
-def util_higuchi_fd(x, kmax):
+def _higuchi_fd(x, kmax):
     """Utility function for `higuchi_fd`.
     """
     n_times = x.size
@@ -126,7 +127,7 @@ def util_higuchi_fd(x, kmax):
         lk[k - 1] = m_lm
         x_reg[k - 1] = log(1. / k)
         y_reg[k - 1] = log(m_lm)
-    higuchi, _ = linear_regression(x_reg, y_reg)
+    higuchi, _ = _linear_regression(x_reg, y_reg)
     return higuchi
 
 
@@ -163,16 +164,16 @@ def higuchi_fd(x, kmax=10):
     """
     x = np.asarray(x, dtype=np.float64)
     kmax = int(kmax)
-    return util_higuchi_fd(x, kmax)
+    return _higuchi_fd(x, kmax)
 
 
 @jit('f8(f8[:])', nopython=True)
-def dfa(x):
+def _dfa(x):
     """
     Utility function for detrended fluctuation analysis
     """
     N = len(x)
-    nvals = log_n(4, 0.1 * N, 1.2)
+    nvals = _log_n(4, 0.1 * N, 1.2)
     walk = np.cumsum(x - x.mean())
     fluctuations = np.zeros(len(nvals))
 
@@ -184,7 +185,7 @@ def dfa(x):
         intercept = np.empty(d_len)
         trend = np.empty((d_len, ran_n.size))
         for i in range(d_len):
-            slope[i], intercept[i] = linear_regression(ran_n, d[i])
+            slope[i], intercept[i] = _linear_regression(ran_n, d[i])
             y = np.zeros_like(ran_n)
             # Equivalent to np.polyval function
             for p in [slope[i], intercept[i]]:
@@ -203,7 +204,7 @@ def dfa(x):
         # all fluctuations are zero => we cannot fit a line
         dfa = np.nan
     else:
-        dfa, _ = linear_regression(np.log(nvals), np.log(fluctuations))
+        dfa, _ = _linear_regression(np.log(nvals), np.log(fluctuations))
     return dfa
 
 
@@ -266,4 +267,4 @@ def detrended_fluctuation(x):
     0.761647725305623
     """
     x = np.asarray(x, dtype=np.float64)
-    return dfa(x)
+    return _dfa(x)

@@ -7,7 +7,7 @@ from shapely.geometry.polygon import LinearRing
 
 
 @jit('UniTuple(float64, 2)(float64[:], float64[:])', nopython=True)
-def linear_regression(x, y):
+def _linear_regression(x, y):
     """Fast linear regression using Numba.
     Parameters
     ----------
@@ -37,7 +37,7 @@ def linear_regression(x, y):
     return slope, intercept
 
 @jit('i8[:](f8, f8, f8)', nopython=True)
-def log_n(min_n, max_n, factor):
+def _log_n(min_n, max_n, factor):
     """
     Creates a list of integer values by successively multiplying a minimum
     value min_n by a factor > 1 until a maximum value max_n is reached.
