@@ -147,7 +147,7 @@ def _higuchi_fd(series, kmax):
             n_max = floor((n_times - m - 1) / k)
             n_max = int(n_max)
             for j in range(1, n_max):
-                ll += abs(series[m + j * k] - x[m + (j - 1) * k])
+                ll += abs(series[m + j * k] - series[m + (j - 1) * k])
             ll /= k
             ll *= (n_times - 1) / (k * n_max)
             lm[m] = ll
