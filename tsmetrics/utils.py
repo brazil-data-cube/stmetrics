@@ -63,7 +63,7 @@ def _log_n(min_n, max_n, factor):
     for i in range(max_i + 1):
         n = int(np.floor(min_n * (factor ** i)))
         if n > ns[-1]:
-        ns.append(n)
+            ns.append(n)
 
     return ns
 
