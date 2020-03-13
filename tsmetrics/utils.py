@@ -26,7 +26,7 @@ def _linear_regression(x, y):
     sxy = 0
     for j in range(n_times):
         sx2 += x[j] ** 2
-        sx += x[j]s
+        sx += x[j]
         sxy += x[j] * y[j]
         sy += y[j]
     den = n_times * sx2 - (sx ** 2)
