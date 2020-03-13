@@ -1,4 +1,4 @@
-import numpy as np
+import numpy
 from numba import jit
 from math import log, floor
 
