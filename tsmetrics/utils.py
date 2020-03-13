@@ -36,35 +36,35 @@ def _linear_regression(x, y):
     intercept = numpy.mean(y) - slope * numpy.mean(x)
     return slope, intercept
 
-@jit('i8[:](f8, f8, f8)', nopython=True)
 def _log_n(min_n, max_n, factor):
-    """
-    Creates a list of integer values by successively multiplying a minimum
-    value min_n by a factor > 1 until a maximum value max_n is reached.
-    Used for detrended fluctuation analysis (DFA).
-    Function taken from the nolds python package
-    (https://github.com/CSchoel/nolds) by Christopher Scholzel.
-    Parameters
-    ----------
-    min_n (float):
+     """
+    Creates a list of values by successively multiplying a minimum value min_n by
+    a factor > 1 until a maximum value max_n is reached.
+    Non-integer results are rounded down.
+    Args:
+      min_n (float):
         minimum value (must be < max_n)
     max_n (float):
         maximum value (must be > min_n)
     factor (float):
-       factor used to increase min_n (must be > 1)
-    Returns
-    -------
-    list of integers:
-        min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
-        without duplicates
-    """
-    max_i = int(numpy.floor(numpy.log(1.0 * max_n / min_n) / numpy.log(factor)))
+        factor used to increase min_n (must be > 1)
+    Returns:
+        list of integers:
+            min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
+            without duplicates
+  """
+    assert max_n > min_n
+    assert factor > 1
+    # stop condition: min * f^x = max
+    # => f^x = max/min
+    # => x = log(max/min) / log(f)
+    max_i = int(np.floor(np.log(1.0 * max_n / min_n) / np.log(factor)))
     ns = [min_n]
     for i in range(max_i + 1):
-        n = int(numpy.floor(min_n * (factor ** i)))
+        n = int(np.floor(min_n * (factor ** i)))
         if n > ns[-1]:
-            ns.append(n)
-    return numpy.array(ns, dtype=numpy.int64)
+        ns.append(n)
+  return ns
 
 def fixseries(time_series):
     
