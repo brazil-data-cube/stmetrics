@@ -1,5 +1,6 @@
 import numpy
 import math
+from numba import jit
 from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
@@ -146,3 +147,33 @@ def check_input(timeseries):
             return timeseries
     else:
         raise Exception('Incorrect type: Please use numpy.array as inumpyut.')
+
+@jit('UniTuple(float64, 2)(float64[:], float64[:])', nopython=True)
+def _linear_regression(x, y):
+    """Fast linear regression using Numba.
+    Parameters
+    ----------
+    x, y : ndarray, shape (n_times,)
+        Variables
+    Returns
+    -------
+    slope : float
+        Slope of 1D least-square regression.
+    intercept : float
+        Intercept
+    """
+    n_times = x.size
+    sx2 = 0
+    sx = 0
+    sy = 0
+    sxy = 0
+    for j in range(n_times):
+        sx2 += x[j] ** 2
+        sx += x[j]
+        sxy += x[j] * y[j]
+        sy += y[j]
+    den = n_times * sx2 - (sx ** 2)
+    num = n_times * sxy - sx * sy
+    slope = num / den
+    intercept = np.mean(y) - slope * np.mean(x)
+    return slope, intercept
