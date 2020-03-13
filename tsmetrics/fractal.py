@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 from math import log, floor
 
-from .utils import _linear_regression, _log_n
+from . utils import _linear_regression, _log_n
 
 all = ['petrosian_fd', 'katz_fd', 'higuchi_fd', 'detrended_fluctuation']
 
