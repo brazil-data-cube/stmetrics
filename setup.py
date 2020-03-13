@@ -18,7 +18,8 @@ setuptools.setup(
     'matplotlib',
     'shapely',
     'descartes',
-    'numba'
+    'numba',
+    'nolds'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

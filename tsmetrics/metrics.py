@@ -16,7 +16,7 @@ def get_metrics(series,show=False):
 
     return numpy.concatenate((basicas, polares), axis=None)
 
-def extractMetrics(X):
+def extractMetrics(series):
     from tsmetrics import metrics
     import multiprocessing as mp
     
@@ -25,7 +25,7 @@ def extractMetrics(X):
     
     #use pool to compute metrics for each pixel
     #return a list of arrays
-    metrics = pool.map(metrics.get_metrics,[serie for serie in X])
+    metrics = pool.map(metrics.get_metrics,[serie for serie in series])
     
     #close pool
     pool.close()    
@@ -34,6 +34,6 @@ def extractMetrics(X):
     X_m = numpy.vstack(metrics)
     
     #Concatenate time series and metrics
-    X_all = numpy.concatenate((X,X_m), axis=1)
+    X_all = numpy.concatenate((series,X_m), axis=1)
     
     return X_all

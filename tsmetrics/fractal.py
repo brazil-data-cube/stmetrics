@@ -1,17 +1,57 @@
 import numpy
 from numba import jit
 from math import log, floor
+import nolds
 
 from . import utils
 
 all = ['petrosian_fd', 'katz_fd', 'higuchi_fd', 'detrended_fluctuation']
 
+def dfa(series):
+    """Detrended Fluctuation Analysis (DFA)
+    Parameters
+    ----------
+    series : list or numpy.array
+        One dimensional time series.
+    Returns
+    -------
+    dfa : float
+        Detrended Fluctuation Analysis.
+    
+    This functions uses the dfa implementation from the Nolds package.
+    DFA measures the Hurst parameter H, which is very similar to the Hurst exponent. 
+    The main difference is that DFA can be used for non-stationary processes (whose mean and/or variance change over time).
+    """
 
-def petrosian_fd(x):
+    dfa = nolds.dfa(series)
+    return dfa
+
+def hurst(series):
+    """
+    Hurst exponent
+    
+    Parameters
+    ----------
+    series : list or numpy.array
+        One dimensional time series.
+    Returns
+    -------
+    hurst : float
+        Hurst exponent.
+    
+    The hurst exponent is a measure of the “long-term memory” of a time series. 
+    It can be used to determine whether the time series is more, less, or equally likely to increase if it has increased in previous steps. 
+    This property makes the Hurst exponent especially interesting for the analysis of stock data.
+    """
+
+    h = nolds.hurst(series)
+    return h
+
+def petrosian_fd(series):
     """Petrosian fractal dimension.
     Parameters
     ----------
-    x : list or numpy.array
+    series : list or numpy.array
         One dimensional time series.
     Returns
     -------
@@ -36,14 +76,7 @@ def petrosian_fd(x):
        the computation of EEG biomarkers for dementia." 2nd International
        Conference on Computational Intelligence in Medicine and Healthcare
        (CIMED2005). 2005.
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from entropy import petrosian_fd
-    >>> numpy.random.seed(123)
-    >>> x = numpy.random.rand(100)
-    >>> print(petrosian_fd(x))
-    1.0505385662721405
+
     """
     n = len(x)
     # Number of sign changes in the first derivative of the signal
@@ -52,7 +85,7 @@ def petrosian_fd(x):
     return numpy.log10(n) / (numpy.log10(n) + numpy.log10(n / (n + 0.4 * N_delta)))
 
 
-def katz_fd(x):
+def katz_fd(series):
     """Katz Fractal Dimension.
     Parameters
     ----------
@@ -100,7 +133,7 @@ def katz_fd(x):
     return numpy.divide(ln, numpy.add(ln, numpy.log10(numpy.divide(d, ll))))
 
 
-def _higuchi_fd(x, kmax):
+def _higuchi_fd(series, kmax):
     """Utility function for `higuchi_fd`.
     """
     n_times = x.size
@@ -130,7 +163,7 @@ def _higuchi_fd(x, kmax):
     return higuchi
 
 
-def higuchi_fd(x, kmax=10):
+def higuchi_fd(series, kmax=10):
     """Higuchi Fractal Dimension.
     Parameters
     ----------
@@ -164,105 +197,3 @@ def higuchi_fd(x, kmax=10):
     x = numpy.asarray(x, dtype=numpy.float64)
     kmax = int(kmax)
     return _higuchi_fd(x, kmax)
-
-
-def _dfa(x):
-    """
-    Utility function for detrended fluctuation analysis
-    """
-    N = len(x)
-    nvals = utils._log_n(4, 0.1 * N, 1.2)
-    walk = numpy.cumsum(x - x.mean())
-    fluctuations = numpy.zeros(len(nvals))
-
-    for i_n, n in enumerate(nvals):
-        d = numpy.reshape(walk[:N - (N % n)], (N // n, n))
-        ran_n = numpy.array([float(na) for na in range(n)])
-        d_len = len(d)
-        slope = numpy.empty(d_len)
-        intercept = numpy.empty(d_len)
-        trend = numpy.empty((d_len, ran_n.size))
-        for i in range(d_len):
-            slope[i], intercept[i] = utils._linear_regression(ran_n, d[i])
-            y = numpy.zeros_like(ran_n)
-            # Equivalent to numpy.polyval function
-            for p in [slope[i], intercept[i]]:
-                y = y * ran_n + p
-            trend[i, :] = y
-        # calculate standard deviation (fluctuation) of walks in d around trend
-        flucs = numpy.sqrt(numpy.sum((d - trend) ** 2, axis=1) / n)
-        # calculate mean fluctuation over all subsequences
-        fluctuations[i_n] = flucs.sum() / flucs.size
-
-    # Filter zero
-    nonzero = numpy.nonzero(fluctuations)[0]
-    fluctuations = fluctuations[nonzero]
-    nvals = nvals[nonzero]
-    if len(fluctuations) == 0:
-        # all fluctuations are zero => we cannot fit a line
-        dfa = numpy.nan
-    else:
-        dfa, _ = utils._linear_regression(numpy.log(nvals), numpy.log(fluctuations))
-    return dfa
-
-
-def detrended_fluctuation(x):
-    """
-    Detrended fluctuation analysis (DFA).
-    Parameters
-    ----------
-    x : list or numpy.array
-        One-dimensional time-series.
-    Returns
-    -------
-    alpha : float
-        the estimate alpha (:math:`\\alpha`) for the Hurst parameter.
-        :math:`\\alpha < 1`` indicates a
-        stationary process similar to fractional Gaussian noise with
-        :math:`H = \\alpha`.
-        :math:`\\alpha > 1`` indicates a non-stationary process similar to
-        fractional Brownian motion with :math:`H = \\alpha - 1`
-    Notes
-    -----
-    `Detrended fluctuation analysis
-    <https://en.wikipedia.org/wiki/Detrended_fluctuation_analysis>`_
-    is used to find long-term statistical dependencies in time series.
-    The idea behind DFA originates from the definition of self-affine
-    processes. A process :math:`X` is said to be self-affine if the standard
-    deviation of the values within a window of length n changes with the window
-    length factor :math:`L` in a power law:
-    .. math:: \\texttt{std}(X, L * n) = L^H * \\texttt{std}(X, n)
-    where :math:`\\texttt{std}(X, k)` is the standard deviation of the process
-    :math:`X` calculated over windows of size :math:`k`. In this equation,
-    :math:`H` is called the Hurst parameter, which behaves indeed very similar
-    to the Hurst exponent.
-    For more details, please refer to the excellent documentation of the
-    `nolds <https://cschoel.github.io/nolds/>`_
-    Python package by Christopher Scholzel, from which this function is taken:
-    https://cschoel.github.io/nolds/nolds.html#detrended-fluctuation-analysis
-    Note that the default subseries size is set to
-    entropy.utils._log_n(4, 0.1 * len(x), 1.2)). The current implementation
-    does not allow to manually specify the subseries size or use overlapping
-    windows.
-    The code is a faster (Numba) adaptation of the original code by Christopher
-    Scholzel.
-    References
-    ----------
-    .. [1] C.-K. Peng, S. V. Buldyrev, S. Havlin, M. Simons,
-           H. E. Stanley, and A. L. Goldberger, “Mosaic organization of
-           DNA nucleotides,” Physical Review E, vol. 49, no. 2, 1994.
-    .. [2] R. Hardstone, S.-S. Poil, G. Schiavone, R. Jansen,
-           V. V. Nikulin, H. D. Mansvelder, and K. Linkenkaer-Hansen,
-           “Detrended fluctuation analysis: A scale-free view on neuronal
-           oscillations,” Frontiers in Physiology, vol. 30, 2012.
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from entropy import detrended_fluctuation
-    >>> numpy.random.seed(123)
-    >>> x = numpy.random.rand(100)
-    >>> print(detrended_fluctuation(x))
-    0.761647725305623
-    """
-    x = numpy.asarray(x, dtype=numpy.float64)
-    return _dfa(x)
