@@ -119,7 +119,7 @@ def get_list_of_points(ts):
     
     return list_of_observations, list_of_angles
 
-def check_inumpyut(timeseries):
+def check_input(timeseries):
 
     """
     
@@ -146,6 +146,3 @@ def check_inumpyut(timeseries):
             return timeseries
     else:
         raise Exception('Incorrect type: Please use numpy.array as inumpyut.')
-
-
-    
