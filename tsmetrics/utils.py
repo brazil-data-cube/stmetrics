@@ -33,7 +33,7 @@ def _linear_regression(x, y):
     den = n_times * sx2 - (sx ** 2)
     num = n_times * sxy - sx * sy
     slope = num / den
-    intercept = np.mean(y) - slope * np.mean(x)
+    intercept = numpy.mean(y) - slope * numpy.mean(x)
     return slope, intercept
 
 @jit('i8[:](f8, f8, f8)', nopython=True)
@@ -64,7 +64,7 @@ def _log_n(min_n, max_n, factor):
         n = int(floor(min_n * (factor ** i)))
         if n > ns[-1]:
             ns.append(n)
-    return np.array(ns, dtype=np.int64)
+    return numpy.array(ns, dtype=numpy.int64)
 
 def fixseries(time_series):
     
