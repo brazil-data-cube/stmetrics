@@ -53,8 +53,8 @@ def _log_n(min_n, max_n, factor):
             min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
             without duplicates
     """
-    assert max_n > min_n
-    assert factor > 1
+    #assert max_n > min_n
+    #assert factor > 1
     # stop condition: min * f^x = max
     # => f^x = max/min
     # => x = log(max/min) / log(f)
