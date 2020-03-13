@@ -78,9 +78,9 @@ def petrosian_fd(series):
        (CIMED2005). 2005.
 
     """
-    n = len(x)
+    n = len(series)
     # Number of sign changes in the first derivative of the signal
-    diff = numpy.ediff1d(x)
+    diff = numpy.ediff1d(series)
     N_delta = (diff[1:-1] * diff[0:-2] < 0).sum()
     return numpy.log10(n) / (numpy.log10(n) + numpy.log10(n / (n + 0.4 * N_delta)))
 
@@ -124,7 +124,7 @@ def katz_fd(series):
     >>> print(katz_fd(x))
     5.121395665678078
     """
-    x = numpy.array(x)
+    x = numpy.array(series)
     dists = numpy.abs(numpy.ediff1d(x))
     ll = dists.sum()
     ln = numpy.log10(numpy.divide(ll, dists.mean()))
@@ -136,7 +136,7 @@ def katz_fd(series):
 def _higuchi_fd(series, kmax):
     """Utility function for `higuchi_fd`.
     """
-    n_times = x.size
+    n_times = series.size
     lk = numpy.empty(kmax)
     x_reg = numpy.empty(kmax)
     y_reg = numpy.empty(kmax)
@@ -194,6 +194,6 @@ def higuchi_fd(series, kmax=10):
     >>> print(higuchi_fd(x))
     2.0511793572134467
     """
-    x = numpy.asarray(x, dtype=numpy.float64)
+    x = numpy.asarray(series, dtype=numpy.float64)
     kmax = int(kmax)
     return _higuchi_fd(x, kmax)
