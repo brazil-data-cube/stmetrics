@@ -1,6 +1,7 @@
 import numpy
 from . import basics
 from . import polar
+from . import fractal
 
 def get_metrics(series,show=False):
     
@@ -8,13 +9,14 @@ def get_metrics(series,show=False):
     ts = series[~numpy.isnan(series)]
     
     if (not numpy.any(ts)) == True:
-        return numpy.zeros((1,16))
+        return numpy.zeros((1,21))
         
     #call functions
     basicas = basics.ts_basics(ts)
     polares = polar.ts_polar(ts,show)
+    fd = fractal.ts_fractal(timeseries,kmax=10)
 
-    return numpy.concatenate((basicas, polares), axis=None)
+    return numpy.concatenate((basicas, polares,fd), axis=None)
 
 def extractMetrics(series):
     from tsmetrics import metrics

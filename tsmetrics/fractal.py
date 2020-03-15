@@ -5,10 +5,12 @@ import nolds
 
 from . import utils
 
-all = ['petrosian_fd', 'katz_fd', 'higuchi_fd', 'detrended_fluctuation']
-
-def dfa(series):
+def dfa_fd(series):
     """Detrended Fluctuation Analysis (DFA)
+
+    DFA measures the Hurst parameter H, which is very similar to the Hurst exponent. 
+    The main difference is that DFA can be used for non-stationary processes (whose mean and/or variance change over time).
+
     Parameters
     ----------
     series : list or numpy.array
@@ -18,17 +20,19 @@ def dfa(series):
     dfa : float
         Detrended Fluctuation Analysis.
     
+    Notes:
+    ------
     This functions uses the dfa implementation from the Nolds package.
-    DFA measures the Hurst parameter H, which is very similar to the Hurst exponent. 
-    The main difference is that DFA can be used for non-stationary processes (whose mean and/or variance change over time).
+    
     """
 
     dfa = nolds.dfa(series)
     return dfa
 
-def hurst(series):
+def hurst_exp(series):
     """
-    Hurst exponent
+    Hurst exponent.
+    Hurst Exponent is a self-similarity measure that assess long-range dependence in a time series.
     
     Parameters
     ----------
@@ -48,7 +52,10 @@ def hurst(series):
     return h
 
 def petrosian_fd(series):
-    """Petrosian fractal dimension.
+    """Petrosian Algorithm.
+
+    This algorirhm computes the FD of a signal by translating the series into a binary sequence.
+
     Parameters
     ----------
     series : list or numpy.array
@@ -64,8 +71,9 @@ def petrosian_fd(series):
               \\log_{10}(\\frac{N}{N+0.4N_{\\delta}})}
     where :math:`N` is the length of the time series, and
     :math:`N_{\\delta}` is the number of sign changes in the signal derivative.
-    Original code from the `pyrem <https://github.com/gilestrolab/pyrem>`_
-    package by Quentin Geissmann.
+
+    This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
+
     References
     ----------
     .. [1] A. Petrosian, Kolmogorov complexity of finite sequences and
@@ -86,7 +94,8 @@ def petrosian_fd(series):
 
 
 def katz_fd(series):
-    """Katz Fractal Dimension.
+    """Katz Algorithm.
+    
     Parameters
     ----------
     x : list or numpy.array
@@ -104,8 +113,9 @@ def katz_fd(series):
     `Euclidean distance <https://en.wikipedia.org/wiki/Euclidean_distance>`_
     between the first point in the series and the point that provides the
     furthest distance with respect to the first point.
-    Original code from the `mne-features <https://mne.tools/mne-features/>`_
-    package by Jean-Baptiste Schiratti and Alexandre Gramfort.
+
+    This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
+
     References
     ----------
     .. [1] Esteller, R. et al. (2001). A comparison of waveform fractal
@@ -115,14 +125,6 @@ def katz_fd(series):
            the computation of EEG biomarkers for dementia." 2nd International
            Conference on Computational Intelligence in Medicine and Healthcare
            (CIMED2005). 2005.
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from entropy import katz_fd
-    >>> numpy.random.seed(123)
-    >>> x = numpy.random.rand(100)
-    >>> print(katz_fd(x))
-    5.121395665678078
     """
     x = numpy.array(series)
     dists = numpy.abs(numpy.ediff1d(x))
@@ -135,6 +137,11 @@ def katz_fd(series):
 
 def _higuchi_fd(series, kmax):
     """Utility function for `higuchi_fd`.
+
+    Notes
+    -----
+    This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
+
     """
     n_times = series.size
     lk = numpy.empty(kmax)
@@ -164,36 +171,70 @@ def _higuchi_fd(series, kmax):
 
 
 def higuchi_fd(series, kmax=10):
-    """Higuchi Fractal Dimension.
+    """Higuchi Fractal Dimension (HFD).
+
+    HFD is defined as the slope of the line that fits the pairs {ln[L(k)],ln(1/k)} in a least-squares sense.  
+
+    where: k indicates the discrete time interval between points.
+
     Parameters
     ----------
     x : list or numpy.array
         One dimensional time series.
     kmax : int
-        Maximum delay/offset (in number of samples).
+        Time interval between points. 
     Returns
     -------
     hfd : float
         Higuchi fractal dimension.
     Notes
     -----
-    Original code from the `mne-features <https://mne.tools/mne-features/>`_
-    package by Jean-Baptiste Schiratti and Alexandre Gramfort.
-    This function uses Numba to speed up the computation.
+    This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
+
     References
     ----------
     .. [1] Higuchi, Tomoyuki. "Approach to an irregular time series on the
        basis of the fractal theory." Physica D: Nonlinear Phenomena 31.2
        (1988): 277-283.
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from entropy import higuchi_fd
-    >>> numpy.random.seed(123)
-    >>> x = numpy.random.rand(100)
-    >>> print(higuchi_fd(x))
-    2.0511793572134467
     """
     x = numpy.asarray(series, dtype=numpy.float64)
     kmax = int(kmax)
     return _higuchi_fd(series, kmax)
+
+def ts_fractal(timeseries,kmax=10):
+    
+    """
+    
+    This function compute 4 fractal dimensions and the hurst exponential.
+    
+    DFA: measures the Hurst parameter H, which is very similar to the Hurst exponent. 
+    HFD: is defined as the slope of the line that fits the pairs {ln[L(k)],ln(1/k)} in a least-squares sense.  
+    HE: self-similarity measure that assess long-range dependence in a time series.
+    KFD:
+    PFD: This algorirhm computes the FD of a signal by translating the series into a binary sequence.
+    
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+    show: boolean
+         This inform that the polar plot must be presented.
+    Returns
+    -------
+    numpy.array:
+        array of polar metrics values
+    """
+    
+    #define header for polar dataframe
+    #header_polar=["dfa", "hfd", "he", "kfd", "kfd","pdf"]
+    
+    #Compute metrics
+
+    ts = fixseries(timeseries)
+    
+    dfa = dfa_fd(ts)
+    hfd = higuchi_fd(ts, kmax=kmax)
+    he = hurst_exp(ts)
+    kfd = katz_fd(ts)
+    pfd = petrosian_fd(ts) 
+
+    return numpy.array([dfa,hfd,he,kfd,pfd])
