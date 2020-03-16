@@ -3,5 +3,5 @@ Utility functions
 
 Utility module for tsmetrics
 
-.. automodule:: tsmetrics.utils
+.. automodule:: stmetrics.utils
 	:members:

@@ -3,5 +3,5 @@ Fractal metrics
 
 Module for computing fractal metrics
 
-.. automodule:: tsmetrics.fractal
+.. automodule:: stmetrics.fractal
 	:members:
