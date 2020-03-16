@@ -3,7 +3,7 @@ from numba import jit
 from math import log, floor
 import nolds
 
-from . import utils
+from.utils import *
 
 def dfa_fd(series):
     """Detrended Fluctuation Analysis (DFA)
