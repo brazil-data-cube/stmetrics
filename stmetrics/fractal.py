@@ -65,11 +65,11 @@ def petrosian_fd(series):
         Petrosian fractal dimension.
     Notes
     -----
-    The Petrosian fractal dimension of a time-series :math:`x` is defined by:
+    The Petrosian fractal dimension of a time-series ..:math:`x` is defined by:
     .. math:: P = \\frac{\\log_{10}(N)}{\\log_{10}(N) +
               \\log_{10}(\\frac{N}{N+0.4N_{\\delta}})}
-    where :math:`N` is the length of the time series, and
-    :math:`N_{\\delta}` is the number of sign changes in the signal derivative.
+    where ..:math:`N` is the length of the time series, and
+    ..:math:`N_{\\delta}` is the number of sign changes in the signal derivative.
 
     This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
 
