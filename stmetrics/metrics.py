@@ -14,7 +14,7 @@ def get_metrics(series,show=False):
     #call functions
     basicas = basics.ts_basics(ts)
     polares = polar.ts_polar(ts,show)
-    fd = fractal.ts_fractal(timeseries,kmax=10)
+    fd = fractal.ts_fractal(ts,kmax=10)
 
     return numpy.concatenate((basicas, polares,fd), axis=None)
 

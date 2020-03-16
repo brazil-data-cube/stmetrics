@@ -107,7 +107,9 @@ def katz_fd(series):
     Notes
     -----
     The Katz fractal dimension is defined by:
+
     .. math:: K = \\frac{\\log_{10}(n)}{\\log_{10}(d/L)+\\log_{10}(n)}
+    
     where :math:`L` is the total length of the time series and :math:`d`
     is the
     `Euclidean distance <https://en.wikipedia.org/wiki/Euclidean_distance>`_
@@ -223,9 +225,6 @@ def ts_fractal(timeseries,kmax=10):
     numpy.array:
         array of polar metrics values
     """
-    
-    #define header for polar dataframe
-    #header_polar=["dfa", "hfd", "he", "kfd", "kfd","pdf"]
     
     #Compute metrics
 
