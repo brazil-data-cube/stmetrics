@@ -18,7 +18,6 @@ Installation
 You can pip install it straight from git:
 
 .. code-block:: console
-	:linenos:
 
 	pip install stmetrics	
 
