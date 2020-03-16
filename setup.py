@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="stmetrics",
-    version="0.1.2",
+    version="0.1.3",
     author="Anderson Soares, Thales Körting",
     author_email="andersonreis.geo@gmail.com",
     description="A package to compute metrics from Satellite Image Time Series (SITS).",
