@@ -2,4 +2,5 @@ numpy
 matplotlib
 shapely
 descartes
+numba
 nolds
