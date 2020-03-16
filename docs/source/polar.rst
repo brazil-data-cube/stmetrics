@@ -3,7 +3,7 @@ polar
 
 Module for computing polar metrics
 
-.. module:: polar
+.. module:: tsmetrics.polar
 	:members:
 .. autofunction:: tsmetrics.polar.ts_polar
     
