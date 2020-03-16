@@ -3,7 +3,7 @@ from . import basics
 from . import polar
 from . import fractal
 
-def get_metrics(series,show=False):
+def get_metrics(series,kmax=10,show=False):
     
     #Remove eventual nans from timeseries
     ts = series[~numpy.isnan(series)]
@@ -14,7 +14,7 @@ def get_metrics(series,show=False):
     #call functions
     basicas = basics.ts_basics(ts)
     polares = polar.ts_polar(ts,show)
-    fd = fractal.ts_fractal(ts,kmax=10)
+    fd = fractal.ts_fractal(ts,k=kmax)
 
     return numpy.concatenate((basicas, polares,fd), axis=None)
 
