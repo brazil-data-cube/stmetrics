@@ -10,9 +10,8 @@ def dfa_fd(series):
     DFA measures the Hurst parameter H, which is very similar to the Hurst exponent. 
     The main difference is that DFA can be used for non-stationary processes (whose mean and/or variance change over time).
 
-    Parameters
-    ----------
-    series : list or numpy.array
+    Keyword arguments:
+    series : numpy.array
         One dimensional time series.
     Returns
     -------
@@ -22,7 +21,6 @@ def dfa_fd(series):
     Notes:
     ------
     This functions uses the dfa implementation from the Nolds package.
-    
     """
 
     dfa = nolds.dfa(series)
@@ -33,9 +31,8 @@ def hurst_exp(series):
     Hurst exponent.
     Hurst Exponent is a self-similarity measure that assess long-range dependence in a time series.
     
-    Parameters
-    ----------
-    series : list or numpy.array
+    Keyword arguments:
+    series : numpy.array
         One dimensional time series.
     Returns
     -------
@@ -55,9 +52,8 @@ def petrosian_fd(series):
 
     This algorirhm computes the FD of a signal by translating the series into a binary sequence.
 
-    Parameters
-    ----------
-    series : list or numpy.array
+    Keyword arguments:
+    series : numpy.array
         One dimensional time series.
     Returns
     -------
@@ -83,7 +79,6 @@ def petrosian_fd(series):
        the computation of EEG biomarkers for dementia." 2nd International
        Conference on Computational Intelligence in Medicine and Healthcare
        (CIMED2005). 2005.
-
     """
     n = len(series)
     # Number of sign changes in the first derivative of the signal
@@ -95,10 +90,10 @@ def petrosian_fd(series):
 def katz_fd(series):
     """Katz Algorithm.
     
-    Parameters
-    ----------
-    x : list or numpy.array
+    Keyword arguments:
+    series : numpy.array. 
         One dimensional time series.
+        
     Returns
     -------
     kfd : float
@@ -178,7 +173,7 @@ def katz_fd(series):
 
 #     where: k indicates the discrete time interval between points.
 
-#     Parameters
+#     Keyword arguments:
 #     ----------
 #     x : list or numpy.array
 #         One dimensional time series.
@@ -205,24 +200,20 @@ def katz_fd(series):
 def ts_fractal(timeseries,kmax=10):
     
     """
-    
     This function compute 4 fractal dimensions and the hurst exponential.
     
-    DFA: measures the Hurst parameter H, which is very similar to the Hurst exponent. 
-    HFD: is defined as the slope of the line that fits the pairs {ln[L(k)],ln(1/k)} in a least-squares sense.  
+    DFA: measures the Hurst parameter H, which is very similar to the Hurst exponent.
     HE: self-similarity measure that assess long-range dependence in a time series.
     KFD:
     PFD: This algorirhm computes the FD of a signal by translating the series into a binary sequence.
     
     Keyword arguments:
-        timeseries : numpy.ndarray
-            Your time series.
-    show: boolean
-         This inform that the polar plot must be presented.
+    timeseries : numpy.ndarray
+        Your time series.
     Returns
     -------
     numpy.array:
-        array of polar metrics values
+        array of fractal metrics values
     """
     
     #Compute metrics
