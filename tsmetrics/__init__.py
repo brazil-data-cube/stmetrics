@@ -11,4 +11,4 @@ from . import fractal
 
 __version__ = "0.0.1.9"
 
-name = "tsmetrics"
+name = "stmetrics"

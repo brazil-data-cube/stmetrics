@@ -19,7 +19,7 @@ def get_metrics(series,show=False):
     return numpy.concatenate((basicas, polares,fd), axis=None)
 
 def extractMetrics(series):
-    from tsmetrics import metrics
+    from stmetrics import metrics
     import multiprocessing as mp
     
     #Initialize pool
