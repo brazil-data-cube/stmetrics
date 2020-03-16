@@ -3,21 +3,21 @@ polar
 
 Module for computing polar metrics
 
-.. currentmodule:: polar
+.. module:: polar
 	:members:
-.. autofunction:: ts_polar
+.. autofunction:: polar.ts_polar
     
-.. autofunction:: ecc_metrics
+.. autofunction:: polar.ecc_metrics
     
-.. autofunction:: gyration_radius
+.. autofunction:: polar.gyration_radius
     
-.. autofunction:: area_ts
+.. autofunction:: polar.area_ts
     
-.. autofunction:: area_season
+.. autofunction:: polar.area_season
     
-.. autofunction:: polar_balance
+.. autofunction:: polar.polar_balance
     
-.. autofunction:: angle
+.. autofunction:: polar.angle
     
-.. autofunction:: polar_plot
+.. autofunction:: polar.polar_plot
     
