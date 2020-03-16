@@ -237,3 +237,64 @@ def ts_fractal(timeseries,kmax=10):
     pfd = petrosian_fd(ts) 
 
     return numpy.array([dfa,hfd,he,kfd,pfd])
+
+def _linear_regression(x, y):
+    """Fast linear regression using Numba.
+    Parameters
+    ----------
+    x, y : ndarray, shape (n_times,)
+        Variables
+    Returns
+    -------
+    slope : float
+        Slope of 1D least-square regression.
+    intercept : float
+        Intercept
+    """
+    n_times = x.size
+    sx2 = 0
+    sx = 0
+    sy = 0
+    sxy = 0
+    for j in range(n_times):
+        sx2 += x[j] ** 2
+        sx += x[j]
+        sxy += x[j] * y[j]
+        sy += y[j]
+    den = n_times * sx2 - (sx ** 2)
+    num = n_times * sxy - sx * sy
+    slope = num / den
+    intercept = numpy.mean(y) - slope * numpy.mean(x)
+    return slope, intercept
+
+
+def _log_n(min_n, max_n, factor):
+    """
+    Creates a list of values by successively multiplying a minimum value min_n by
+    a factor > 1 until a maximum value max_n is reached.
+    Non-integer results are rounded down.
+    Args:
+      min_n (float):
+        minimum value (must be < max_n)
+    max_n (float):
+        maximum value (must be > min_n)
+    factor (float):
+        factor used to increase min_n (must be > 1)
+    Returns:
+        list of integers:
+            min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
+            without duplicates
+    """
+    #assert max_n > min_n
+    #assert factor > 1
+    # stop condition: min * f^x = max
+    # => f^x = max/min
+    # => x = log(max/min) / log(f)
+    max_i = int(numpy.floor(numpy.log(1.0 * max_n / min_n) / numpy.log(factor)))
+    ns = [min_n]
+    for i in range(max_i + 1):
+        n = int(numpy.floor(min_n * (factor ** i)))
+        if n > ns[-1]:
+            ns.append(n)
+
+    return ns
