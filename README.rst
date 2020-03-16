@@ -17,7 +17,8 @@ Installation
 =============
 You can pip install it straight from git:
 
-pip install stmetrics
+.. code-block:: console
+	pip install stmetrics	
 
 For windows users:
 ==================
