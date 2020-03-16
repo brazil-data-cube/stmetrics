@@ -30,6 +30,10 @@ conda config --add channels conda-forge
 
 conda install shapely
 
+Developer Documentation
+========================
+See https://stmetrics.readthedocs.io/en/latest/
+
 
 Collaborators
 =============
