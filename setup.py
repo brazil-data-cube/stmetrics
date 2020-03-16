@@ -14,6 +14,8 @@ setuptools.setup(
     url="https://github.com/andersonreisoares/tsmetrics/",
     packages=['tsmetrics'],
     install_requires=[
+    'scipy',
+    'sklearn',
     'pandas',
     'numpy',
     'matplotlib',
