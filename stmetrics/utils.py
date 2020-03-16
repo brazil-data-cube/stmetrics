@@ -87,7 +87,7 @@ def fixseries(time_series):
     
     """
 
-    check_inumpyut(time_series)
+    check_input(time_series)
 
     if time_series.size == numpy.ones((1,)).size :
         return numpy.array([1])
