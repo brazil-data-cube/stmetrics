@@ -3,8 +3,8 @@ polar
 
 Module for computing polar metrics
 
-.. module:: tsmetrics.polar
-	:members:
+.. currentmodule:: polar
+	
 .. autofunction:: ts_polar
     
 .. autofunction:: polar.ecc_metrics
