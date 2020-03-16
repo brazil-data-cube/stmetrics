@@ -5,5 +5,4 @@ scipy
 matplotlib
 shapely
 descartes
-numba
 nolds

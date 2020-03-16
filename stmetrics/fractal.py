@@ -1,5 +1,4 @@
 import numpy
-from numba import jit
 from math import log, floor
 import nolds
 
@@ -137,71 +136,71 @@ def katz_fd(series):
     return numpy.divide(ln, numpy.add(ln, numpy.log10(numpy.divide(d, ll))))
 
 
-def _higuchi_fd(series, kmax):
-    """Utility function for `higuchi_fd`.
+# def _higuchi_fd(series, kmax):
+#     """Utility function for `higuchi_fd`.
 
-    Notes
-    -----
-    This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
+#     Notes
+#     -----
+#     This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
 
-    """
-    n_times = series.size
-    lk = numpy.empty(kmax)
-    x_reg = numpy.empty(kmax)
-    y_reg = numpy.empty(kmax)
-    for k in range(1, kmax + 1):
-        lm = numpy.empty((k,))
-        for m in range(k):
-            ll = 0
-            n_max = floor((n_times - m - 1) / k)
-            n_max = int(n_max)
-            for j in range(1, n_max):
-                ll += abs(series[m + j * k] - series[m + (j - 1) * k])
-            ll /= k
-            ll *= (n_times - 1) / (k * n_max)
-            lm[m] = ll
-        # Mean of lm
-        m_lm = 0
-        for m in range(k):
-            m_lm += lm[m]
-        m_lm /= k
-        lk[k - 1] = m_lm
-        x_reg[k - 1] = log(1. / k)
-        y_reg[k - 1] = log(m_lm)
-    higuchi, _ = _linear_regression(x_reg, y_reg)
-    return higuchi
+#     """
+#     n_times = series.size
+#     lk = numpy.empty(kmax)
+#     x_reg = numpy.empty(kmax)
+#     y_reg = numpy.empty(kmax)
+#     for k in range(1, kmax + 1):
+#         lm = numpy.empty((k,))
+#         for m in range(k):
+#             ll = 0
+#             n_max = floor((n_times - m - 1) / k)
+#             n_max = int(n_max)
+#             for j in range(1, n_max):
+#                 ll += abs(series[m + j * k] - series[m + (j - 1) * k])
+#             ll /= k
+#             ll *= (n_times - 1) / (k * n_max)
+#             lm[m] = ll
+#         # Mean of lm
+#         m_lm = 0
+#         for m in range(k):
+#             m_lm += lm[m]
+#         m_lm /= k
+#         lk[k - 1] = m_lm
+#         x_reg[k - 1] = log(1. / k)
+#         y_reg[k - 1] = log(m_lm)
+#     higuchi, _ = _linear_regression(x_reg, y_reg)
+#     return higuchi
 
 
-def higuchi_fd(series, kmax=10):
-    """Higuchi Fractal Dimension (HFD).
+# def higuchi_fd(series, kmax=10):
+#     """Higuchi Fractal Dimension (HFD).
 
-    HFD is defined as the slope of the line that fits the pairs {ln[L(k)],ln(1/k)} in a least-squares sense.  
+#     HFD is defined as the slope of the line that fits the pairs {ln[L(k)],ln(1/k)} in a least-squares sense.  
 
-    where: k indicates the discrete time interval between points.
+#     where: k indicates the discrete time interval between points.
 
-    Parameters
-    ----------
-    x : list or numpy.array
-        One dimensional time series.
-    kmax : int
-        Time interval between points. 
-    Returns
-    -------
-    hfd : float
-        Higuchi fractal dimension.
-    Notes
-    -----
-    This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
+#     Parameters
+#     ----------
+#     x : list or numpy.array
+#         One dimensional time series.
+#     kmax : int
+#         Time interval between points. 
+#     Returns
+#     -------
+#     hfd : float
+#         Higuchi fractal dimension.
+#     Notes
+#     -----
+#     This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
 
-    References
-    ----------
-    .. [1] Higuchi, Tomoyuki. "Approach to an irregular time series on the
-       basis of the fractal theory." Physica D: Nonlinear Phenomena 31.2
-       (1988): 277-283.
-    """
-    x = numpy.asarray(series, dtype=numpy.float64)
-    kmax = int(kmax)
-    return _higuchi_fd(series, kmax)
+#     References
+#     ----------
+#     .. [1] Higuchi, Tomoyuki. "Approach to an irregular time series on the
+#        basis of the fractal theory." Physica D: Nonlinear Phenomena 31.2
+#        (1988): 277-283.
+#     """
+#     x = numpy.asarray(series, dtype=numpy.float64)
+#     kmax = int(kmax)
+#     return _higuchi_fd(series, kmax)
 
 def ts_fractal(timeseries,kmax=10):
     
@@ -231,70 +230,70 @@ def ts_fractal(timeseries,kmax=10):
     ts = fixseries(timeseries)
     
     dfa = dfa_fd(ts)
-    hfd = higuchi_fd(ts, kmax=kmax)
+    #hfd = higuchi_fd(ts, kmax=kmax)
     he = hurst_exp(ts)
     kfd = katz_fd(ts)
     pfd = petrosian_fd(ts) 
 
-    return numpy.array([dfa,hfd,he,kfd,pfd])
+    return numpy.array([dfa,he,kfd,pfd])
 
-def _linear_regression(x, y):
-    """Fast linear regression using Numba.
-    Parameters
-    ----------
-    x, y : ndarray, shape (n_times,)
-        Variables
-    Returns
-    -------
-    slope : float
-        Slope of 1D least-square regression.
-    intercept : float
-        Intercept
-    """
-    n_times = x.size
-    sx2 = 0
-    sx = 0
-    sy = 0
-    sxy = 0
-    for j in range(n_times):
-        sx2 += x[j] ** 2
-        sx += x[j]
-        sxy += x[j] * y[j]
-        sy += y[j]
-    den = n_times * sx2 - (sx ** 2)
-    num = n_times * sxy - sx * sy
-    slope = num / den
-    intercept = numpy.mean(y) - slope * numpy.mean(x)
-    return slope, intercept
+# def _linear_regression(x, y):
+#     """Fast linear regression using Numba.
+#     Parameters
+#     ----------
+#     x, y : ndarray, shape (n_times,)
+#         Variables
+#     Returns
+#     -------
+#     slope : float
+#         Slope of 1D least-square regression.
+#     intercept : float
+#         Intercept
+#     """
+#     n_times = x.size
+#     sx2 = 0
+#     sx = 0
+#     sy = 0
+#     sxy = 0
+#     for j in range(n_times):
+#         sx2 += x[j] ** 2
+#         sx += x[j]
+#         sxy += x[j] * y[j]
+#         sy += y[j]
+#     den = n_times * sx2 - (sx ** 2)
+#     num = n_times * sxy - sx * sy
+#     slope = num / den
+#     intercept = numpy.mean(y) - slope * numpy.mean(x)
+#     return slope, intercept
 
 
-def _log_n(min_n, max_n, factor):
-    """
-    Creates a list of values by successively multiplying a minimum value min_n by
-    a factor > 1 until a maximum value max_n is reached.
-    Non-integer results are rounded down.
-    Args:
-      min_n (float):
-        minimum value (must be < max_n)
-    max_n (float):
-        maximum value (must be > min_n)
-    factor (float):
-        factor used to increase min_n (must be > 1)
-    Returns:
-        list of integers:
-            min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
-            without duplicates
-    """
-    #assert max_n > min_n
-    #assert factor > 1
-    # stop condition: min * f^x = max
-    # => f^x = max/min
-    # => x = log(max/min) / log(f)
-    max_i = int(numpy.floor(numpy.log(1.0 * max_n / min_n) / numpy.log(factor)))
-    ns = [min_n]
-    for i in range(max_i + 1):
-        n = int(numpy.floor(min_n * (factor ** i)))
-        if n > ns[-1]:
-            ns.append(n)
+# def _log_n(min_n, max_n, factor):
+#     """
+#     Creates a list of values by successively multiplying a minimum value min_n by
+#     a factor > 1 until a maximum value max_n is reached.
+#     Non-integer results are rounded down.
+#     Args:
+#       min_n (float):
+#         minimum value (must be < max_n)
+#     max_n (float):
+#         maximum value (must be > min_n)
+#     factor (float):
+#         factor used to increase min_n (must be > 1)
+#     Returns:
+#         list of integers:
+#             min_n, min_n * factor, min_n * factor^2, ... min_n * factor^i < max_n
+#             without duplicates
+#     """
+#     #assert max_n > min_n
+#     #assert factor > 1
+#     # stop condition: min * f^x = max
+#     # => f^x = max/min
+#     # => x = log(max/min) / log(f)
+#     max_i = int(numpy.floor(numpy.log(1.0 * max_n / min_n) / numpy.log(factor)))
+#     ns = [min_n]
+#     for i in range(max_i + 1):
+#         n = int(numpy.floor(min_n * (factor ** i)))
+#         if n > ns[-1]:
+#             ns.append(n)
 
-    return ns
+#     return ns
