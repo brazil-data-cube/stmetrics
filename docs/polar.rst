@@ -1,5 +1,5 @@
-polar
-=====
+Polar metrics
+=============
 
 Module for computing polar metrics
 
