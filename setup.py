@@ -14,6 +14,7 @@ setuptools.setup(
     url="https://github.com/andersonreisoares/tsmetrics/",
     packages=['tsmetrics'],
     install_requires=[
+    'pandas',
     'numpy',
     'matplotlib',
     'shapely',
