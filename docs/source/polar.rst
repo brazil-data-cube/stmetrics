@@ -3,5 +3,5 @@ polar
 
 Module for computing polar metrics
 
-.. automodule:: polar
-
+.. automodule:: tsmetrics.polar
+	:members:
