@@ -168,7 +168,7 @@ def _higuchi_fd(series, kmax):
         lk[k - 1] = m_lm
         x_reg[k - 1] = log(1. / k)
         y_reg[k - 1] = log(m_lm)
-    higuchi, _ = utils._linear_regression(x_reg, y_reg)
+    higuchi, _ = _linear_regression(x_reg, y_reg)
     return higuchi
 
 
