@@ -19,7 +19,7 @@ You can pip install it straight from git:
 
 .. code-block:: console
 	:linenos:
-	
+
 	pip install stmetrics	
 
 For windows users:
@@ -28,8 +28,8 @@ For windows users:
   
 Using conda do this:
 ---------------------
-.. code-block:: console
-	:linenos:
+
+.. code-block:: python
 
 	conda config --add channels conda-forge
 	conda install shapely
