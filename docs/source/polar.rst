@@ -5,7 +5,7 @@ Module for computing polar metrics
 
 .. module:: polar
 	:members:
-.. autofunction:: polar.ts_polar
+.. autofunction:: tsmetrics.polar.ts_polar
     
 .. autofunction:: polar.ecc_metrics
     
