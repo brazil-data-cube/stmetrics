@@ -1,8 +1,10 @@
 import numpy
 import math
+from numba import jit
 from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
+
 
 def fixseries(time_series):
     
@@ -24,7 +26,7 @@ def fixseries(time_series):
     
     """
 
-    check_inumpyut(time_series)
+    check_input(time_series)
 
     if time_series.size == numpy.ones((1,)).size :
         return numpy.array([1])
@@ -119,7 +121,7 @@ def get_list_of_points(ts):
     
     return list_of_observations, list_of_angles
 
-def check_inumpyut(timeseries):
+def check_input(timeseries):
 
     """
     
@@ -148,4 +150,3 @@ def check_inumpyut(timeseries):
         raise Exception('Incorrect type: Please use numpy.array as inumpyut.')
 
 
-    

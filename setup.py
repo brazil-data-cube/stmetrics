@@ -1,23 +1,27 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="tsmetrics",
-    version="0.0.1.6",
+    name="stmetrics",
+    version="0.1.3",
     author="Anderson Soares, Thales Körting",
     author_email="andersonreis.geo@gmail.com",
     description="A package to compute metrics from Satellite Image Time Series (SITS).",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/andersonreisoares/tsmetrics/",
-    packages=['tsmetrics'],
+    url="https://github.com/andersonreisoares/stmetrics/",
+    packages=['stmetrics'],
     install_requires=[
+    'scipy',
+    'sklearn',
+    'pandas',
     'numpy',
     'matplotlib',
     'shapely',
-    'descartes'
+    'descartes',
+    'nolds'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
