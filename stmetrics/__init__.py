@@ -9,6 +9,6 @@ from . import fractal
 
 # Version of the package
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 name = "stmetrics"
