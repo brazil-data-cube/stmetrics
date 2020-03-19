@@ -6,7 +6,7 @@ Spatio-Temporal Metrics
 		:alt: Documentation Status
 
 .. image:: https://img.shields.io/badge/license-MIT-green
-        :target: https://github.com/andersonreisoares/stmetrics/blob/master/LICENSE
+        :target: https://github.com/andersonreisoares/stmetrics/master/LICENSE
         :alt: License
 
 Produce reliable land use and land cover maps to support the deployment and operation of public policies is a necessity, especially when environmental management and economic development are considered. To increase the accuracy of these maps, satellite image time-series have been used, as they allow the understanding of land cover dynamics through the time.

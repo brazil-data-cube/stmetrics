@@ -111,7 +111,7 @@ def get_greenness(series,start,minimum_up):
             Your time series.
         start : integer 
             Position along time series axis
-        minimum_up : integer 
+        minimum_up : float 
             Minimum growing that will be used to detect a new cycle.
 
     Returns
@@ -177,7 +177,7 @@ def get_brownness(series,start,minimum_up):
     
     return b,d,r_mi
 
-def get_peaks(timeseries,window,minimum_up):
+def get_peaks(timeseries,minimum_up):
     
     """
     
@@ -188,8 +188,6 @@ def get_peaks(timeseries,window,minimum_up):
     Keyword arguments:
         timeseries : numpy.ndarray
             Your time series.
-        window: integer (odd number) default 7
-            Size of the window used for filtering with the Savitzky-Golay 
         minimum_up : float
             Minimum growing that will be used to detect a new cycle.
     Returns
@@ -225,19 +223,15 @@ def domain(y,peaks,minimum_up):
     Keyword arguments:
         timeseries : numpy.ndarray
             Your time series.
+        peaks : list
+            Peaks that are detected using function get_peaks.
         minimum_up : float
             Minimum growing that will be used to detect a new cycle.
-        max_dist_fitting: float, 0.125 default
-            Maximum distance used
-        Window: integer (odd number) default 7
-            Size of the window used for filtering with the Savitzky-Golay 
-        show: boolean
-            This inform if you want to plot the series with the starting and ending of each cycle detected.
+
     Returns
     -------
     pandas.dataframe:
         dataframe with the phenometrics
-    timeseries plot with the start and end points
     """
     
     
@@ -293,7 +287,7 @@ def domain(y,peaks,minimum_up):
                     
     return dfp
 
-def metrics(time_series, minimum_up, max_dist_fitting = 0.125, window = 7, show=True):
+def metrics(time_series, minimum_up, treshold = 0.125, window = 7, show=True):
     
     """
     
@@ -306,7 +300,7 @@ def metrics(time_series, minimum_up, max_dist_fitting = 0.125, window = 7, show=
             Your time series.
         minimum_up : float
             Minimum growing that will be used to detect a new cycle.
-        max_dist_fitting: float, 0.125 default
+        treshold: float, 0.125 default
             Maximum distance used
         Window: integer (odd number) default 7
             Size of the window used for filtering with the Savitzky-Golay 

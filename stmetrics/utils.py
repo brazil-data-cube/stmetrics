@@ -1,6 +1,5 @@
 import numpy
 import math
-from numba import jit
 from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
