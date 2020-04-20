@@ -23,8 +23,8 @@ setuptools.setup(
     'descartes',
     'nolds',
     'dtaidistance',
-    'rasterio==1.1.1',
-    'gdal==3.0.2',
+    'gdal',
+    'rasterio',
     'math'
     ],
     classifiers=[
