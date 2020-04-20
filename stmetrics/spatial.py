@@ -547,7 +547,7 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
             stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(i+1), affine=affine, stats=features))
             names = [i + j for i, j in zip(stats.columns, [band] * len(features))]
             stats.columns = names
-            segmentation = pandas.concat([segmentation, stats.reindex(seg.index)], axis=1)
+            segmentation = pandas.concat([segmentation, stats.reindex(segmentation.index)], axis=1)
         
     return segmentation
 
@@ -568,11 +568,11 @@ def seg_metrics(dataframe,feature='mean',merge=False):
     '''
     
     series = dataframe.filter(regex=feature)
-    metrics = seg_exmetrics(series.to_numpy())
+    metricas = seg_exmetrics(series.to_numpy())
     
     header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz","Pfd"]
     
-    dataframe = pandas.DataFrame(metrics,columns = header)
+    dataframe = pandas.DataFrame(metricas,columns = header)
     
     out_dataframe = pandas.concat([t, ouy], axis=1)
     
