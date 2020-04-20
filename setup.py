@@ -22,7 +22,6 @@ setuptools.setup(
     'shapely',
     'descartes',
     'nolds',
-    'osgeo',
     'dtaidistance',
     'rasterio',
     'cv2',
