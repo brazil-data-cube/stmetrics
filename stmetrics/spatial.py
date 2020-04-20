@@ -570,7 +570,7 @@ def seg_metrics(dataframe,feature='mean',merge=True):
     series = dataframe.filter(regex=feature)
     metricas = seg_exmetrics(series.to_numpy())
     
-    header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz","Pfd"]
+    header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz"]
     
     metricsdf = pandas.DataFrame(metricas,columns = header)
     
