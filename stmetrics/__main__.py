@@ -3,6 +3,7 @@ from .basics import *
 from .polar import *
 from .metrics import *
 from .fractal import *	
+from .spatial import *	
 
 if __name__ == "__main__":
 
