@@ -515,6 +515,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
     return C,int(S),l,d,int(kk)
 
 def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','length']):
+    import pandas
     
     '''
     This function extracts features using polygons.
