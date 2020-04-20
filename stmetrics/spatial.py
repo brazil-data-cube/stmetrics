@@ -516,7 +516,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
 
 def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','length']):
     import pandas
-    
+    import rasterstats
     '''
     This function extracts features using polygons.
     Mean, Standard Deviation, Minimum, Maximum, Area and Length are extracted for each polygon.
@@ -552,7 +552,7 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
     return segmentation
 
 def seg_metrics(dataframe,feature='mean',merge=False):
-
+    import pandas
     '''
     This function compute time metrics from a geopandas with time features.
     Basic, polar and fractal metrics.
