@@ -1,6 +1,4 @@
 import numpy
-import matplotlib.pyplot as plt
-from descartes import PolygonPatch
 from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
@@ -74,7 +72,8 @@ def symmetric_distance(time_series_1, time_series_2):
 
 
 def polar_plot(timeseries):
-    
+    import matplotlib.pyplot as plt
+    from descartes import PolygonPatch
     """
     
     This function create a plot of time series in polar space.

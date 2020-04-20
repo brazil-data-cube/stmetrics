@@ -5,7 +5,8 @@ import nolds
 from.utils import *
 
 def dfa_fd(series):
-    """Detrended Fluctuation Analysis (DFA)
+    """
+    Detrended Fluctuation Analysis (DFA)
 
     DFA measures the Hurst parameter H, which is very similar to the Hurst exponent. 
     The main difference is that DFA can be used for non-stationary processes (whose mean and/or variance change over time).
@@ -224,9 +225,9 @@ def ts_fractal(timeseries,kmax=10):
     #hfd = higuchi_fd(ts, kmax=kmax)
     he = hurst_exp(ts)
     kfd = katz_fd(ts)
-    pfd = petrosian_fd(ts) 
+    #pfd = petrosian_fd(ts) 
 
-    return numpy.array([dfa,he,kfd,pfd])
+    return numpy.array([dfa,he,kfd])
 
 # def _linear_regression(x, y):
 #     """Fast linear regression using Numba.

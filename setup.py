@@ -5,10 +5,10 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="stmetrics",
-    version="0.1.4",
+    version="0.1.5",
     author="Anderson Soares, Thales Körting",
     author_email="andersonreis.geo@gmail.com",
-    description="A package to compute metrics from Satellite Image Time Series (SITS).",
+    description="A package to compute process Satellite Image Time Series (SITS).",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/andersonreisoares/stmetrics/",
@@ -21,12 +21,17 @@ setuptools.setup(
     'matplotlib',
     'shapely',
     'descartes',
-    'nolds'
+    'nolds',
+    'osgeo',
+    'dtaidistance',
+    'rasterio',
+    'cv2',
+    'math'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Development Status :: 2 - Pre-Alpha"
+        "Development Status :: 4 - Beta"
     ],
 ) 

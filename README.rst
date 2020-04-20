@@ -41,6 +41,7 @@ See https://stmetrics.readthedocs.io/en/latest/
 Collaborators
 =============
 
+- Anderson Soares
 - Thales Körting
 - Hugo Bendini
 - Leila Fonseca

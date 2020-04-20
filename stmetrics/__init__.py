@@ -1,11 +1,11 @@
 import numpy
 
-from . import basics
-from . import polar
-from . import utils
-from . import phenometrics
-from . import metrics
-from . import fractal
+from stmetrics import basics
+from stmetrics import polar
+from stmetrics import utils
+from stmetrics import phenometrics
+from stmetrics import metrics
+from stmetrics import fractal
 
 # Version of the package
 

@@ -1,5 +1,4 @@
 import numpy
-import math
 from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
@@ -65,8 +64,6 @@ def create_polygon(timeseries):
         Shapely.Polygon
     
     """
-    
-    import math
 
     #remove weird spikes on timeseries
     ts = fixseries(timeseries)
@@ -84,8 +81,8 @@ def create_polygon(timeseries):
     
     #start to build up polygon
     for i in range(N):
-        a = list_of_radius[i] * math.cos(2 * numpy.pi * i / N)
-        o = list_of_radius[i] * math.sin(2 * numpy.pi * i / N)
+        a = list_of_radius[i] * numpy.cos(2 * numpy.pi * i / N)
+        o = list_of_radius[i] * numpy.sin(2 * numpy.pi * i / N)
         ring.append([a,o])
     r = LinearRing(ring)  
     

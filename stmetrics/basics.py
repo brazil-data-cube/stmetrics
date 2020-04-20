@@ -1,5 +1,4 @@
 import numpy
-
 from.utils import *
 
 def ts_basics(timeseries):
