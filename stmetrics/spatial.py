@@ -517,7 +517,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
 def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','length']):
     import pandas
     import rasterstats
-    '''
+    """
     This function extracts features using polygons.
     Mean, Standard Deviation, Minimum, Maximum, Area and Length are extracted for each polygon.
     
@@ -529,7 +529,7 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
     -------
     geopandas.Dataframe:
         segmentation
-    '''
+    """
 
     affine = dataset.transform
     
@@ -553,7 +553,7 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
 
 def seg_metrics(dataframe,feature='mean',merge=True):
     import pandas
-    '''
+    """
     This function compute time metrics from a geopandas with time features.
     Basic, polar and fractal metrics.
     
@@ -565,7 +565,7 @@ def seg_metrics(dataframe,feature='mean',merge=True):
     -------
     geopandas.Dataframe
     
-    '''
+    """
     
     series = dataframe.filter(regex=feature)
     metricas = seg_exmetrics(series.to_numpy())
@@ -584,7 +584,7 @@ def seg_metrics(dataframe,feature='mean',merge=True):
 def seg_exmetrics(series):
     import multiprocessing as mp
 
-    '''
+    """
     This function performs the computation of the metrics using multiprocessing.
 
     Keyword arguments:
@@ -597,7 +597,7 @@ def seg_exmetrics(series):
     image : numpy.array
         Numpy matrix of metrics and/or image.
 
-    '''
+    """
 
     #Initialize pool
     pool = mp.Pool(mp.cpu_count())
