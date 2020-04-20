@@ -1,5 +1,4 @@
 import numpy
-from math import log, floor
 import nolds
 
 from.utils import *
