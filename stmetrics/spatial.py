@@ -551,7 +551,7 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
         
     return segmentation
 
-def seg_metrics(dataframe,feature='mean',merge=False):
+def seg_metrics(dataframe,feature='mean',merge=True):
     import pandas
     '''
     This function compute time metrics from a geopandas with time features.
@@ -572,14 +572,16 @@ def seg_metrics(dataframe,feature='mean',merge=False):
     
     header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz","Pfd"]
     
-    dataframe = pandas.DataFrame(metricas,columns = header)
+    metricsdf = pandas.DataFrame(metricas,columns = header)
     
-    out_dataframe = pandas.concat([t, ouy], axis=1)
-    
-    return out_dataframe
+    if merge==True:
+        out_dataframe = pandas.concat([dataframe, metricsdf], axis=1)
+        return out_dataframe
+    else:
+        return metricsdf
 
 
-def seg_exmetrics(series,merge = False):
+def seg_exmetrics(series):
     import multiprocessing as mp
 
     '''
