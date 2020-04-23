@@ -39,7 +39,7 @@ def sits2metrics(image,merge = False):
     # Take our full image, ignore the Fmask band, and reshape into long 2d array (nrow * ncol, nband) for classification
     new_shape = (image.shape[1] * image.shape[2], image.shape[0])
 
-    series = image[:,:,:].T.reshape(new_shape)
+    series = image[:,:,:].reshape(new_shape)
     print('Reshaped from {o} to {n}'.format(o=image.shape,n=series.shape))
 
     #Initialize pool
