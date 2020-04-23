@@ -6,6 +6,9 @@ def get_metrics(series,show=False):
 
     #Remove eventual nans from timeseries
     ts = series[~numpy.isnan(series)]
+
+    if numpy.mean(ts)==0:
+        return 0
     
     if (not numpy.any(ts)) == True:
         return numpy.zeros((1,20))
