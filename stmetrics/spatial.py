@@ -2,7 +2,7 @@ import numpy
 import rasterio
 from . import metrics
 
-def SNITC(image,k,m,name,factor=10):
+def snitc(image,ki,m,factor=100):
 
     """
     
@@ -25,7 +25,8 @@ def SNITC(image,k,m,name,factor=10):
     """
 
     print('Simple Non-Linear Iterative Temporal Clustering V 1.0')
-    
+    name = os.path.basename(file_path)[:-4]
+
     ##READ FILE
     dataset = rasterio.open(image)
     img = dataset.read()
@@ -58,10 +59,10 @@ def SNITC(image,k,m,name,factor=10):
             subim = img[:,rmin:rmax,cmin:cmax];  
             
             #Calculate Spatio-temporal distance
-            try:
-                D = distance_fast(C[kk, :], subim, S, m, rmin, cmin) #DTW fast
-            except:
-                D = distance(C[kk, :], subim, S, m, rmin, cmin) #DTW regular
+            #try:
+            D = distance_fast(C[kk, :], subim, S, m, rmin, cmin) #DTW fast
+            #except:
+            #    D = distance(C[kk, :], subim, S, m, rmin, cmin) #DTW regular
 
             subd = d[rmin:rmax,cmin:cmax]
             subl = l[rmin:rmax,cmin:cmax]
@@ -518,7 +519,8 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
     """
     This function extracts features using polygons.
     Mean, Standard Deviation, Minimum, Maximum, Area and Length are extracted for each polygon.
-    
+    Nodata information is extracted from raster metadata.
+
     Keyword arguments:
         image : rasterio dataset
         segmentation : geopandas dataframe
@@ -544,7 +546,7 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
     if any(feat in features for feat in ('mean','std','min','max')):
         for i in range(dataset.count):
             band = '_'+str(i+1)
-            stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(i+1), affine=affine, stats=features))
+            stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(i+1), affine=affine, stats=features, nodata=dataset.nodata))
             names = [i + j for i, j in zip(stats.columns, [band] * len(features))]
             stats.columns = names
             segmentation = pandas.concat([segmentation, stats.reindex(segmentation.index)], axis=1)
@@ -567,7 +569,7 @@ def seg_metrics(dataframe,feature='mean',merge=True):
     
     """
     import pandas
-    
+
     series = dataframe.filter(regex=feature)
     metricas = seg_exmetrics(series.to_numpy())
     

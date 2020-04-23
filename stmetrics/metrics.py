@@ -47,22 +47,22 @@ def sits2metrics(image,merge = False):
         
     #use pool to compute metrics for each pixel
     #return a list of arrays
-    metricas = pool.map(metrics.get_metrics,[serie for serie in series])
+    X_m = pool.map(metrics.get_metrics,[serie for serie in series])
         
     #close pool
     pool.close()    
         
     #Conver list to numpy array
-    X_m = numpy.vstack(metricas)
+    metricas = numpy.vstack(X_m)
 
     # Reshape to image shape
-    ma = [numpy.reshape(X_m[:,b], image[0,:,:].shape, order='F') for b in range(X_m.shape[1])]
+    ma = [numpy.reshape(metricas[:,b], image[0,:,:].shape, order='F') for b in range(metricas.shape[1])]
     im_metrics = numpy.rollaxis(numpy.dstack(ma),2)
         
     if merge==True:
         #Concatenate time series and metrics
-        X_all = numpy.concatenate((image,im_metrics), axis=0).shape     
+        stacked = numpy.concatenate((image,im_metrics), axis=0).shape     
         
-        return X_all
+        return stacked
     else:
-        return features
+        return im_metrics
