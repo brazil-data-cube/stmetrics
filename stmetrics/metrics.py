@@ -40,7 +40,7 @@ def sits2metrics(image,merge = False):
     new_shape = (image.shape[1] * image.shape[2], image.shape[0])
 
     series = image[:,:,:].T.reshape(new_shape)
-    print('Reshaped from {o} to {n}'.format(o=image.shape,n=img_as_array.shape))
+    print('Reshaped from {o} to {n}'.format(o=image.shape,n=series.shape))
 
     #Initialize pool
     pool = mp.Pool(mp.cpu_count())
