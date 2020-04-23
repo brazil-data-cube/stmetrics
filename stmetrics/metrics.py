@@ -46,7 +46,7 @@ def sits2metrics(image,merge = False):
         
     #use pool to compute metrics for each pixel
     #return a list of arrays
-    X_m = pool.map(stmetrics.metrics.get_metrics,[serie for serie in series])
+    X_m = pool.map(get_metrics,[serie for serie in series])
         
     #close pool
     pool.close()    
