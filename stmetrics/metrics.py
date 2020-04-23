@@ -40,14 +40,13 @@ def sits2metrics(image,merge = False):
     new_shape = (image.shape[1] * image.shape[2], image.shape[0])
 
     series = image[:,:,:].reshape(new_shape)
-    print('Reshaped from {o} to {n}'.format(o=image.shape,n=series.shape))
-
+  
     #Initialize pool
     pool = mp.Pool(mp.cpu_count())
         
     #use pool to compute metrics for each pixel
     #return a list of arrays
-    X_m = pool.map(get_metrics,[serie for serie in series])
+    X_m = pool.map(stmetrics.metrics.get_metrics,[serie for serie in series])
         
     #close pool
     pool.close()    
