@@ -546,7 +546,7 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
     if any(feat in features for feat in ('mean','std','min','max')):
         for i in range(dataset.count):
             band = '_'+str(i+1)
-            stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(i+1), affine=affine, stats=features, nodata=dataset.nodata))
+            stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(i+1), affine=affine, stats=features, nodata=int(dataset.nodata)))
             names = [i + j for i, j in zip(stats.columns, [band] * len(features))]
             stats.columns = names
             segmentation = pandas.concat([segmentation, stats.reindex(segmentation.index)], axis=1)
