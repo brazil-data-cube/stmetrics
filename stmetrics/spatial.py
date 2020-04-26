@@ -1,14 +1,15 @@
 import numpy
 import rasterio
-from . import metrics
+from stmetrics import metrics
 
-def snitc(image,ki,m,factor=100):
+def snitc(image,ki,m):
 
     """
     
     This function create spatial-temporal superpixels using a Satellite Image Time Series (SITS).
 
     Keyword arguments:
+    ------------------
         image : Rasterio dataset object
             Input image
         k : int
@@ -24,12 +25,11 @@ def snitc(image,ki,m,factor=100):
     
     """
     import os
-    
+
     print('Simple Non-Linear Iterative Temporal Clustering V 1.0')
-    name = os.path.basename(file_path)[:-4]
+    name = os.path.basename(image.name)[:-4]
 
     ##READ FILE
-    dataset = rasterio.open(image)
     img = dataset.read()
     
     meta = dataset.profile #get image metadata
@@ -39,7 +39,7 @@ def snitc(image,ki,m,factor=100):
     #Normalize data
     for band in range(img.shape[0]):
         img[numpy.isnan(img)] = 0
-        img[band,:,:] = img[band,:,:]*0.5+0.5
+        img[band,:,:] = img[band,:,:]#*0.5+0.5
     
     #Get image dimensions
     bands = img.shape[0]
@@ -60,10 +60,10 @@ def snitc(image,ki,m,factor=100):
             subim = img[:,rmin:rmax,cmin:cmax];  
             
             #Calculate Spatio-temporal distance
-            #try:
-            D = distance_fast(C[kk, :], subim, S, m, rmin, cmin) #DTW fast
-            #except:
-            #    D = distance(C[kk, :], subim, S, m, rmin, cmin) #DTW regular
+            try:
+                D = distance_fast(C[kk, :], subim, S, m, rmin, cmin) #DTW fast
+            except:
+                D = distance(C[kk, :], subim, S, m, rmin, cmin) #DTW regular
 
             subd = d[rmin:rmax,cmin:cmax]
             subl = l[rmin:rmax,cmin:cmax]
@@ -90,14 +90,14 @@ def snitc(image,ki,m,factor=100):
         
     return None                                 #Return labeled numpy.array for visualization on python
 
-def distance_fast(C, subim, S, m, rmin, cmin, factor):
-    from dtaidistance import dtw
+def distance_fast(C, subim, S, m, rmin, cmin):
     """
     
     This function computes the spatial-temporal distance between
     two pixels using the dtw distance with C implementation.
 
     Keyword arguments:
+    ------------------
         C : numpy.ndarray
             ND-array containing cluster centres information
         subim : numpy.ndarray  
@@ -119,7 +119,8 @@ def distance_fast(C, subim, S, m, rmin, cmin, factor):
         ND-Array distance
     
     """
-
+    from dtaidistance import dtw
+    
     #Initialize submatrix
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
     
@@ -146,14 +147,14 @@ def distance_fast(C, subim, S, m, rmin, cmin, factor):
              
     return D
 
-def distance(C, subim, S, m, rmin, cmin, factor):
-    from dtaidistance import dtw
+def distance(C, subim, S, m, rmin, cmin):
     """
     
     This function computes the spatial-temporal distance between
     two pixels using the DTW distance.
 
     Keyword arguments:
+    ------------------
         C : numpy.ndarray
             ND-array containing cluster centres information
         subim : numpy.ndarray  
@@ -175,7 +176,7 @@ def distance(C, subim, S, m, rmin, cmin, factor):
         ND-Array distance
     
     """
-    
+    from dtaidistance import dtw
     #Initialize submatrix
     dc = numpy.zeros([subim.shape[1],subim.shape[2]])
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
@@ -189,7 +190,7 @@ def distance(C, subim, S, m, rmin, cmin, factor):
     for u in range(subim.shape[1]):
         for v in range(subim.shape[2]):
             a1 = subim[:,u,v]                                              # Get pixel time series 
-            dc[u,v] = dtw.distance_fast(a1.astype(float),a2.astype(float)) #Compute DTW distance
+            dc[u,v] = dtw.distance(a1.astype(float),a2.astype(float)) #Compute DTW distance
             ds[u,v] = (((u-ic)**2 + (v-jc)**2)**0.5)                       #Calculate Spatial Distance
     
     
@@ -204,6 +205,7 @@ def update_cluster(C,img,l,rows,columns,bands,k,residual_error):
     This function update clusters' informations.
 
     Keyword arguments:
+    ------------------
         C : numpy.ndarray
             ND-array containing cluster centres information
         img : numpy.ndarray  
@@ -252,13 +254,13 @@ def update_cluster(C,img,l,rows,columns,bands,k,residual_error):
 
 
 def postprocessing(l,S):
-    import cc3d
-    import fastremap
+
     """
     
     This function forces conectivity.
 
     Keyword arguments:
+    ------------------
         L : numpy.ndarray
             Labelled image
         S : int
@@ -269,6 +271,8 @@ def postprocessing(l,S):
         Segmentation result
     
     """
+    import cc3d
+    import fastremap
     
     for smooth in range(2):
         #Remove spourious regions generated during segmentation
@@ -284,14 +288,13 @@ def postprocessing(l,S):
     return raster
 
 def write_shp(segmentation, meta, name, k, m):
-    import fiona
-    from shapely.geometry import shape, mapping, MultiPolygon
 
     """
     
     This function creates the shapefile of the segmentation produced.
 
     Keyword arguments:
+    ------------------
         segmentation : numpy.ndarray
             Segmentation array
         meta : int
@@ -308,6 +311,8 @@ def write_shp(segmentation, meta, name, k, m):
     Segmentation as shapefile.
     
     """
+    import fiona
+    from shapely.geometry import shape, mapping, MultiPolygon
 
     #Get-Set transform and CRS
     transform = meta["transform"]
@@ -343,6 +348,7 @@ def write_raster(segmentation, meta, name, k, m):
     This function creates a TUF file of the segmentation produced.
 
     Keyword arguments:
+    ------------------
         segmentation : numpy.ndarray
             Segmentation array
         meta : int
@@ -359,7 +365,7 @@ def write_raster(segmentation, meta, name, k, m):
     Segmentation as TIF file.
     
     """
-
+    import rasterio
     #Adjust metadata to flush temporary file to 1
     meta['count'] = 1
     # change the data type to float rather than integer
@@ -371,13 +377,14 @@ def write_raster(segmentation, meta, name, k, m):
         
     return None
 
-def init_cluster_hex(img,bands,rows,columns,ki):
+def init_cluster_hex(rows,columns,ki,img,bands):
 
     """
     
     This function initialize the clusters using a hexagonal pattern.
 
     Keyword arguments:
+    ------------------
         img : numpy.ndarray
             Input image
         bands : int
@@ -407,7 +414,7 @@ def init_cluster_hex(img,bands,rows,columns,ki):
     
     #Setting up SNITC
     S = (rows*columns / (ki * (3**0.5)/2))**0.5
-
+    
     #Get nodes per row allowing a half column margin at one end that alternates
     nodeColumns = round(columns/S - 0.5);
     #Given an integer number of nodes per row recompute S
@@ -458,6 +465,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
     This function initialize the clusters using a square pattern.
 
     Keyword arguments:
+    ------------------
         img : numpy.ndarray
             Input image
         bands : int
@@ -523,13 +531,14 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
     Nodata information is extracted from raster metadata.
 
     Keyword arguments:
+    ------------------
         image : rasterio dataset
         segmentation : geopandas dataframe
 
     Returns
     -------
-    geopandas.Dataframe:
-        segmentation
+        geopandas.Dataframe:
+            segmentation
     """
     import pandas
     import rasterstats
@@ -569,12 +578,13 @@ def seg_metrics(dataframe,feature='mean',merge=True):
     Basic, polar and fractal metrics.
     
     Keyword arguments:
+    ------------------
         dataframe : geodataframe
         feature : feature that will be used to compute the metrics. Usually mean.
 
     Returns
     -------
-    geopandas.Dataframe
+        geopandas.Dataframe
     
     """
     import pandas
@@ -594,20 +604,21 @@ def seg_metrics(dataframe,feature='mean',merge=True):
 
 
 def seg_exmetrics(series):
-    
-
     """
     This function performs the computation of the metrics using multiprocessing.
 
     Keyword arguments:
+    ------------------
+
     image : numpy.array
         Array of time series. (Series  x Time)
     merge : Boolean
         Indicate if the matrix of features should be merged with the input matrix.
+    
     Returns
     -------
-    image : numpy.array
-        Numpy matrix of metrics and/or image.
+        image : numpy.array
+            Numpy matrix of metrics and/or image.
 
     """
     import multiprocessing as mp
@@ -631,12 +642,16 @@ def aspect_ratio(geom):
     """
     This function computes the aspect ratio of a given geometry.
     
+    The Length-Width Ratio (LW) is the ratio of the length (LMBR) and the width (WMBR) of the minimum bounding rectangle of a polygon. 
+    
     Keyword arguments:
-    geom : shapely.geometry.Polygon
+    ------------------
+    geom: shapely.geometry.Polygon
         Polygon geometry
     Returns
     -------
-    ratio : double
+        LW : double
+
     """
 
     from shapely.geometry import Polygon, LineString
@@ -656,13 +671,20 @@ def aspect_ratio(geom):
 def symmetry(geom):
     """
     This function computes the symmetry of a given geometry.
+
+    Symmetry is calculated by dividing the overlapping area AO, between a polygon and its reflection across the horizontal axis by the area of the original polygon P.
+    The range of this score goes between [0,1] and a score closer to 1 indicates a more compact and regular geometry.
+
+    .. math:: Symmetry = AO/A_p
     
     Keyword arguments:
-    geom : shapely.geometry.Polygon
-        Polygon geometry
+    ------------------
+    
+    geom: shapely.geometry.Polygon
+       Polygon geometry
     Returns
     -------
-    symmetry : double
+        symmetry : double
     """
     from shapely import affinity
 
@@ -675,13 +697,19 @@ def symmetry(geom):
 def reock_compactness(geom):
     """
     This function computes the reock compactness of a given geometry.
+
+    The Reock Score (R) is the ratio of the area of the polygon P to the area of a minimum bounding cirle (AMBC) that encloses the geometry. 
+    A polygon Reock score falls within the range of [0,1] and high values indicates a more compact district.
+
+    .. math:: Reock = A_p/A_{MBC}
     
     Keyword arguments:
-    geom : shapely.geometry.Polygon
+    ------------------
+
+    geom: shapely.geometry.Polygon
         Polygon geometry
     Returns
-    -------
-    reock compactness : double
+       reock compactness : double
 
     Reock, Ernest C. 1961. “A note: Measuring compactness as a requirement of legislative apportionment.” Midwest Journal of Political Science 1(5), 70–74.
     """

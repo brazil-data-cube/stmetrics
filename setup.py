@@ -25,7 +25,10 @@ setuptools.setup(
     'dtaidistance',
     'gdal',
     'rasterio',
-    'pointpats'
+    'pointpats',
+    'cc3d',
+    'rasterstats',
+    'fastremap'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

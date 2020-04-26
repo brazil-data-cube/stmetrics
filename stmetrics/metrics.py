@@ -1,4 +1,19 @@
 def get_metrics(series,show=False):
+    """
+    This function perform the computation and plot of the spectral-polar-fractal metrics available in the stmetrics package.
+
+    Keyword arguments:
+    ------------------
+        series : numpy.array
+            Array of time series.
+        show : Boolean
+            Indicate if the polar plot should be displayed.
+    Returns
+    -------
+        numpy.array : numpy.array
+            Numpy of the metrics.
+            
+    """
     import numpy
     from . import basics
     from . import polar
@@ -28,14 +43,15 @@ def sits2metrics(image,merge = False):
     This function performs the computation of the metrics using multiprocessing.
 
     Keyword arguments:
-    image : numpy.array
-        Array of time series. (Series  x Time)
-    merge : Boolean
-        Indicate if the matrix of features should be merged with the input matrix.
+    ------------------
+        image : numpy.array
+            Array of time series. (Series  x Time)
+        merge : Boolean
+            Indicate if the matrix of features should be merged with the input matrix.
     Returns
     -------
-    image : numpy.array
-        Numpy matrix of metrics and/or image.
+        image : numpy.array
+            Numpy matrix of metrics and/or image.
 
     '''
 

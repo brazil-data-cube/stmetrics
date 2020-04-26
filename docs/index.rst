@@ -15,10 +15,10 @@ Welcome to stmetrics's documentation!
    polar.rst
    basics.rst
    fractal.rst
+   spatial.rst
    utils.rst
    installation.rst
    license.rst
-   credits.rst
    contributors.rst
    
 .. toctree::

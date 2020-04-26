@@ -11,12 +11,13 @@ def dfa_fd(series):
     The main difference is that DFA can be used for non-stationary processes (whose mean and/or variance change over time).
 
     Keyword arguments:
-    series : numpy.array
-        One dimensional time series.
+    ------------------
+        series : numpy.array
+            One dimensional time series.
     Returns
     -------
-    dfa : float
-        Detrended Fluctuation Analysis.
+        dfa : float
+            Detrended Fluctuation Analysis.
     
     Notes:
     ------
@@ -28,16 +29,15 @@ def dfa_fd(series):
 
 def hurst_exp(series):
     """
-    Hurst exponent.
-    Hurst Exponent is a self-similarity measure that assess long-range dependence in a time series.
+    Hurst exponent is a self-similarity measure that assess long-range dependence in a time series.
     
     Keyword arguments:
-    series : numpy.array
-        One dimensional time series.
+        series : numpy.array
+            One dimensional time series.
     Returns
     -------
-    hurst : float
-        Hurst exponent.
+        hurst : float
+            Hurst exponent.
     
     The hurst exponent is a measure of the “long-term memory” of a time series. 
     It can be used to determine whether the time series is more, less, or equally likely to increase if it has increased in previous steps. 
@@ -48,17 +48,20 @@ def hurst_exp(series):
     return h
 
 def petrosian_fd(series):
-    """Petrosian Algorithm.
+    """
+    Petrosian Algorithm.
 
     This algorirhm computes the FD of a signal by translating the series into a binary sequence.
 
     Keyword arguments:
-    series : numpy.array
-        One dimensional time series.
+    ------------------
+        series : numpy.array
+            One dimensional time series.
     Returns
     -------
-    pfd : float
-        Petrosian fractal dimension.
+        pfd : float
+            Petrosian fractal dimension.
+
     Notes
     -----
     The Petrosian fractal dimension of a time-series ..:math:`x` is defined by:
@@ -88,16 +91,19 @@ def petrosian_fd(series):
 
 
 def katz_fd(series):
-    """Katz Algorithm.
+    """
+    Katz Algorithm.
     
     Keyword arguments:
-    series : numpy.array. 
-        One dimensional time series.
+    ------------------
+        series : numpy.array. 
+            One dimensional time series.
         
     Returns
     -------
-    kfd : float
-        Katz fractal dimension.
+        kfd : float
+            Katz fractal dimension.
+
     Notes
     -----
     The Katz fractal dimension is defined by:
@@ -204,16 +210,16 @@ def ts_fractal(timeseries,kmax=10):
     
     DFA: measures the Hurst parameter H, which is very similar to the Hurst exponent.
     HE: self-similarity measure that assess long-range dependence in a time series.
-    KFD:
+    KFD: This algorirhm computes the FD using Katz algorithm.
     PFD: This algorirhm computes the FD of a signal by translating the series into a binary sequence.
     
     Keyword arguments:
-    timeseries : numpy.ndarray
-        Your time series.
+        timeseries : numpy.ndarray
+            Your time series.
     Returns
     -------
-    numpy.array:
-        array of fractal metrics values
+        numpy.array:
+            array of fractal metrics values
     """
     
     #Compute metrics
