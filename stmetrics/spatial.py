@@ -177,6 +177,8 @@ def distance(C, subim, S, m, rmin, cmin):
     
     """
     from dtaidistance import dtw
+    from dtw import *
+    
     #Initialize submatrix
     dc = numpy.zeros([subim.shape[1],subim.shape[2]])
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
@@ -190,7 +192,7 @@ def distance(C, subim, S, m, rmin, cmin):
     for u in range(subim.shape[1]):
         for v in range(subim.shape[2]):
             a1 = subim[:,u,v]                                              # Get pixel time series 
-            dc[u,v] = dtw.distance(a1.astype(float),a2.astype(float)) #Compute DTW distance
+            dc[u,v] = dtw(a1.astype(float),a2.astype(float)).distance  #Compute DTW distance
             ds[u,v] = (((u-ic)**2 + (v-jc)**2)**0.5)                       #Calculate Spatial Distance
     
     
