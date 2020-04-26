@@ -23,7 +23,8 @@ def snitc(image,ki,m,factor=100):
         Shapefile containing superpixels produced.
     
     """
-
+    import os
+    
     print('Simple Non-Linear Iterative Temporal Clustering V 1.0')
     name = os.path.basename(file_path)[:-4]
 
@@ -515,7 +516,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
         
     return C,int(S),l,d,int(kk)
 
-def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','length']):
+def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter']):
     """
     This function extracts features using polygons.
     Mean, Standard Deviation, Minimum, Maximum, Area and Length are extracted for each polygon.
@@ -539,9 +540,17 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
         segmentation["area"] = segmentation['geometry'].area
         features.remove('area')
         
-    if 'length' in features:
-        segmentation["length"] = segmentation['geometry'].length
-        features.remove('length')
+    if 'perimeter' in features:
+        segmentation["perimeter"] = segmentation['geometry'].length
+        features.remove('perimeter')
+
+    if 'ratio' in features:
+        segmentation["ratio"] = segmentation['geometry'].apply(lambda g: aspect_ratio(g))
+
+    if 'symmetry' in features:
+        segmentation["symmetry"] = segmentation['geometry'].apply(lambda g: symmetry(g))
+
+
         
     if any(feat in features for feat in ('mean','std','min','max')):
         for i in range(dataset.count):
@@ -617,3 +626,70 @@ def seg_exmetrics(series):
     X_m = numpy.vstack(metricas)
         
     return X_m
+
+def aspect_ratio(geom):
+    """
+    This function computes the aspect ratio of a given geometry.
+    
+    Keyword arguments:
+    geom : shapely.geometry.Polygon
+        Polygon geometry
+    Returns
+    -------
+    ratio : double
+    """
+
+    from shapely.geometry import Polygon, LineString
+
+    # get the minimum bounding rectangle and zip coordinates into a list of point-tuples
+    mbr_points = list(zip(*geom.minimum_rotated_rectangle.exterior.coords.xy))
+
+    # calculate the length of each side of the minimum bounding rectangle
+    mbr_lengths = [LineString((mbr_points[i], mbr_points[i+1])).length for i in range(len(mbr_points) - 1)]
+
+    # get major/minor axis measurements
+    minor_axis = min(mbr_lengths)
+    major_axis = max(mbr_lengths)
+    
+    return minor_axis/major_axis
+
+def symmetry(geom):
+    """
+    This function computes the symmetry of a given geometry.
+    
+    Keyword arguments:
+    geom : shapely.geometry.Polygon
+        Polygon geometry
+    Returns
+    -------
+    symmetry : double
+    """
+    from shapely import affinity
+
+    rotated = affinity.rotate(geom, 180)
+    
+    sym_dif = geom.symmetric_difference(rotated)
+    
+    return sym_dif.area/geom.area
+
+def reock_compactness(geom):
+    """
+    This function computes the reock compactness of a given geometry.
+    
+    Keyword arguments:
+    geom : shapely.geometry.Polygon
+        Polygon geometry
+    Returns
+    -------
+    reock compactness : double
+
+    Reock, Ernest C. 1961. “A note: Measuring compactness as a requirement of legislative apportionment.” Midwest Journal of Political Science 1(5), 70–74.
+    """
+    import pointpats
+    from shapely.geometry import Point
+    
+    points = list(zip(*geom.minimum_rotated_rectangle.exterior.coords.xy))
+    (radius, center), _, _, _ = pointpats.skyum(points)
+    mbc_poly = Point(*center).buffer(radius)
+    
+    return geom.area/mbc_poly.area

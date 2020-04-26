@@ -24,7 +24,8 @@ setuptools.setup(
     'nolds',
     'dtaidistance',
     'gdal',
-    'rasterio'
+    'rasterio',
+    'pointpats'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
