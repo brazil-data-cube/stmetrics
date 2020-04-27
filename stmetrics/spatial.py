@@ -182,7 +182,7 @@ def distance(C, subim, S, m, rmin, cmin):
     """
     from dtaidistance import dtw
     #f = subim.shape[0]
-    m = m*10
+    m = m/10
     #Initialize submatrix
     dc = numpy.zeros([subim.shape[1],subim.shape[2]])
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
@@ -514,7 +514,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
         
     return C,int(S),l,d,int(kk)
 
-def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter']):
+def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter','ratio','symmetry',]):
     """
     This function extracts features using polygons.
     Mean, Standard Deviation, Minimum, Maximum, Area and Length are extracted for each polygon.
@@ -549,7 +549,8 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
     if 'symmetry' in features:
         segmentation["symmetry"] = segmentation['geometry'].apply(lambda g: symmetry(g))
 
-
+    if 'compactness' in features:
+        segmentation["compactness"] = segmentation['geometry'].apply(lambda g: reock_compactness(g))
         
     if any(feat in features for feat in ('mean','std','min','max')):
         for i in range(dataset.count):
