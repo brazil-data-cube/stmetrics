@@ -13,30 +13,12 @@ Produce reliable land use and land cover maps to support the deployment and oper
 
 The stmetrics, is a python package that provides the extraction of state-of-the-art time-series features. These features can be used for remote sensing time-series image classification and analysis.
 
-Installation
-=============
-You can pip install it straight from git:
-
-.. code-block:: console
-
-	pip install stmetrics	
-
-For windows users:
-==================
-  Please before installing the package make sure that you have correctly installed the Shapely package.
-  
-Using conda do this:
----------------------
-
-.. code-block:: python
-
-	conda config --add channels conda-forge
-	conda install shapely
-
 Developer Documentation
 ========================
+
 See https://stmetrics.readthedocs.io/en/latest/
 
+Windows users, please check the installation procedures in our documentation!
 
 Collaborators
 =============
