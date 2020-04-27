@@ -23,12 +23,11 @@ setuptools.setup(
     'descartes',
     'nolds',
     'dtaidistance',
-    'gdal',
     'rasterio',
+    'geopandas',
     'pointpats',
-    'cc3d',
-    'rasterstats',
-    'fastremap'
+    'connected-components-3d',
+    'rasterstats'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
