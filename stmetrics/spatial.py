@@ -514,10 +514,10 @@ def init_cluster_regular(rows,columns,ki,img,bands):
         
     return C,int(S),l,d,int(kk)
 
-def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter','ratio','symmetry',]):
+def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter','ratio','symmetry','compactness']):
     """
     This function extracts features using polygons.
-    Mean, Standard Deviation, Minimum, Maximum, Area and Length are extracted for each polygon.
+    Mean, Standard Deviation, Minimum, Maximum, Area, Perimeter, Lenght/With ratio, Symmetry and Compactness are extracted for each polygon.
     Nodata information is extracted from raster metadata.
 
     Keyword arguments:
