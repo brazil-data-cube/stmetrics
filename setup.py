@@ -26,6 +26,7 @@ setuptools.setup(
     'rasterio',
     'geopandas',
     'pointpats',
+    'fastremap',
     'connected-components-3d',
     'rasterstats'
     ],
