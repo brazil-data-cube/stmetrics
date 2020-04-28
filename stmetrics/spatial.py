@@ -280,7 +280,9 @@ def postprocessing(raster,S):
         Segmentation result
     
     """
-
+    import cc3d
+    import fastremap
+    from rasterio import features
     
     for smooth in range(3):
         #Remove spourious regions generated during segmentation

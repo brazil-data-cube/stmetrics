@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.1.5",
     author="Anderson Soares, Thales Körting",
     author_email="andersonreis.geo@gmail.com",
-    description="A package to compute process Satellite Image Time Series (SITS).",
+    description="A package to compute features from Satellite Image Time Series (SITS).",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/andersonreisoares/stmetrics/",
