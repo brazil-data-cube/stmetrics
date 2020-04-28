@@ -1,8 +1,5 @@
 import numpy
 import rasterio
-import cc3d
-import fastremap
-from rasterio import features
 from stmetrics import metrics
 
 def snitc(dataset,ki,m):
