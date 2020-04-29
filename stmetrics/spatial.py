@@ -545,12 +545,15 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
 
     if 'ratio' in features:
         segmentation["ratio"] = segmentation['geometry'].apply(lambda g: aspect_ratio(g))
+        features.remove('ratio')
 
     if 'symmetry' in features:
         segmentation["symmetry"] = segmentation['geometry'].apply(lambda g: symmetry(g))
+        features.remove('symmetry')
 
     if 'compactness' in features:
         segmentation["compactness"] = segmentation['geometry'].apply(lambda g: reock_compactness(g))
+        features.remove('compactness')
         
     if any(feat in features for feat in ('mean','std','min','max')):
         for i in range(dataset.count):
