@@ -281,7 +281,7 @@ def postprocessing(raster,S):
     import fastremap
     from rasterio import features
     
-    for smooth in range(3):
+    for smooth in range(5):
         #Remove spourious regions generated during segmentation
         cc = cc3d.connected_components(raster.astype(dtype=numpy.uint16), connectivity=6, out_dtype=numpy.uint32)
 
@@ -554,7 +554,7 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
     if 'compactness' in features:
         segmentation["compactness"] = segmentation['geometry'].apply(lambda g: reock_compactness(g))
         features.remove('compactness')
-        
+
     if any(feat in features for feat in ('mean','std','min','max')):
         for i in range(dataset.count):
             band = '_'+str(i+1)
