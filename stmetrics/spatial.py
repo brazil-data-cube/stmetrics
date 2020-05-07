@@ -514,57 +514,6 @@ def init_cluster_regular(rows,columns,ki,img,bands):
         
     return C,int(S),l,d,int(kk)
 
-def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter','ratio','symmetry','compactness']):
-    """
-    This function extracts features using polygons.
-    Mean, Standard Deviation, Minimum, Maximum, Area, Perimeter, Lenght/With ratio, Symmetry and Compactness are extracted for each polygon.
-    Nodata information is extracted from raster metadata.
-
-    Keyword arguments:
-    ------------------
-        image : rasterio dataset
-        segmentation : geopandas dataframe
-
-    Returns
-    -------
-        geopandas.Dataframe:
-            segmentation
-    """
-    import pandas
-    import rasterstats
-
-    affine = dataset.transform
-    
-    if 'area' in features:
-        segmentation["area"] = segmentation['geometry'].area
-        features.remove('area')
-        
-    if 'perimeter' in features:
-        segmentation["perimeter"] = segmentation['geometry'].length
-        features.remove('perimeter')
-
-    if 'ratio' in features:
-        segmentation["ratio"] = segmentation['geometry'].apply(lambda g: aspect_ratio(g))
-        features.remove('ratio')
-
-    if 'symmetry' in features:
-        segmentation["symmetry"] = segmentation['geometry'].apply(lambda g: symmetry(g))
-        features.remove('symmetry')
-
-    if 'compactness' in features:
-        segmentation["compactness"] = segmentation['geometry'].apply(lambda g: reock_compactness(g))
-        features.remove('compactness')
-
-    if any(feat in features for feat in ('mean','std','min','max')):
-        for i in range(dataset.count):
-            band = '_'+str(i+1)
-            stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(i+1), affine=affine, stats=features, nodata=int(dataset.nodata)))
-            names = [i + j for i, j in zip(stats.columns, [band] * len(features))]
-            stats.columns = names
-            segmentation = pandas.concat([segmentation, stats.reindex(segmentation.index)], axis=1)
-        
-    return segmentation
-
 def seg_metrics(dataframe,feature='mean',merge=True):
     
     """
@@ -631,6 +580,70 @@ def seg_exmetrics(series):
     X_m = numpy.vstack(metricas)
         
     return X_m
+
+def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter','width','length','ratio','symmetry','compactness','rectangular_fit']):
+    """
+    This function extracts features using polygons.
+    Mean, Standard Deviation, Minimum, Maximum, Area, Perimeter, Lenght/With ratio, Symmetry and Compactness are extracted for each polygon.
+    Nodata information is extracted from raster metadata.
+
+    Keyword arguments:
+    ------------------
+        image : rasterio dataset
+        segmentation : geopandas dataframe
+
+    Returns
+    -------
+        geopandas.Dataframe:
+            segmentation
+    """
+    import pandas
+    import rasterstats
+
+    affine = dataset.transform
+    
+    if 'area' in features:
+        segmentation["area"] = segmentation['geometry'].area
+        features.remove('area')
+        
+    if 'perimeter' in features:
+        segmentation["perimeter"] = segmentation['geometry'].length
+        features.remove('perimeter')
+
+    if 'ratio' in features:
+        segmentation["ratio"] = segmentation['geometry'].apply(lambda g: aspect_ratio(g))
+        features.remove('ratio')
+
+    if 'symmetry' in features:
+        segmentation["symmetry"] = segmentation['geometry'].apply(lambda g: symmetry(g))
+        features.remove('symmetry')
+
+    if 'compactness' in features:
+        segmentation["compactness"] = segmentation['geometry'].apply(lambda g: reock_compactness(g))
+        features.remove('compactness')
+
+    if 'rectangular_fit' in features:
+        segmentation["rectangular_fit"] = segmentation['geometry'].apply(lambda g: rectangular_fit(g))
+        features.remove('rectangular_fit')
+
+    if 'width' in features:
+        segmentation["width"] = segmentation['geometry'].apply(lambda g: width(g))
+        features.remove('width')
+
+    if 'length' in features:
+        segmentation["length"] = segmentation['geometry'].apply(lambda g: length(g))
+        features.remove('length')
+
+
+    if any(feat in features for feat in ('mean','std','min','max')):
+        for i in range(dataset.count):
+            band = '_'+str(i+1)
+            stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(i+1), affine=affine, stats=features, nodata=int(dataset.nodata)))
+            names = [i + j for i, j in zip(stats.columns, [band] * len(features))]
+            stats.columns = names
+            segmentation = pandas.concat([segmentation, stats.reindex(segmentation.index)], axis=1)
+        
+    return segmentation
 
 def aspect_ratio(geom):
     """
@@ -715,3 +728,21 @@ def reock_compactness(geom):
     mbc_poly = Point(*center).buffer(radius)
     
     return geom.area/mbc_poly.area
+
+def rectangular_fit(geom):
+    
+    mrc = geom.minimum_rotated_rectangle
+    
+    return geom.symmetric_difference(mrc).area/geom.area
+
+def width(geom):
+    
+    minx, miny, maxx, maxy = geom.bounds
+
+    return maxx - minx
+
+def length(geom):
+    
+    minx, miny, maxx, maxy = geom.bounds
+
+    return maxy - miny

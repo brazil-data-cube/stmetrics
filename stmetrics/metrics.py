@@ -35,7 +35,7 @@ def get_metrics(series,show=False):
 
     return numpy.concatenate((basicas, polares,fd), axis=None)
 
-def sits2metrics(image,merge = False):
+def sits2metrics(dataset,merge = False):
     import multiprocessing as mp
     import numpy
 
@@ -44,7 +44,7 @@ def sits2metrics(image,merge = False):
 
     Keyword arguments:
     ------------------
-        image : numpy.array
+        dataset : numpy.array
             Array of time series. (Series  x Time)
         merge : Boolean
             Indicate if the matrix of features should be merged with the input matrix.
@@ -54,11 +54,12 @@ def sits2metrics(image,merge = False):
             Numpy matrix of metrics and/or image.
 
     '''
+    image = dataset.read()
 
     # Take our full image, ignore the Fmask band, and reshape into long 2d array (nrow * ncol, nband) for classification
     new_shape = (image.shape[1] * image.shape[2], image.shape[0])
 
-    series = image[:,:,:].reshape(new_shape)
+    series = image[:,:,:].T.reshape(new_shape)
   
     #Initialize pool
     pool = mp.Pool(mp.cpu_count())

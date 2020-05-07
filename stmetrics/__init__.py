@@ -8,6 +8,6 @@ from stmetrics import spatial
 
 # Version of the package
 
-__version__ = "0.1.4.2"
+__version__ = "0.1.4.3"
 
 name = "stmetrics"
