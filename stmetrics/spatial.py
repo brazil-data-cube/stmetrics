@@ -326,7 +326,7 @@ def write_pandas(segmentation, meta):
     for vec in rasterio.features.shapes(segmentation.astype(dtype = numpy.float32), transform = transform):
         mypoly.append(shape(vec[0]))
         
-    gdf = geopandas.GeoDataFrame(geometry=mypoly)
+    gdf = geopandas.GeoDataFrame(geometry=mypoly, crs = crs)
 
     return gdf
     
@@ -514,7 +514,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
         
     return C,int(S),l,d,int(kk)
 
-def seg_metrics(dataframe,feature='mean',merge=True):
+def seg_metrics(dataframe,feature=['mean'],merge=True):
     
     """
     This function compute time metrics from a geopandas with time features.
@@ -532,12 +532,13 @@ def seg_metrics(dataframe,feature='mean',merge=True):
     """
     import pandas
 
-    series = dataframe.filter(regex=feature)
-    metricas = seg_exmetrics(series.to_numpy())
+    for f in feature:
+        series = dataframe.filter(regex=f)
+        metricas = seg_exmetrics(series.to_numpy())
     
-    header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz"]
-    
-    metricsdf = pandas.DataFrame(metricas,columns = header)
+        header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz"]
+        
+        metricsdf = pandas.DataFrame(metricas,columns = header)
     
     if merge==True:
         out_dataframe = pandas.concat([dataframe, metricsdf], axis=1)
