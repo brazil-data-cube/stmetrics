@@ -23,10 +23,10 @@ def get_metrics(series,show=False):
     ts = series[~numpy.isnan(series)]
 
     if numpy.all(ts == 0) == True:
-        return numpy.zeros((1,20))
+        return numpy.zeros((1,19))
     
     if (not numpy.any(ts)) == True:
-        return numpy.zeros((1,20))
+        return numpy.zeros((1,19))
         
     #call functions
     basicas = basics.ts_basics(ts)
