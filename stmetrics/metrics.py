@@ -1,4 +1,4 @@
-def get_metrics(series,show=False):
+def get_metrics(series, show=False):
     """
     This function perform the computation and plot of the spectral-polar-fractal metrics available in the stmetrics package.
 
@@ -19,7 +19,10 @@ def get_metrics(series,show=False):
     from . import polar
     from . import fractal
 
-    #Remove eventual nans from timeseries
+    #Remove nodata on non masked arrays
+    #ts[ts==nodata]=numpy.nan
+
+    #Remove nans from timeseries
     ts = series[~numpy.isnan(series)]
 
     if numpy.all(ts == 0) == True:
@@ -36,16 +39,12 @@ def get_metrics(series,show=False):
     return numpy.concatenate((basicas, polares,fd), axis=None)
 
 def sits2metrics(dataset,merge = False):
-    import multiprocessing as mp
-    import numpy
-
     '''
     This function performs the computation of the metrics using multiprocessing.
 
     Keyword arguments:
     ------------------
-        dataset : numpy.array
-            Array of time series. (Series  x Time)
+        dataset : rasterio dataset            
         merge : Boolean
             Indicate if the matrix of features should be merged with the input matrix.
     Returns
@@ -54,6 +53,10 @@ def sits2metrics(dataset,merge = False):
             Numpy matrix of metrics and/or image.
 
     '''
+
+    import multiprocessing as mp
+    import numpy
+
     image = dataset.read()
 
     # Take our full image, ignore the Fmask band, and reshape into long 2d array (nrow * ncol, nband) for classification
@@ -62,7 +65,7 @@ def sits2metrics(dataset,merge = False):
     series = image[:,:,:].T.reshape(new_shape)
   
     #Initialize pool
-    pool = mp.Pool(mp.cpu_count())
+    pool = mp.Pool(mp.cpu_count()-1)
         
     #use pool to compute metrics for each pixel
     #return a list of arrays

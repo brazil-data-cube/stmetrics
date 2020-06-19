@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="stmetrics",
-    version="0.1.4.3",
+    version="0.1.4.4",
     author="Anderson Soares, Thales Körting",
     author_email="andersonreis.geo@gmail.com",
     description="A package to compute features from Satellite Image Time Series (SITS).",
@@ -28,7 +28,9 @@ setuptools.setup(
     'pointpats',
     'fastremap',
     'connected-components-3d',
-    'rasterstats'
+    'rasterstats',
+    'xarray',
+    'affine'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

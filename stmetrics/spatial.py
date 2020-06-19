@@ -2,7 +2,7 @@ import numpy
 import rasterio
 from stmetrics import metrics
 
-def snitc(dataset,ki,m):
+def snitc(dataset,ki,m, iter=10):
 
     """
     
@@ -10,7 +10,7 @@ def snitc(dataset,ki,m):
 
     Keyword arguments:
     ------------------
-        image : Rasterio dataset object
+        image : Rasterio dataset object or a xarray.DataArray
             Input image
         k : int
             Number or desired superpixels
@@ -27,11 +27,17 @@ def snitc(dataset,ki,m):
     import os
     from tqdm import tnrange, tqdm_notebook
 
-    print('Simple Non-Linear Iterative Temporal Clustering V 1.0')
+    print('Simple Non-Linear Iterative Temporal Clustering V 1.1')
     name = os.path.basename(dataset.name)[:-4]
 
-    ##READ FILE
-    img = dataset.read()
+    if not isinstance(dataset, rasterio.io.DatasetReader):
+        dataset = _xray2rio(dataset)
+
+    try:
+        ##READ FILE
+        img = dataset.read()
+    except:
+        print('Dataset is not valid. Please use rasterio ou xarray packages to read your data.')
     
     meta = dataset.profile #get image metadata
     transform = meta["transform"]
@@ -50,7 +56,7 @@ def snitc(dataset,ki,m):
     C,S,l,d,k = init_cluster_hex(rows,columns,ki,img,bands)
     
     #Start clustering
-    for n in tnrange(10):
+    for n in tnrange(iter):
         residual_error = 0
         for kk in range(k):
             # Get subimage around cluster
@@ -281,14 +287,14 @@ def postprocessing(raster,S):
     import fastremap
     from rasterio import features
     
-    for smooth in range(5):
+    for smooth in range(10):
         #Remove spourious regions generated during segmentation
         cc = cc3d.connected_components(raster.astype(dtype=numpy.uint16), connectivity=6, out_dtype=numpy.uint32)
 
         T = int((S**2)/2) 
 
         #Use Connectivity as 4 to avoid undesired connections     
-        raster = features.sieve(cc.astype(dtype=numpy.int32),T,connectivity = 4)
+        raster = features.sieve(cc.astype(dtype=numpy.int32),T,connectivity = 8)
     
     return raster
 
@@ -326,8 +332,8 @@ def write_pandas(segmentation, meta):
     for vec in rasterio.features.shapes(segmentation.astype(dtype = numpy.float32), transform = transform):
         mypoly.append(shape(vec[0]))
         
-    gdf = geopandas.GeoDataFrame(geometry=mypoly, crs = crs)
-
+    gdf = geopandas.GeoDataFrame(geometry=mypoly,crs=meta["crs"])
+    gdf.crs = crs
     return gdf
     
 def write_raster(segmentation, meta, name, k, m):
@@ -514,6 +520,42 @@ def init_cluster_regular(rows,columns,ki,img,bands):
         
     return C,int(S),l,d,int(kk)
 
+def _xray2rio(dataset):
+    '''
+    This function performs the conversion of a xarray.DataArray to rasterio.DataReader, that is used to perform the segmentation.
+    
+    Keyword arguments:
+    ------------------
+        dataset : xarray
+
+    Returns
+    -------
+        data = rasterio.DataReader()
+
+    '''
+    import xarray
+    import numpy
+    from affine import Affine
+    from rasterio import Affine, MemoryFile
+    from rasterio.profiles import DefaultGTiffProfile
+    
+    if not isinstance(dataset, xarray.DataArray):
+        print('Invalid dataset! Please use Rasterio ou xarray DataArray')
+
+    c = list(dataset.transform)
+    afim = Affine.from_gdal(*(c[2],c[0],c[1], c[5], c[3], c[4]))
+
+    profile = DefaultGTiffProfile(count=dataset.values.shape[0])
+    profile.update(transform=afim, driver='GTiff', height = dataset.values.shape[2], 
+        width = dataset.values.shape[3], dtype = dataset.dtype , nodata = dataset.nodatavals[0], crs=dataset.crs)
+    
+    with MemoryFile() as memfile:
+        with memfile.open(**profile) as memset:
+            memset.write(numpy.squeeze(dataset.values))
+        data = memfile.open()
+        
+    return data
+
 def seg_metrics(dataframe,feature=['mean'],merge=True):
     
     """
@@ -534,7 +576,7 @@ def seg_metrics(dataframe,feature=['mean'],merge=True):
 
     for f in feature:
         series = dataframe.filter(regex=f)
-        metricas = seg_exmetrics(series.to_numpy())
+        metricas = _seg_ex_metrics(series.to_numpy())
     
         header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz"]
         
@@ -547,7 +589,7 @@ def seg_metrics(dataframe,feature=['mean'],merge=True):
         return metricsdf
 
 
-def seg_exmetrics(series):
+def _seg_ex_metrics(series):
     """
     This function performs the computation of the metrics using multiprocessing.
 
@@ -582,11 +624,11 @@ def seg_exmetrics(series):
         
     return X_m
 
-def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter','width','length','ratio','symmetry','compactness','rectangular_fit']):
+def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter','width','length','ratio','compactness','rectangular_fit'], nodata = -9999):
     """
     This function extracts features using polygons.
     Mean, Standard Deviation, Minimum, Maximum, Area, Perimeter, Lenght/With ratio, Symmetry and Compactness are extracted for each polygon.
-    Nodata information is extracted from raster metadata.
+    Nodata value can be is extracted from raster metadata.
 
     Keyword arguments:
     ------------------
@@ -598,10 +640,12 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
         geopandas.Dataframe:
             segmentation
     """
+    import os
     import pandas
     import rasterstats
+    import xarray
 
-    affine = dataset.transform
+    segmentation['geometry'] = segmentation['geometry'].buffer(0)
     
     if 'area' in features:
         segmentation["area"] = segmentation['geometry'].area
@@ -635,16 +679,140 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
         segmentation["length"] = segmentation['geometry'].apply(lambda g: length(g))
         features.remove('length')
 
+    if isinstance(dataset, rasterio.io.DatasetReader):
 
-    if any(feat in features for feat in ('mean','std','min','max')):
-        for i in range(dataset.count):
-            band = '_'+str(i+1)
-            stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(i+1), affine=affine, stats=features, nodata=int(dataset.nodata)))
-            names = [i + j for i, j in zip(stats.columns, [band] * len(features))]
+        segmentation = _exRasterio(dataset,segmentation, features, nodata)
+
+    elif isinstance(dataset, xarray.Dataset): 
+
+        segmentation = _extract_xray(dataset, segmentation, features, nodata)
+
+    elif os.path.exists(os.path.dirname(dataset)):
+        try:
+            segmentation = _extract_from_path(dataset, segmentation, features, nodata)
+        except:
+            print('Something went wrong!')
+            return None
+    else:
+        print('Error! We could not extract espectral information! Dataset invalid')
+        return None
+    
+    return segmentation
+
+
+def _exRasterio(dataset,segmentation, features, nodata):
+    """
+    This function is used to extract features from images that are stored in a rasterio object.
+    """
+
+    import os
+    import pandas
+    import rasterstats
+
+    geoms = segmentation.geometry.tolist()
+
+    for i in range(dataset.count):
+        band = '_'+str(i+1)
+        stats = fx2parallel(dataset.read(i+1), geoms, features, dataset.transform, int(dataset.nodata))
+        #stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(i+1), affin=edataset.transform, stats=features, nodata=int(dataset.nodata)))
+        names = [i + j for i, j in zip(stats.columns, [band] * len(features))]
+        stats.columns = names
+        segmentation = pandas.concat([segmentation, stats.reindex(segmentation.index)], axis=1)
+
+    return segmentation
+
+def _extract_xray(dataset, segmentation, features, nodata):
+    """
+    This function is used to extract features from images that are stored in a xarray.
+    """
+    
+    import numpy
+    import pandas
+    import rasterstats
+    from affine import Affine
+    
+    band_list = list(dataset.data_vars)
+    dates = dataset.time.values
+    geoms = segmentation.geometry.tolist()
+
+    #Fix affine transformation
+    #Function from_gdal swap positions we need to fix this in a brute force approach.
+    c = list(dataset[band_list[0]].transform)
+    affine = Affine.from_gdal(*(c[2],c[0],c[1], c[5], c[3], c[4]))
+
+    for key in band_list:
+        attr = numpy.squeeze(dataset[key].values)
+        for i in range(attr.shape[0]):
+            stats = fx2parallel(attr[i,:,:], geoms, features, affine, int(dataset[key].nodatavals[0]))
+            #stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, attr[i,:,:], stats = features, affine = affine, nodata=-99999))
+            names = [y + j + g + f+ k for y, j, g, f, k in zip([key] * len(features), ['_'] * len(features), list(dates),['_'] * len(features), stats.columns)]
             stats.columns = names
             segmentation = pandas.concat([segmentation, stats.reindex(segmentation.index)], axis=1)
-        
+            
     return segmentation
+
+def _extract_from_path(path,segmentation,features,nodata):
+    """
+    This function is used to extract features from images that are stored in a folder.
+    """
+    
+    import os
+    import re
+    import glob
+    import pandas
+    import rasterio
+    import rasterstats
+        
+    #Read images and sort
+    f_path = glob.glob(path+"*.tif")   
+    f_path.sort()
+    geoms = segmentation.geometry.tolist()
+
+    for f in f_path:
+        
+        dataset = rasterio.open(f)
+        affine = dataset.transform
+
+        #find datetime and att
+        key = os.path.basename(f).split('_')[-1][:-4]
+        match = re.findall(r'\d{4}-\d{2}-\d{2}', f)[-1]
+        stats = fx2parallel(dataset.read(1), geoms, features,dataset.transform, int(dataset.nodata))
+
+        #stat = pandas.DataFrame(rasterstats.zonal_stats(segmentation, dataset.read(1), stats = features, affine = affine, nodata=dataset.nodata, all_touched=False))
+        stats.columns = [y + j + g + f + k for y, j, g, f, k in zip([key] * len(features), ['_'] * len(features), [match] * len(features), ['_'] * len(features), stats.columns)]
+        segmentation = pandas.concat([segmentation, stats.reindex(segmentation.index)], axis=1)
+
+    return segmentation
+
+def _chunks(data, n):
+    """Yield successive n-sized chunks from a slice-able iterable."""
+    for i in range(0, len(data), n):
+        yield data[i:i+n]
+
+def _zonal_stats_wrapper(raster, stats, affine, nodata):
+    """Wrapper for zonal stats, takes a list of features"""
+    from rasterstats import zonal_stats
+    import functools
+    return functools.partial(zonal_stats,raster=raster, stats=stats, affine = affine, nodata=nodata)
+
+def fx2parallel(dataset, geoms, features, transform, nodata):
+    """
+    This functions allow the extraction of features.
+    """
+    import pandas
+    import itertools
+    import multiprocessing
+
+    cores = multiprocessing.cpu_count()
+    p = multiprocessing.Pool(cores)
+
+    _zonal_stats_partial = _zonal_stats_wrapper(dataset, features, affine=transform, nodata=nodata)  
+    stats_lst = p.map(_zonal_stats_partial, _chunks(geoms, (cores - 1)))
+    stats = pandas.DataFrame(list(itertools.chain(*stats_lst)))
+    
+    p.close()    
+    
+    return stats
 
 def aspect_ratio(geom):
     """
@@ -658,8 +826,7 @@ def aspect_ratio(geom):
         Polygon geometry
     Returns
     -------
-        LW : double
-
+        aspect_ratio : double
     """
 
     from shapely.geometry import Polygon, LineString
@@ -731,18 +898,58 @@ def reock_compactness(geom):
     return geom.area/mbc_poly.area
 
 def rectangular_fit(geom):
+    '''
+    This functions computes the rectangular_fit of a geometry. Rectangular fit is defined as:
+
+    .. math:: RectFit = (AR - AD) / AO
+
+    where AO is the area of the original object, AR is the area of the equal rectangle (AO = AR) and AD is the overlaid difference between the equal rectangle and the original object (Sun et al. 2015).
+    
+
+    Keyword arguments:
+    ------------------
+
+    geom: shapely.geometry.Polygon
+        Polygon geometry
+    Returns
+        rectangular_fit : double
+
+    Sun, Z., Fang, H., Deng, M., Chen, A., Yue, P. and Di, L.. "Regular Shape Similarity Index: A Novel Index for Accurate Extraction of Regular Objects From Remote Sensing Images," IEEE Transactions on Geoscience and Remote Sensing, v.53, 2015, p. 3737. doi:10.1109/TGRS.2014.2382566
+    '''  
     
     mrc = geom.minimum_rotated_rectangle
     
     return geom.symmetric_difference(mrc).area/geom.area
 
 def width(geom):
+    '''
+    This functions computes the width of a geometry.
+
+    Keyword arguments:
+    ------------------
+
+    geom: shapely.geometry.Polygon
+        Polygon geometry
+    Returns
+        width : double
+    '''
     
     minx, miny, maxx, maxy = geom.bounds
 
     return maxx - minx
 
 def length(geom):
+    '''
+    This functions computes the lenght of a geometry.
+
+    Keyword arguments:
+    ------------------
+
+    geom: shapely.geometry.Polygon
+        Polygon geometry
+    Returns
+        length : double
+    '''
     
     minx, miny, maxx, maxy = geom.bounds
 

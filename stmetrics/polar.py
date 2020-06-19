@@ -26,7 +26,6 @@ def symmetric_distance(time_series_1, time_series_2):
     dist = numpy.inf
     pos = numpy.inf
 
-
     time_series_1 = fixseries(time_series_1)
     time_series_2 = fixseries(time_series_2)
 
