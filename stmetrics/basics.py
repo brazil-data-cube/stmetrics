@@ -1,4 +1,5 @@
 import numpy
+from scipy import stats
 from.utils import *
 
 def ts_basics(timeseries):
@@ -37,21 +38,24 @@ def ts_basics(timeseries):
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1,1,1,1,1,1,1])
+        return numpy.array([1,1,1,1,1,1,1,1,1,1])
 
 
-    mean = mean_ts(ts)
-    maxi = max_ts(ts)
-    mini = min_ts(ts)
-    std = std_ts(ts)
-    soma = sum_ts(ts)
+    mean = mean(ts)
+    maxi = max(ts)
+    mini = min(ts)
+    std = std(ts)
+    soma = sum(ts)
     amp = amplitude(ts)
     slope = first_slop(ts)
+    skewness = skew(ts)
+    amds = amd(ts)
+    asum = abs_sum(ts)
     
-    return numpy.array([mean,maxi,mini,std,soma,amp,slope])
+    return numpy.array([mean,maxi,mini,std,soma,amp,slope,skewness,amds,asum])
 
 
-def mean_ts(timeseries):
+def mean(timeseries):
 
     """
     "Mean" - Average value of the curve along one cycle.
@@ -73,7 +77,7 @@ def mean_ts(timeseries):
 
     return numpy.mean(ts)
     
-def max_ts(timeseries):
+def max(timeseries):
 
     """
     "Max" - Maximum value of the cycle.
@@ -94,7 +98,7 @@ def max_ts(timeseries):
 
     return numpy.max(ts)
 
-def min_ts(timeseries):
+def min(timeseries):
 
     """
     "Min" - Minimum value of the curve along one cycle.
@@ -115,7 +119,7 @@ def min_ts(timeseries):
 
     return numpy.min(ts)
 
-def std_ts(timeseries):
+def std(timeseries):
     """
     "Std" - Standard deviation of the cycle’s values. 
 
@@ -135,7 +139,7 @@ def std_ts(timeseries):
 
     return numpy.std(ts)
 
-def sum_ts(timeseries):
+def sum(timeseries):
 
     """
     "Sum" - Sum of values over a cycle. 
@@ -156,7 +160,7 @@ def sum_ts(timeseries):
         return numpy.array([1])
 
     return numpy.sum(ts)
-    
+
 def amplitude(timeseries):
 
     """
@@ -199,5 +203,92 @@ def first_slop(timeseries):
         return numpy.array([1])
 
     return numpy.max(abs(numpy.diff(ts)))
+
+def abs_sum(timeseries):
+
+    """
+    "Sum" - Sum of values over a cycle. 
+    Usually is an indicator of the annual production of vegetation.
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+
+    Returns
+    -------
+    numpy.float64:
+        Sum of values of time series.
+    """
+    ts = fixseries(timeseries)
+
+    if ts.size == numpy.ones((1,)).size :
+        return numpy.array([1])
+
+    return numpy.sum(numpy.abs(ts))
+    
+
+def skew(timeseries):
+    """ 
+    "skew" - Measures the asymmetry of the time series
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+
+    Returns
+    -------
+    numpy.float64:
+        The asymmetry of time series.
+    """
+    ts = fixseries(timeseries)
+    
+    if ts.size == numpy.ones((1,)).size :
+        return numpy.array([1])
+
+    return stats.skew(ts)
+
+def amd(timeseries):
+    """ 
+    "amd" - Absolute mean derivative (AMD)
+    It provides information on the growth rate of vegetation, allowing discrimination of natural cycles from crop cycles.
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+
+    Returns
+    -------
+    numpy.float64:
+        The absolute mean derivative of time series.
+    """
+    ts = fixseries(timeseries)
+    
+    if ts.size == numpy.ones((1,)).size :
+        return numpy.array([1])
+
+    return numpy.mean(numpy.abs(numpy.diff(ts)))
+
+def mse(timeseries):
+    """ 
+    "mse" - Mean Spectral Energy
+    It computes mean spectral energy of a time series.
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+
+    Returns
+    -------
+    numpy.float64:
+        The absolute mean derivative of time series.
+    
+    note: this function was adapted from sglearn package
+    """
+    ts = fixseries(timeseries)
+    
+    if ts.size == numpy.ones((1,)).size :
+        return numpy.array([1])
+
+    return numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts))))
 
     

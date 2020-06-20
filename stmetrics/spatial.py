@@ -624,7 +624,7 @@ def _seg_ex_metrics(series):
         
     return X_m
 
-def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter','width','length','ratio','compactness','rectangular_fit'], nodata = -9999):
+def extract_features(dataset,segmentation,features = ['mean','std','min','max','area','perimeter','width','length','ratio','symmetry','compactness','rectangular_fit'], nodata = -9999):
     """
     This function extracts features using polygons.
     Mean, Standard Deviation, Minimum, Maximum, Area, Perimeter, Lenght/With ratio, Symmetry and Compactness are extracted for each polygon.
@@ -745,9 +745,9 @@ def _extract_xray(dataset, segmentation, features, nodata):
         for i in range(attr.shape[0]):
             stats = fx2parallel(attr[i,:,:], geoms, features, affine, int(dataset[key].nodatavals[0]))
             #stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, attr[i,:,:], stats = features, affine = affine, nodata=-99999))
-            names = [y + j + g + f+ k for y, j, g, f, k in zip([key] * len(features), ['_'] * len(features), list(dates),['_'] * len(features), stats.columns)]
+            names = [y + j + g + f+ k for y, j, g, f, k in zip([key] * len(features), ['_'] * len(features), [dates[i]]* len(features), ['_'] * len(features), stats.columns)]
             stats.columns = names
-            segmentation = pandas.concat([segmentation, stats.reindex(segmentation.index)], axis=1)
+            segmentation = pandas.concat([segmentation, stats], axis=1)
             
     return segmentation
 
