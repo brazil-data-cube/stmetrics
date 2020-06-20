@@ -41,10 +41,10 @@ def ts_basics(timeseries):
         return numpy.array([1,1,1,1,1,1,1,1,1,1])
 
 
-    mean = mean(ts)
+    means = mean(ts)
     maxi = max(ts)
     mini = min(ts)
-    std = std(ts)
+    stds = std(ts)
     soma = sum(ts)
     amp = amplitude(ts)
     slope = first_slop(ts)
@@ -52,7 +52,7 @@ def ts_basics(timeseries):
     amds = amd(ts)
     asum = abs_sum(ts)
     
-    return numpy.array([mean,maxi,mini,std,soma,amp,slope,skewness,amds,asum])
+    return numpy.array([means,maxi,mini,stds,soma,amp,slope,skewness,amds,asum])
 
 
 def mean(timeseries):
