@@ -92,7 +92,7 @@ def snitc(dataset,ki,m, iter=10):
 
         
     #print('Fixing segmentation')
-    labelled = postprocessing(l,S)                 #Remove noise from segmentation
+    labelled = postprocessing(l, S, meta)                 #Remove noise from segmentation
     
     segmentation = write_pandas(labelled, meta)
     
@@ -133,7 +133,7 @@ def distance_fast(C, subim, S, m, rmin, cmin):
     from dtaidistance import dtw
     
     #f = subim.shape[0]
-    m = m/10
+    m = m/100
     #Initialize submatrix
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
 
@@ -188,7 +188,7 @@ def distance(C, subim, S, m, rmin, cmin):
     """
     from dtaidistance import dtw
     #f = subim.shape[0]
-    m = m/10
+    m = m/100
     #Initialize submatrix
     dc = numpy.zeros([subim.shape[1],subim.shape[2]])
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
@@ -265,7 +265,7 @@ def update_cluster(C,img,l,rows,columns,bands,k,residual_error):
     return C_new,residual_error
 
 
-def postprocessing(raster,S):
+def postprocessing(raster,S, meta):
 
     """
     
@@ -285,16 +285,21 @@ def postprocessing(raster,S):
     """
     import cc3d
     import fastremap
-    from rasterio import features
+    from rasterio import features, MemoryFile
     
-    for smooth in range(10):
+    for i in range(10):
+        
+        raster, remapping = fastremap.renumber(raster, in_place=True)
+
         #Remove spourious regions generated during segmentation
         cc = cc3d.connected_components(raster.astype(dtype=numpy.uint16), connectivity=6, out_dtype=numpy.uint32)
 
         T = int((S**2)/2) 
 
+        meta.update(dtype = rasterio.int32)
+
         #Use Connectivity as 4 to avoid undesired connections     
-        raster = features.sieve(cc.astype(dtype=numpy.int32),T,connectivity = 8)
+        raster = features.sieve(cc.astype(dtype=rasterio.int32),T, out=numpy.zeros(cc.shape, meta['dtype']), connectivity = 4)
     
     return raster
 
@@ -577,8 +582,8 @@ def seg_metrics(dataframe,feature=['mean'],merge=True):
     for f in feature:
         series = dataframe.filter(regex=f)
         metricas = _seg_ex_metrics(series.to_numpy())
-    
-        header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz"]
+        ([means,maxi,mini,stds,soma,amp,slope,skewness,amds,asum])
+        header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Skew","AMDS","AbSum","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz"]
         
         metricsdf = pandas.DataFrame(metricas,columns = header)
     
@@ -804,7 +809,7 @@ def fx2parallel(dataset, geoms, features, transform, nodata):
     import multiprocessing
 
     cores = multiprocessing.cpu_count()
-    p = multiprocessing.Pool(cores)
+    p = multiprocessing.Pool(cores - 1)
 
     _zonal_stats_partial = _zonal_stats_wrapper(dataset, features, affine=transform, nodata=nodata)  
     stats_lst = p.map(_zonal_stats_partial, _chunks(geoms, (cores - 1)))
