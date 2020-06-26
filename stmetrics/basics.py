@@ -14,6 +14,9 @@ def ts_basics(timeseries):
     "Sum" - Sum of values over a cycle. Usually is an indicator of the annual production of vegetation.
     "Amplitude" - The difference between the cycle’s maximum and minimum values.
     "First_slope" - Maximum value of the first slope of the cycle.
+    "mse" - Mean Spectral Energy.
+    "amd" - Absolute mean derivative (AMD).
+    "skew" - Measures the asymmetry of the time series.
     
     Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
@@ -31,8 +34,6 @@ def ts_basics(timeseries):
     
     """
     
-    #Define header for basic metrics
-    #header_basics=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Angle"]    
     
     # compute mean, maximum, minimum, standart deviation and amplitude    
     ts = fixseries(timeseries)

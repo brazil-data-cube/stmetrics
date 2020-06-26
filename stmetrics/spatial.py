@@ -133,7 +133,7 @@ def distance_fast(C, subim, S, m, rmin, cmin):
     from dtaidistance import dtw
     
     #f = subim.shape[0]
-    m = m/100
+    m = m/10
     #Initialize submatrix
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
 
@@ -188,7 +188,7 @@ def distance(C, subim, S, m, rmin, cmin):
     """
     from dtaidistance import dtw
     #f = subim.shape[0]
-    m = m/100
+    m = m/10
     #Initialize submatrix
     dc = numpy.zeros([subim.shape[1],subim.shape[2]])
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
@@ -582,7 +582,7 @@ def seg_metrics(dataframe,feature=['mean'],merge=True):
     for f in feature:
         series = dataframe.filter(regex=f)
         metricas = _seg_ex_metrics(series.to_numpy())
-        ([means,maxi,mini,stds,soma,amp,slope,skewness,amds,asum])
+
         header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Skew","AMDS","AbSum","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz"]
         
         metricsdf = pandas.DataFrame(metricas,columns = header)
@@ -750,7 +750,7 @@ def _extract_xray(dataset, segmentation, features, nodata):
         for i in range(attr.shape[0]):
             stats = fx2parallel(attr[i,:,:], geoms, features, affine, int(dataset[key].nodatavals[0]))
             #stats = pandas.DataFrame(rasterstats.zonal_stats(segmentation, attr[i,:,:], stats = features, affine = affine, nodata=-99999))
-            names = [y + j + g + f+ k for y, j, g, f, k in zip([key] * len(features), ['_'] * len(features), [dates[i]]* len(features), ['_'] * len(features), stats.columns)]
+            names = [y + j + g + f+ k for y, j, g, f, k in zip([key] * len(features), ['_'] * len(features), [str(dates[i])] * len(features), ['_'] * len(features), stats.columns)]
             stats.columns = names
             segmentation = pandas.concat([segmentation, stats], axis=1)
             
