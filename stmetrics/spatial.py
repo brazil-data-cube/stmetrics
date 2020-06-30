@@ -592,6 +592,7 @@ def extract_features(dataset,segmentation,features = ['mean','std','min','max','
     import rasterstats
     import xarray
 
+    #Performing buffer to solve possible invalid polygons
     segmentation['geometry'] = segmentation['geometry'].buffer(0)
     
     if 'area' in features:
