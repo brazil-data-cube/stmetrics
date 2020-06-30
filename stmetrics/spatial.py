@@ -109,9 +109,9 @@ def snitc(dataset,ki,m,scale=10000,iter=10,pattern="hexagonal"):
 
         
     #print('Fixing segmentation')
-    labelled = postprocessing(l, S, meta)                 #Remove noise from segmentation
+    labelled = postprocessing(l, S)                 #Remove noise from segmentation
     
-    segmentation = write_pandas(labelled, meta)
+    segmentation = write_pandas(labelled, transform, crs)
             
     return segmentation                                 #Return labeled numpy.array for visualization on python
 
@@ -279,7 +279,7 @@ def update_cluster(C,img,l,rows,columns,bands,k,residual_error):
     return C_new,residual_error
 
 
-def postprocessing(raster,S, meta):
+def postprocessing(raster,S):
 
     """
     
@@ -299,7 +299,7 @@ def postprocessing(raster,S, meta):
     """
     import cc3d
     import fastremap
-    from rasterio import features, MemoryFile
+    from rasterio import features
     
     for i in range(10):
         
@@ -310,14 +310,14 @@ def postprocessing(raster,S, meta):
 
         T = int((S**2)/2) 
 
-        meta.update(dtype = rasterio.int32)
+        #meta.update()
 
         #Use Connectivity as 4 to avoid undesired connections     
-        raster = features.sieve(cc.astype(dtype=rasterio.int32),T, out=numpy.zeros(cc.shape, meta['dtype']), connectivity = 4)
+        raster = features.sieve(cc.astype(dtype=rasterio.int32),T, out=numpy.zeros(cc.shape, dtype = rasterio.int32), connectivity = 4)
     
     return raster
 
-def write_pandas(segmentation, meta):
+def write_pandas(segmentation, transform, crs):
 
     """
     
@@ -341,8 +341,8 @@ def write_pandas(segmentation, meta):
 
 
     #Get-Set transform and CRS
-    transform = meta["transform"]
-    crs = meta["crs"]
+    #transform = meta["transform"]
+    #crs = meta["crs"]
     
     import geopandas
 
@@ -351,7 +351,7 @@ def write_pandas(segmentation, meta):
     for vec in rasterio.features.shapes(segmentation.astype(dtype = numpy.float32), transform = transform):
         mypoly.append(shape(vec[0]))
         
-    gdf = geopandas.GeoDataFrame(geometry=mypoly,crs=meta["crs"])
+    gdf = geopandas.GeoDataFrame(geometry=mypoly,crs=crs)
     gdf.crs = crs
     return gdf
 
