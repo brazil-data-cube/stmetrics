@@ -147,25 +147,6 @@ def check_input(timeseries):
     else:
         raise Exception('Incorrect type: Please use numpy.array as input.')
 
-def longlat2window(lon, lat, dataset):
-    """
-    Args:
-        lon (tuple): Tuple of min and max lon
-        lat (tuple): Tuple of min and max lat
-        dataset: Rasterio dataset
-
-    Returns:
-        rasterio.windows.Window
-    """
-    p = Proj(dataset.crs)
-    t = dataset.transform
-    xmin, ymin = p(lon[0], lat[0])
-    xmax, ymax = p(lon[1], lat[1])
-    col_min, row_min = ~t * (xmin, ymin)
-    col_max, row_max = ~t * (xmax, ymax)
-    return Window.from_slices(rows=(floor(row_max), ceil(row_min)),
-                              cols=(floor(col_min), ceil(col_max)))
-
 def file_to_da(filepath):
     import re
     import pandas

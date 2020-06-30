@@ -1,8 +1,9 @@
 import numpy
+import xarray
 import rasterio
 from stmetrics import metrics
 
-def snitc(dataset,ki,m, iter=10):
+def snitc(dataset,ki,m,scale=10000,iter=10,pattern="hexagonal"):
 
     """
     
@@ -16,8 +17,12 @@ def snitc(dataset,ki,m, iter=10):
             Number or desired superpixels
         m : float
             Compactness factor
-        factor: float
-            Adjust the time series distance, usually 100 performs best.
+        scale: int
+            Adjust the time series, to 0-1.
+        iter: int
+            Number of iterations to be performed.
+        pattern: string
+            Type of pattern initialization. it can be hexagonal (default) or regular (as SLIC).
 
     Returns
     -------
@@ -30,30 +35,44 @@ def snitc(dataset,ki,m, iter=10):
     print('Simple Non-Linear Iterative Temporal Clustering V 1.1')
     name = os.path.basename(dataset.name)[:-4]
 
-    if not isinstance(dataset, rasterio.io.DatasetReader):
-        dataset = _xray2rio(dataset)
+    if isinstance(dataset, rasterio.io.DatasetReader):
+        try:
+            ##READ FILE
+            meta = dataset.profile #get image metadata
+            transform = meta["transform"]
+            crs = meta["crs"]
+            img = dataset.read()
+        except:
+            print('Sorry we could not read your dataset.')
+    elif isinstance(dataset, xarray.DataArray):
+        try:
+            ##READ FILE
+            transform = dataset.transform
+            crs = dataset.crs
+            img = numpy.squeeze(dataset.values)
+        except:
+            print('Sorry we could not read your dataset.')
+    else:
+        print("Sorry we can't read this type of file. Please use Rasterio or xarray")
 
-    try:
-        ##READ FILE
-        img = dataset.read()
-    except:
-        print('Dataset is not valid. Please use rasterio ou xarray packages to read your data.')
-    
-    meta = dataset.profile #get image metadata
-    transform = meta["transform"]
-    crs = meta["crs"]
     
     #Normalize data
     for band in range(img.shape[0]):
         img[numpy.isnan(img)] = 0
-        img[band,:,:] = img[band,:,:]#*0.5+0.5
+        img[band,:,:] = (img[band,:,:]/scale)#*0.5+0.5
     
     #Get image dimensions
     bands = img.shape[0]
     rows = img.shape[1]
     columns = img.shape[2]
 
-    C,S,l,d,k = init_cluster_hex(rows,columns,ki,img,bands)
+    if pattern == "hexagonal":
+        C,S,l,d,k = init_cluster_hex(rows,columns,ki,img,bands)
+    elif pattern == "regular":
+        C,S,l,d,k = init_cluster_regular(rows,columns,ki,img,bands)
+    else:
+        print("Unknow patter. We are using hexagonal")
+        C,S,l,d,k = init_cluster_hex(rows,columns,ki,img,bands)
     
     #Start clustering
     for n in tnrange(iter):
@@ -73,8 +92,6 @@ def snitc(dataset,ki,m, iter=10):
                 D = distance_fast(C[kk, :], subim, S, m, rmin, cmin) #DTW fast
             except:
                 print('dtaidistance package is not properly installed.')
-                print('Please, check our documentation and follow the steps.')
-                print('This will take too much time to finish, use this time to properly install =D')
                 D = distance(C[kk, :], subim, S, m, rmin, cmin) #DTW regular
 
             subd = d[rmin:rmax,cmin:cmax]
@@ -95,10 +112,7 @@ def snitc(dataset,ki,m, iter=10):
     labelled = postprocessing(l, S, meta)                 #Remove noise from segmentation
     
     segmentation = write_pandas(labelled, meta)
-    
-    #print('Writing raster')
-    #write_raster(labelled, meta, name, ki, m)
-        
+            
     return segmentation                                 #Return labeled numpy.array for visualization on python
 
 def distance_fast(C, subim, S, m, rmin, cmin):
@@ -340,42 +354,6 @@ def write_pandas(segmentation, meta):
     gdf = geopandas.GeoDataFrame(geometry=mypoly,crs=meta["crs"])
     gdf.crs = crs
     return gdf
-    
-def write_raster(segmentation, meta, name, k, m):
-    
-    """
-    
-    This function creates a TUF file of the segmentation produced.
-
-    Keyword arguments:
-    ------------------
-        segmentation : numpy.ndarray
-            Segmentation array
-        meta : int
-            Metadata of the original image
-        name: string
-            Output name
-        k:
-            Number of desired superpixels
-        m: 
-            Compactness
-
-    Returns
-    -------
-    Segmentation as TIF file.
-    
-    """
-
-    #Adjust metadata to flush temporary file to 1
-    meta['count'] = 1
-    # change the data type to float rather than integer
-    meta['dtype'] = "uint32"
-    meta['nodata'] = 0
-    
-    with rasterio.open(name+"_"+str(k)+"_"+str(m)+".tif", 'w', **meta) as dst:
-        dst.write(segmentation.astype(dtype = numpy.uint32), 1)
-        
-    return None
 
 def init_cluster_hex(rows,columns,ki,img,bands):
 
@@ -524,42 +502,6 @@ def init_cluster_regular(rows,columns,ki,img,bands):
         w = S/2
         
     return C,int(S),l,d,int(kk)
-
-def _xray2rio(dataset):
-    '''
-    This function performs the conversion of a xarray.DataArray to rasterio.DataReader, that is used to perform the segmentation.
-    
-    Keyword arguments:
-    ------------------
-        dataset : xarray
-
-    Returns
-    -------
-        data = rasterio.DataReader()
-
-    '''
-    import xarray
-    import numpy
-    from affine import Affine
-    from rasterio import Affine, MemoryFile
-    from rasterio.profiles import DefaultGTiffProfile
-    
-    if not isinstance(dataset, xarray.DataArray):
-        print('Invalid dataset! Please use Rasterio ou xarray DataArray')
-
-    c = list(dataset.transform)
-    afim = Affine.from_gdal(*(c[2],c[0],c[1], c[5], c[3], c[4]))
-
-    profile = DefaultGTiffProfile(count=dataset.values.shape[0])
-    profile.update(transform=afim, driver='GTiff', height = dataset.values.shape[2], 
-        width = dataset.values.shape[3], dtype = dataset.dtype , nodata = dataset.nodatavals[0], crs=dataset.crs)
-    
-    with MemoryFile() as memfile:
-        with memfile.open(**profile) as memset:
-            memset.write(numpy.squeeze(dataset.values))
-        data = memfile.open()
-        
-    return data
 
 def seg_metrics(dataframe,feature=['mean'],merge=True):
     
