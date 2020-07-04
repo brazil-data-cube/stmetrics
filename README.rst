@@ -13,12 +13,24 @@ Produce reliable land use and land cover maps to support the deployment and oper
 
 The stmetrics, is a python package that provides the extraction of state-of-the-art time-series features. These features can be used for remote sensing time-series image classification and analysis.
 
-Developer Documentation
+Instalation
+========================
+
+See `installation.rst <./docs/installation.rst>`_.
+
+Documentation
 ========================
 
 See https://stmetrics.readthedocs.io/en/latest/
 
 Windows users, please check the installation procedures in our documentation!
+
+License
+=======
+
+Copyright (C) 2019 INPE.
+
+STMETRICS is free software; you can redistribute it and/or modify it under the terms of the MIT License; see LICENSE file for more details.
 
 Collaborators
 =============

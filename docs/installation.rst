@@ -121,5 +121,5 @@ You can pip install it straight from git:
 
 With pip::
 
-	pip install stmetrics
+	pip install git+https://github.com/brazil-data-cube/stmetrics
 
