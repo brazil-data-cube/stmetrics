@@ -1,8 +1,12 @@
-numpy
-pandas
-sklearn
 scipy
+sklearn
+pandas
+numpy
 matplotlib
 shapely
 descartes
 nolds
+dtaidistance
+gdal
+rasterio
+pointpats

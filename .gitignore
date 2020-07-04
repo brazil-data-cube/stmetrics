@@ -88,3 +88,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Ignore spatial and phenometrics
+./stmetrics/phenometrics.py
+./stmetrics/spatial.py

@@ -3,16 +3,13 @@ Installation
 
 .. _windows:
 
-.. currentmodule:: pystan
-
-===================
+---------------------
  stmetrics on Windows
-===================
+---------------------
 
 stmetrics is partially supported under Windows with the following caveats:
 
-- Python 2.7: Doesn't support parallel sampling. When drawing samples ``n_jobs=1`` must be used)
-- Python 3.5 or higher: Parallel sampling is supported
+- Python 3.5 or higher
 - MSVC compiler is not supported.
 
 stmetrics requires a working C++ compiler, due to the spatial-temporal segmentation algorithm available. Configuring such a compiler is the critical step in getting stmetrics running.
@@ -22,7 +19,7 @@ and supports x86 and x64.
 
 
 Installing Python
-=================
+-----------------
 
 There several ways of installing stmetrics on Windows. The following instructions
 assume you have installed Python as packaged in the `Anaconda
@@ -30,7 +27,7 @@ Python distribution <https://www.anaconda.com/download/#windows>`_
 or `Miniconda distribution <https://conda.io/miniconda.html>`_.
 
 Open Command prompt
-===================
+-------------------
 
 All the following commands are written in a command line prompt. You can use one like
 `Anaconda Prompt` if you installed Python using Anaconda in the previous step, or
@@ -45,7 +42,7 @@ To update conda package manager to the latest version::
     conda update conda
 
 Create a conda virtual environment (optional)
-=============================================
+---------------------------------------------
 
 It is a good practice to keep specific projects on their on aspecific conda virtual environments. To do it, use::
 
@@ -65,19 +62,8 @@ To close the environment type::
 
     deactivate
 
-For windows users:
-==================
-
-Please before installing the package make sure that you have correctly installed the Shapely package.
-
-Using conda do this::
-
-    conda config --add channels conda-forge
-
-    conda install shapely
-
 Installing C++ compiler
-=======================
+-----------------------
 
 To install mingw-w64 compiler toolchain with ``conda`` package manager which comes with the Anaconda package, we recommend the following steps.
 
@@ -103,12 +89,37 @@ To find the correct ``distutils`` path, run the following lines in ``python``::
     >>> import distutils
     >>> print(distutils.__file__)
 
+Install dtaidistance package
+----------------------------
+
+The dtaidistance package is a key factor of stmetrics. However, due to some issues, windows users need to compiled and install directly from source.
+
+* Download the source from https://github.com/wannesm/dtaidistance
+* Compile the C extensions: ``python3 setup.py build_ext --inplace``
+* Install into your site-package directory: ``python3 setup.py install``
+
+This requires OpenMP to be available on your system. If this is not the case, use:
+
+::
+
+    $ python3 setup.py --noopenmp build_ext --inplace
+
+Before installing the package make sure that you have correctly installed Shapely and Rasterio packages.
+
+Using conda do this::
+
+    conda config --add channels conda-forge
+
+    conda install shapely
+
+    conda install rasterio
+
 Installing stmetrics
-=================
+--------------------
 
 You can pip install it straight from git:
 
 With pip::
 
-	pip install stmetrics
+	pip install git+https://github.com/brazil-data-cube/stmetrics
 

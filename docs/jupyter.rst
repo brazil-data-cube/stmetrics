@@ -1,4 +1,6 @@
 Jupyter Notebook
 ================
 
-In development!
+Please check our github examples.
+
+https://github.com/brazil-data-cube/stmetrics/example

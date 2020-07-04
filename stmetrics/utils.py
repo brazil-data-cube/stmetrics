@@ -1,8 +1,10 @@
 import numpy
+import warnings
 from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
 
+warnings.filterwarnings("ignore")
 
 def fixseries(time_series):
     
@@ -25,7 +27,7 @@ def fixseries(time_series):
     """
 
     check_input(time_series)
-
+    
     if time_series.size == numpy.ones((1,)).size :
         return numpy.array([1])
     
@@ -143,6 +145,50 @@ def check_input(timeseries):
         else:
             return timeseries
     else:
-        raise Exception('Incorrect type: Please use numpy.array as inumpyut.')
+        raise Exception('Incorrect type: Please use numpy.array as input.')
+
+def file_to_da(filepath):
+    import re
+    import pandas
+    import rasterio
+    import xarray
+    
+    #rasterio.open(1, window=Window(0, 0, 3000, 3000))
+
+    #Open image  
+    da = xarray.open_rasterio(filepath)
+    transform = da.attrs['transform']
+    #find datetime
+    match = re.findall(r'\d{4}-\d{2}-\d{2}', filepath)[-1]
+    pandas.to_datetime(match)
+    da.coords['time'] = match
+
+    return da
 
 
+def img2xarray(path,band):
+    import glob
+    import xarray
+    
+    #datacube f_path
+    f_path = glob.glob(path+"*_"+band+"*.tif")   
+    f_path.sort()
+    dataset = xarray.Dataset()
+    
+    #load bands to xarray dataset
+    list_of_data_arrays=[file_to_da(link) for link in f_path]
+
+    #load xarray
+    dataset[band] = xarray.concat(list_of_data_arrays, dim='time')
+        
+    return dataset
+
+
+def images2xarray(cube_path,list_bands): 
+    import xarray
+
+    xray_dataset = [img2xarray(cube_path,band) for band in list_bands]
+    
+    cube_dataset = xarray.merge(xray_dataset)
+
+    return cube_dataset
