@@ -3,9 +3,7 @@ from scipy import stats
 from.utils import *
 
 def ts_basics(timeseries):
-    
     """
-    
     This function compute 7 basic metrics
     "Mean" - Average value of the curve along one cycle.
     "Max" - Maximum value of the cycle.
@@ -17,6 +15,10 @@ def ts_basics(timeseries):
     "mse" - Mean Spectral Energy.
     "amd" - Absolute mean derivative (AMD).
     "skew" - Measures the asymmetry of the time series.
+    "fqr" - First quartile of the time series.
+    "sqr" - Second quartile of the time series.
+    "tqr" - Third quaritle of the time series.
+    "iqr" - Interquaritle range (IQR) of the time series.
     
     Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
@@ -34,12 +36,12 @@ def ts_basics(timeseries):
     
     """
     
-    
+    metrics_count = 14 
     # compute mean, maximum, minimum, standart deviation and amplitude    
     ts = fixseries(timeseries)
 
     if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1,1,1,1,1,1,1,1,1,1])
+        return numpy.ones((1,metrics_count))
 
 
     means = mean(ts)
@@ -52,8 +54,12 @@ def ts_basics(timeseries):
     skewness = skew(ts)
     amds = amd(ts)
     asum = abs_sum(ts)
-    
-    return numpy.array([means,maxi,mini,stds,soma,amp,slope,skewness,amds,asum])
+    iq = iqr(ts)
+    fq = fqr(ts)
+    tq = tqr(ts)
+    sq = sqr(ts)
+
+    return numpy.array([means,maxi,mini,stds,soma,amp,slope,skewness,amds,asum,fq,sq,tq,iq])
 
 
 def mean(timeseries):
@@ -292,4 +298,96 @@ def mse(timeseries):
 
     return numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts))))
 
+def fqr(timeseries):
+    """ 
+    "fqr" - Mean Spectral Energy
+    It computes the first quartileof a time series.
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+
+    Returns
+    -------
+    numpy.float64:
+        The absolute mean derivative of time series.
     
+
+    """
+    ts = fixseries(timeseries)
+    
+    if ts.size == numpy.ones((1,)).size :
+        return numpy.array([1])
+
+    return numpy.percentile(ts, 25, interpolation = 'midpoint') 
+
+def tqr(timeseries):
+    """ 
+    "tqr" - First quartile
+    It computes the third quartileof a time series.
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+
+    Returns
+    -------
+    numpy.float64:
+        The absolute mean derivative of time series.
+    
+    """
+    ts = fixseries(timeseries)
+    
+    if ts.size == numpy.ones((1,)).size :
+        return numpy.array([1])
+
+    return numpy.percentile(ts, 75, interpolation = 'linear') 
+
+def sqr(timeseries):
+    """ 
+    "sqr" - Interquaritle range (IQR) 
+    It computes the interquaritle range of the time series.
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+
+    Returns
+    -------
+    numpy.float64:
+        The interquaritle range of the time series.
+    
+    """
+    ts = fixseries(timeseries)
+    
+    if ts.size == numpy.ones((1,)).size :
+        return numpy.array([1])
+
+    #interpolation is linear by deafult
+    return numpy.percentile(ts, 50, interpolation = 'linear') 
+
+def iqr(timeseries):
+    """ 
+    "iqr" - Interquaritle range (IQR) 
+    It computes the interquaritle range of the time series.
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+
+    Returns
+    -------
+    numpy.float64:
+        The interquaritle range of the time series.
+    
+    """
+    ts = fixseries(timeseries)
+    
+    if ts.size == numpy.ones((1,)).size :
+        return numpy.array([1])
+
+    #interpolation is linear by deafult
+    q1 = numpy.percentile(ts, 25, interpolation = 'linear') 
+    q3 = numpy.percentile(ts, 75, interpolation = 'linear') 
+
+    return q3-q1

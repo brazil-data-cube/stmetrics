@@ -3,6 +3,41 @@ import nolds
 
 from.utils import *
 
+def ts_fractal(timeseries,kmax=10):
+    
+    """
+    This function compute 4 fractal dimensions and the hurst exponential.
+    
+    DFA: measures the Hurst parameter H, which is very similar to the Hurst exponent.
+    HE: self-similarity measure that assess long-range dependence in a time series.
+    KFD: This algorirhm computes the FD using Katz algorithm.
+    PFD: This algorirhm computes the FD of a signal by translating the series into a binary sequence.
+    
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+    Returns
+    -------
+        numpy.array:
+            array of fractal metrics values
+    """
+        
+    metrics_count = 3
+
+    #Fiz series
+    ts = fixseries(timeseries)
+
+    if ts.size == numpy.ones((1,)).size :
+        return numpy.ones((1,metrics_count))
+
+    dfa = dfa_fd(ts)
+    he = hurst_exp(ts)
+    kfd = katz_fd(ts)
+    #pfd = petrosian_fd(ts) 
+    #hfd = higuchi_fd(ts, kmax=kmax)
+
+    return numpy.array([dfa,he,kfd])
+
 def dfa_fd(series):
     """
     Detrended Fluctuation Analysis (DFA)
@@ -203,36 +238,7 @@ def katz_fd(series):
 #     kmax = int(kmax)
 #     return _higuchi_fd(series, kmax)
 
-def ts_fractal(timeseries,kmax=10):
-    
-    """
-    This function compute 4 fractal dimensions and the hurst exponential.
-    
-    DFA: measures the Hurst parameter H, which is very similar to the Hurst exponent.
-    HE: self-similarity measure that assess long-range dependence in a time series.
-    KFD: This algorirhm computes the FD using Katz algorithm.
-    PFD: This algorirhm computes the FD of a signal by translating the series into a binary sequence.
-    
-    Keyword arguments:
-        timeseries : numpy.ndarray
-            Your time series.
-    Returns
-    -------
-        numpy.array:
-            array of fractal metrics values
-    """
-    
-    #Compute metrics
 
-    ts = fixseries(timeseries)
-    
-    dfa = dfa_fd(ts)
-    #hfd = higuchi_fd(ts, kmax=kmax)
-    he = hurst_exp(ts)
-    kfd = katz_fd(ts)
-    #pfd = petrosian_fd(ts) 
-
-    return numpy.array([dfa,he,kfd])
 
 # def _linear_regression(x, y):
 #     """Fast linear regression using Numba.

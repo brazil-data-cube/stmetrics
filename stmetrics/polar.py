@@ -5,6 +5,70 @@ from shapely.geometry.polygon import LinearRing
 
 from .utils import *
 
+def ts_polar(timeseries,show = False):
+    
+    """
+    
+    This function compute 9 polar metrics:
+    
+    Area - Area of the closed shape.
+    Area_q1 - "Area_q4" - Partial area of the shape, proportional to some quadrant of the polar representation
+    Circle - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.
+    Gyration_radius - Equals the average distance between each point inside the shape and the shape’s centroid.
+    Polar_balance - The standard deviation of the areas per season, considering the 4 seasons. 
+    Angle - The main angle of the closed shape created by the polar visualization.
+    
+    To visualize the time series on polar space use: ts_polar(ts,show=True)
+    
+    Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
+    Land Cover Detection Using Temporal Features Based On Polar Representation. 
+
+    Keyword arguments:
+        timeseries : numpy.ndarray
+            Your time series.
+    show: boolean
+         This inform that the polar plot must be presented.
+    Returns
+    -------
+    numpy.array:
+        array of polar metrics values
+    polar plot
+    """
+    
+    #define header for polar dataframe
+    #header_polar=["Area", "Area_q1", "Area_q2", "Area_q3", "Area_q4","Circle","Gyration_radius","Polar_balance"]
+    
+    #Compute metrics
+    ts = fixseries(timeseries)
+
+    metrics_count = 9
+
+    if ts.size == numpy.ones((1,)).size:
+        return numpy.ones((1,metrics_count))
+    
+    #Eccentricity    
+    circle = ecc_metric(ts)
+    
+    #gyration_radius
+    gyro = gyration_radius(ts)
+    
+    #Get Area
+    area = area_ts(ts)
+    
+    #Seasonal area
+    areas1,areas2,areas3,areas4 = area_season(ts)  
+    
+    #Polar Balance
+    balance = polar_balance(ts)
+    
+    #Angle    
+    ang = angle(ts)
+    
+    if show==True:
+        polar_plot(ts)
+    
+    return numpy.array([area,areas1,areas2,areas3,areas4,circle,gyro,balance,ang])
+
 def symmetric_distance(time_series_1, time_series_2):
 
     """
@@ -364,63 +428,3 @@ def area_ts(timeseries):
     polygon = create_polygon(ts)   
     
     return polygon.area
-
-def ts_polar(timeseries,show = False):
-    
-    """
-    
-    This function compute 9 polar metrics:
-    
-    Area - Area of the closed shape.
-    Area_q1 - "Area_q4" - Partial area of the shape, proportional to some quadrant of the polar representation
-    Circle - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.
-    Gyration_radius - Equals the average distance between each point inside the shape and the shape’s centroid.
-    Polar_balance - The standard deviation of the areas per season, considering the 4 seasons. 
-    Angle - The main angle of the closed shape created by the polar visualization.
-    
-    To visualize the time series on polar space use: ts_polar(ts,show=True)
-    
-    Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
-    Land Cover Detection Using Temporal Features Based On Polar Representation. 
-
-    Keyword arguments:
-        timeseries : numpy.ndarray
-            Your time series.
-	show: boolean
-	     This inform that the polar plot must be presented.
-    Returns
-    -------
-    numpy.array:
-        array of polar metrics values
-    polar plot
-    """
-    
-    #define header for polar dataframe
-    #header_polar=["Area", "Area_q1", "Area_q2", "Area_q3", "Area_q4","Circle","Gyration_radius","Polar_balance"]
-    
-    #Compute metrics
-
-    ts = fixseries(timeseries)
-    
-    #Eccentricity    
-    circle = ecc_metric(ts)
-    
-    #gyration_radius
-    gyro = gyration_radius(ts)
-    
-    #Get Area
-    area = area_ts(ts)
-    
-    #Seasonal area
-    areas1,areas2,areas3,areas4 = area_season(ts)  
-    
-    #Polar Balance
-    balance = polar_balance(ts)
-    
-    #Angle    
-    ang = angle(ts)
-    
-    if show==True:
-        polar_plot(ts)
-    
-    return numpy.array([area,areas1,areas2,areas3,areas4,circle,gyro,balance,ang])

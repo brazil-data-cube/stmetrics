@@ -3,7 +3,7 @@ import xarray
 import rasterio
 from stmetrics import metrics
 
-def snitc(dataset,ki,m,scale=10000,iter=10,pattern="hexagonal"):
+def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal"):
 
     """
     
@@ -146,8 +146,9 @@ def distance_fast(C, subim, S, m, rmin, cmin):
     """
     from dtaidistance import dtw
     
-    #f = subim.shape[0]
+    #Normalizing factor
     m = m/10
+    
     #Initialize submatrix
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
 
@@ -156,9 +157,11 @@ def distance_fast(C, subim, S, m, rmin, cmin):
     ic = (int(numpy.floor(C[subim.shape[0]])) - rmin)         #X-coordinate
     jc = (int(numpy.floor(C[subim.shape[0]+1])) - cmin)       #Y-coordinate
     
+    # Tranpose matrix to allow dtw fast computation with dtaidistance
     linear = subim.transpose(1,2,0).reshape(subim.shape[1]*subim.shape[2],subim.shape[0])
     merge  = numpy.vstack((linear,a2))
 
+    #Compute dtw distances
     c = dtw.distance_matrix_fast(merge, block=((0, merge.shape[0]), (merge.shape[0]-1,merge.shape[0])), compact=True, parallel=True)
     dc = c.reshape(subim.shape[1],subim.shape[2])
     
@@ -201,8 +204,10 @@ def distance(C, subim, S, m, rmin, cmin):
     
     """
     from dtaidistance import dtw
-    #f = subim.shape[0]
+    
+    #Normalizing factor
     m = m/10
+
     #Initialize submatrix
     dc = numpy.zeros([subim.shape[1],subim.shape[2]])
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
@@ -310,8 +315,6 @@ def postprocessing(raster,S):
 
         T = int((S**2)/2) 
 
-        #meta.update()
-
         #Use Connectivity as 4 to avoid undesired connections     
         raster = features.sieve(cc.astype(dtype=rasterio.int32),T, out=numpy.zeros(cc.shape, dtype = rasterio.int32), connectivity = 4)
     
@@ -337,17 +340,12 @@ def write_pandas(segmentation, transform, crs):
     import numpy
     import geopandas
     import rasterio.features
-    from shapely.geometry import shape
-
-
-    #Get-Set transform and CRS
-    #transform = meta["transform"]
-    #crs = meta["crs"]
-    
+    from shapely.geometry import shape   
     import geopandas
 
     mypoly=[]
 
+    #Loop to oconvert raster conneted components to polygons using rasterio features
     for vec in rasterio.features.shapes(segmentation.astype(dtype = numpy.float32), transform = transform):
         mypoly.append(shape(vec[0]))
         

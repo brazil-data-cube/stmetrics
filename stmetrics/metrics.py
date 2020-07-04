@@ -26,10 +26,10 @@ def get_metrics(series, show=False):
     ts = series[~numpy.isnan(series)]
 
     if numpy.all(ts == 0) == True:
-        return numpy.zeros((1,22))
+        return numpy.zeros((1,26))
     
     if (not numpy.any(ts)) == True:
-        return numpy.zeros((1,22))
+        return numpy.zeros((1,26))
         
     #call functions
     basicas = basics.ts_basics(ts)
