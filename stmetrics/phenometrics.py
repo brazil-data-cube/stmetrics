@@ -286,7 +286,7 @@ def domain(y,peaks,minimum_up):
                     
     return dfp
 
-def metrics(time_series, minimum_up, treshold = 0.125, window = 7, show=True):
+def pheno(time_series, minimum_up, treshold = 0.125, window = 7, show=True):
     
     """
     
