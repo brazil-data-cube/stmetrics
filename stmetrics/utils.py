@@ -222,7 +222,8 @@ def error_polar():
         'area_q1': numpy.nan,
         'area_q2': numpy.nan,
         'area_q3': numpy.nan,
-        'area_q4': numpy.nan
+        'area_q4': numpy.nan,
+        'compactness': numpy.nan
     }
     return polares
 

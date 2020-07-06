@@ -52,7 +52,7 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show = False):
     metrics_count = 9
    
     if "all" in funcs:
-        funcs=['ecc_metric','gyration_radius','area_ts','polar_balance','angle','area_q1','area_q2','area_q3','area_q4']
+        funcs=['ecc_metric','gyration_radius','area_ts','polar_balance','angle','area_q1','area_q2','area_q3','area_q4','compactness']
     
     for f in funcs:
         try:
@@ -591,3 +591,19 @@ def area_ts(timeseries, nodata=-9999):
         return polygon.area
     except:
         return numpy.nan
+
+def compactness(timeseries):
+    import pointpats
+    from shapely.geometry import Point
+    
+    #fix time series
+    ts = fixseries(timeseries)
+    
+    #create polygon
+    polygon = create_polygon(ts)   
+
+    points = list(zip(*polygon.minimum_rotated_rectangle.exterior.coords.xy))
+    (radius, center), _, _, _ = pointpats.skyum(points)
+    mbc_poly = Point(*center).buffer(radius)
+
+    return mbc_poly.symmetric_difference(polygon).area
