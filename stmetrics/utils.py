@@ -192,3 +192,45 @@ def images2xarray(cube_path,list_bands):
     cube_dataset = xarray.merge(xray_dataset)
 
     return cube_dataset
+
+def error_basics():
+    basics= {
+        'max_ts': numpy.nan,
+        'min_ts': numpy.nan,
+        'mean_ts': numpy.nan,
+        'std_ts': numpy.nan,
+        'sum_ts': numpy.nan,
+        'amplitude_ts': numpy.nan,
+        "mse_ts": numpy.nan,
+        'fslope_ts': numpy.nan,
+        'skew_ts': numpy.nan,
+        'amd_ts': numpy.nan,
+        'abs_sum_ts': numpy.nan,
+        'iqr_ts': numpy.nan,
+        'fqr_ts': numpy.nan,
+        'tqr_ts': numpy.nan,
+        'sqr_ts': numpy.nan
+    }
+    return basics
+
+def error_polar():
+    polares= {'ecc_metric': numpy.nan,
+        'gyration_radius': numpy.nan,
+        'area_ts': numpy.nan,
+        'polar_balance': numpy.nan,
+        'angle': numpy.nan,
+        'area_q1': numpy.nan,
+        'area_q2': numpy.nan,
+        'area_q3': numpy.nan,
+        'area_q4': numpy.nan
+    }
+    return polares
+
+def error_fractal():
+    fractais = {
+        'dfa_fd': numpy.nan,
+        'hurst_exp': numpy.nan,
+        'katz_fd': numpy.nan,
+        'petrosian_fd': numpy.nan
+    }
+    return fractais

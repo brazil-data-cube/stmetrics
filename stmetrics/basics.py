@@ -1,8 +1,8 @@
 import numpy
 from scipy import stats
-from.utils import *
+from stmetrics.utils import *
 
-def ts_basics(timeseries):
+def ts_basics(timeseries, funcs=["all"], nodata=-9999):
     """
     This function compute 7 basic metrics
     "Mean" - Average value of the curve along one cycle.
@@ -25,9 +25,11 @@ def ts_basics(timeseries):
 
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.array:
@@ -35,118 +37,151 @@ def ts_basics(timeseries):
 
     
     """
+    out_metrics = dict()
     
-    metrics_count = 14 
+    metrics_count = 15
+    
     # compute mean, maximum, minimum, standart deviation and amplitude    
     ts = fixseries(timeseries)
 
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.ones((1,metrics_count))
+    if "all" in funcs:
+        funcs=['max_ts','min_ts','mean_ts','std_ts','sum_ts','amplitude_ts','mse_ts','fslope_ts','skew_ts','amd_ts','abs_sum_ts','iqr_ts','fqr_ts','tqr_ts','sqr_ts']
+    
+    for f in funcs:
+        try:
+            out_metrics[f] = eval(f)(ts,nodata)
+        except:
+            print("Sorry, we dont have ", f)
+    
+    return out_metrics
 
 
-    means = mean(ts)
-    maxi = max(ts)
-    mini = min(ts)
-    stds = std(ts)
-    soma = sum(ts)
-    amp = amplitude(ts)
-    slope = first_slop(ts)
-    skewness = skew(ts)
-    amds = amd(ts)
-    asum = abs_sum(ts)
-    iq = iqr(ts)
-    fq = fqr(ts)
-    tq = tqr(ts)
-    sq = sqr(ts)
-
-    return numpy.array([means,maxi,mini,stds,soma,amp,slope,skewness,amds,asum,fq,sq,tq,iq])
-
-
-def mean(timeseries):
+def mean_ts(timeseries, nodata=-9999):
 
     """
     "Mean" - Average value of the curve along one cycle.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
-	Mean value of time series.
+    Mean value of time series.
 
     """
+
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+    
     ts = fixseries(timeseries)
 
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
-
-    return numpy.mean(ts)
+    try:
+        return numpy.mean(ts)
+    except:
+        return numpy.nan
     
-def max(timeseries):
+def max_ts(timeseries, nodata=-9999):
 
     """
     "Max" - Maximum value of the cycle.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
-    	Maximum value of time series.
+        Maximum value of time series.
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+    
     ts = fixseries(timeseries)
 
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.max(ts)
+    except:
+        return numpy.nan
 
-    return numpy.max(ts)
-
-def min(timeseries):
+def min_ts(timeseries, nodata=-9999):
 
     """
     "Min" - Minimum value of the curve along one cycle.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
-    	Minimum value of time series.
+        Minimum value of time series.
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
 
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.min(ts)
+    except:
+        return numpy.nan
 
-    return numpy.min(ts)
-
-def std(timeseries):
+def std_ts(timeseries, nodata=-9999):
     """
     "Std" - Standard deviation of the cycle’s values. 
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
-    	Standard deviation of time series.
+        Standard deviation of time series.
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
 
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.std(ts)
+    except:
+        return numpy.nan
 
-    return numpy.std(ts)
-
-def sum(timeseries):
+def sum_ts(timeseries, nodata=-9999):
 
     """
     "Sum" - Sum of values over a cycle. 
@@ -155,135 +190,196 @@ def sum(timeseries):
     Keyword arguments:
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
-    	Sum of values of time series.
+        Sum of values of time series.
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
 
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.sum(ts)
+    except:
+        return numpy.nan
 
-    return numpy.sum(ts)
-
-def amplitude(timeseries):
+def amplitude_ts(timeseries, nodata=-9999):
 
     """
     "Amplitude" - The difference between the cycle’s maximum and minimum values.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
-    	Amplitude of values of time series.
+        Amplitude of values of time series.
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
 
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
-
-    return numpy.max(ts) - numpy.min(ts)
+    try:
+        return numpy.max(ts) - numpy.min(ts)
+    except:
+        return numpy.nan
     
-def first_slop(timeseries):
+def fslope_ts(timeseries, nodata=-9999):
 
     """
     "First_slope" - Maximum value of the first slope of the cycle.
     It indicates when the cycle presents some abrupt change in the curve.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
-    	The maximum value of the first slope of time series.
+        The maximum value of the first slope of time series.
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
     
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.max(abs(numpy.diff(ts)))
+    except:
+        return numpy.nan
+    
 
-    return numpy.max(abs(numpy.diff(ts)))
-
-def abs_sum(timeseries):
+def abs_sum_ts(timeseries, nodata=-9999):
 
     """
     "Sum" - Sum of values over a cycle. 
     Usually is an indicator of the annual production of vegetation.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
         Sum of values of time series.
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
 
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.sum(numpy.abs(ts))
+    except:
+        return numpy.nan
 
-    return numpy.sum(numpy.abs(ts))
-    
-
-def skew(timeseries):
+def skew_ts(timeseries, nodata=-9999):
     """ 
     "skew" - Measures the asymmetry of the time series
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
         The asymmetry of time series.
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
     
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return stats.skew(ts)
+    except:
+        return numpy.nan
 
-    return stats.skew(ts)
-
-def amd(timeseries):
+def amd_ts(timeseries, nodata=-9999):
     """ 
     "amd" - Absolute mean derivative (AMD)
     It provides information on the growth rate of vegetation, allowing discrimination of natural cycles from crop cycles.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
         The absolute mean derivative of time series.
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
     
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.mean(numpy.abs(numpy.diff(ts)))
+    except:
+        return numpy.nan
 
-    return numpy.mean(numpy.abs(numpy.diff(ts)))
-
-def mse(timeseries):
+def mse_ts(timeseries, nodata=-9999):
     """ 
     "mse" - Mean Spectral Energy
     It computes mean spectral energy of a time series.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
@@ -291,22 +387,32 @@ def mse(timeseries):
     
     note: this function was adapted from sglearn package
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
     
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts))))
+    except:
+        return numpy.nan    
 
-    return numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts))))
-
-def fqr(timeseries):
+def fqr_ts(timeseries, nodata=-9999):
     """ 
     "fqr" - Mean Spectral Energy
     It computes the first quartileof a time series.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
@@ -314,73 +420,110 @@ def fqr(timeseries):
     
 
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
     
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.percentile(ts, 25, interpolation = 'midpoint') 
+    except:
+        return numpy.nan   
 
-    return numpy.percentile(ts, 25, interpolation = 'midpoint') 
-
-def tqr(timeseries):
+def tqr_ts(timeseries, nodata=-9999):
     """ 
     "tqr" - First quartile
     It computes the third quartileof a time series.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
         The absolute mean derivative of time series.
     
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
-    
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
 
-    return numpy.percentile(ts, 75, interpolation = 'linear') 
+    try:
+        return numpy.percentile(ts, 75, interpolation = 'midpoint') 
+    except:
+        return numpy.nan 
 
-def sqr(timeseries):
+def sqr_ts(timeseries, nodata=-9999):
     """ 
     "sqr" - Interquaritle range (IQR) 
     It computes the interquaritle range of the time series.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
         The interquaritle range of the time series.
     
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
     
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.array([1])
+    try:
+        return numpy.percentile(ts, 50, interpolation = 'linear') 
+    except:
+        return numpy.nan 
 
-    #interpolation is linear by deafult
-    return numpy.percentile(ts, 50, interpolation = 'linear') 
-
-def iqr(timeseries):
+def iqr_ts(timeseries, nodata=-9999):
     """ 
     "iqr" - Interquaritle range (IQR) 
     It computes the interquaritle range of the time series.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
         The interquaritle range of the time series.
     
     """
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+        
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+
     ts = fixseries(timeseries)
     
     if ts.size == numpy.ones((1,)).size :
@@ -390,4 +533,7 @@ def iqr(timeseries):
     q1 = numpy.percentile(ts, 25, interpolation = 'linear') 
     q3 = numpy.percentile(ts, 75, interpolation = 'linear') 
 
-    return q3-q1
+    try:
+        return q3-q1
+    except:
+        return numpy.nan 

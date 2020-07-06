@@ -1,4 +1,6 @@
-def get_metrics(series, show=False):
+import numpy
+
+def get_metrics(series, metrics_dict={"basics": ["all"],"polar": ["all"]}, nodata=-9999, show=False):
     """
     This function perform the computation and plot of the spectral-polar-fractal metrics available in the stmetrics package.
 
@@ -6,37 +8,72 @@ def get_metrics(series, show=False):
     ------------------
         series : numpy.array
             Array of time series.
+        metrics: dictionary
+            Dictionary with metrics. Use the following strutcture:
+            metrics_dict={"basics": ["all"],
+                          "polar": ["all"]
+                          "fractal": ["all"]
+                          }
+        nodata: int/float
+            nodata of the time series. Default is -9999.
         show : Boolean
             Indicate if the polar plot should be displayed.
     Returns
     -------
-        numpy.array : numpy.array
-            Numpy of the metrics.
+        dictionary : 
+            Dicitionary with metrics.
             
     """
-    import numpy
     from . import basics
     from . import polar
     from . import fractal
+    from . import utils
 
-    #Remove nodata on non masked arrays
-    #ts[ts==nodata]=numpy.nan
+    time_metrics = dict()
 
-    #Remove nans from timeseries
-    ts = series[~numpy.isnan(series)]
-
-    if numpy.all(ts == 0) == True:
-        return numpy.zeros((1,26))
+    if numpy.all(series == 0) == True:
+        time_metrics["basics"] = utils.error_basics()
+        time_metrics["polar"] = utils.error_polar()
+        time_metrics["fractal"] = utils.error_fractal()
+        return time_metrics
     
-    if (not numpy.any(ts)) == True:
-        return numpy.zeros((1,26))
+    if (not numpy.any(series)) == True:
+        time_metrics["basics"] = utils.error_basics()
+        time_metrics["polar"] = utils.error_polar()
+        time_metrics["fractal"] = utils.error_fractal()
+        return time_metrics
         
     #call functions
-    basicas = basics.ts_basics(ts)
-    polares = polar.ts_polar(ts,show)
-    fd = fractal.ts_fractal(ts)
+    try:
+        time_metrics["basics"] = basics.ts_basics(series, metrics_dict["basics"], nodata)
+    except:
+        time_metrics["basics"] = utils.error_basics()
+    try:
+        time_metrics["polar"] = polar.ts_polar(series, metrics_dict["polar"], nodata, show)
+    except:
+        time_metrics["polar"] = utils.error_polar()
+    try:
+        time_metrics["fractal"] = fractal.ts_fractal(series, metrics_dict["fractal"], nodata)
+    except:
+        time_metrics["fractal"] = utils.error_fractal()
+        
+    return time_metrics
 
-    return numpy.concatenate((basicas, polares,fd), axis=None)
+def _sitsmetrics(timeseries):
+    
+    metrics = {"basics": ["all"],
+           "polar": ["all"],
+           "fractal": ["all"]
+          }
+    
+    out_metrics = get_metrics(timeseries, metrics)
+    
+    metricas = numpy.array([])
+
+    for metric in out_metrics.keys():
+        metricas = numpy.append(metricas, numpy.fromiter(out_metrics[metric].values(), dtype=float), axis = 0)
+        
+    return metricas
 
 def sits2metrics(dataset,merge = False):
     '''
@@ -55,7 +92,7 @@ def sits2metrics(dataset,merge = False):
     '''
 
     import multiprocessing as mp
-    import numpy
+
 
     image = dataset.read()
 
@@ -69,11 +106,12 @@ def sits2metrics(dataset,merge = False):
         
     #use pool to compute metrics for each pixel
     #return a list of arrays
-    X_m = pool.map(get_metrics,[serie for serie in series])
+    X_m = pool.map(_sitsmetrics,[serie for serie in series])
         
     #close pool
     pool.close()    
-        
+    return X_m
+
     #Conver list to numpy array
     metricas = numpy.vstack(X_m)
 

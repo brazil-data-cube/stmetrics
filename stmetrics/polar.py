@@ -5,7 +5,8 @@ from shapely.geometry.polygon import LinearRing
 
 from .utils import *
 
-def ts_polar(timeseries,show = False):
+
+def ts_polar(timeseries, funcs=["all"], nodata=-9999, show = False):
     
     """
     
@@ -24,52 +25,48 @@ def ts_polar(timeseries,show = False):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-    show: boolean
-         This inform that the polar plot must be presented.
+        nodata: int/float
+            nodata of the time series. Default is -9999.
+        show: boolean
+             This inform that the polar plot must be presented.
     Returns
     -------
     numpy.array:
         array of polar metrics values
     polar plot
     """
-    
-    #define header for polar dataframe
-    #header_polar=["Area", "Area_q1", "Area_q2", "Area_q3", "Area_q4","Circle","Gyration_radius","Polar_balance"]
-    
-    #Compute metrics
-    ts = fixseries(timeseries)
 
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
+    
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+    
+    out_metrics = dict()
+  
     metrics_count = 9
-
-    if ts.size == numpy.ones((1,)).size:
-        return numpy.ones((1,metrics_count))
+   
+    if "all" in funcs:
+        funcs=['ecc_metric','gyration_radius','area_ts','polar_balance','angle','area_q1','area_q2','area_q3','area_q4']
     
-    #Eccentricity    
-    circle = ecc_metric(ts)
-    
-    #gyration_radius
-    gyro = gyration_radius(ts)
-    
-    #Get Area
-    area = area_ts(ts)
-    
-    #Seasonal area
-    areas1,areas2,areas3,areas4 = area_season(ts)  
-    
-    #Polar Balance
-    balance = polar_balance(ts)
-    
-    #Angle    
-    ang = angle(ts)
+    for f in funcs:
+        try:
+            out_metrics[f] = eval(f)(timeseries,nodata)
+        except:
+            print("Sorry, we dont have ", f)
     
     if show==True:
-        polar_plot(ts)
+        polar_plot(timeseries)
     
-    return numpy.array([area,areas1,areas2,areas3,areas4,circle,gyro,balance,ang])
+    return out_metrics
 
-def symmetric_distance(time_series_1, time_series_2):
+
+def symmetric_distance(time_series_1, time_series_2, nodata = -9999):
 
     """
     
@@ -77,9 +74,13 @@ def symmetric_distance(time_series_1, time_series_2):
     polar space.
 
     Keyword arguments:
-        time_series_1 : numpy.ndarray
-        time_series_2 : numpy.ndarray    
-
+    ------------------
+        time_series_1 : 
+            numpy.ndarray
+        time_series_2 : 
+            numpy.ndarray    
+        nodata: int/float
+            nodata of the time series. Default is -9999. 
     Returns
     -------
     numpy.float64:
@@ -89,6 +90,12 @@ def symmetric_distance(time_series_1, time_series_2):
     #setting up initial distance
     dist = numpy.inf
     pos = numpy.inf
+    
+    time_series_1[time_series_1==nodata]=numpy.nan
+    time_series_1 = time_series_1[~numpy.isnan(time_series_1)]
+    
+    time_series_2[time_series_2==nodata]=numpy.nan
+    time_series_2 = time_series_2[~numpy.isnan(time_series_2)]
 
     #filtering timeseries
     time_series_1 = fixseries(time_series_1)
@@ -133,20 +140,19 @@ def symmetric_distance(time_series_1, time_series_2):
         
     return dist
 
-
 def polar_plot(timeseries):
     """
     
     This function create a plot of time series in polar space.
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
 
     Returns
     -------
-    None
-    Plot of time series in polar space.
+        None: Plot of time series in polar space.
     
     """
     import matplotlib.pyplot as plt
@@ -185,7 +191,6 @@ def polar_plot(timeseries):
     
     return None
 
-
 def get_seasons(x,y):
     
     """
@@ -194,14 +199,16 @@ def get_seasons(x,y):
     They are used to compute the metric "area_season."
     
     Keyword arguments:
+    ------------------
         x,y coordinates:
-		Using this coordinates is built the quadrants that represents seasons.
+            Using this coordinates is built the quadrants that represents seasons.
 
     Returns
     -------
-	Polygons
+        Polygons
     
     """
+    
     #get bouding box
     minX = -numpy.max(numpy.abs(x))
     minY = -numpy.max(numpy.abs(y))
@@ -231,9 +238,14 @@ def get_seasons(x,y):
     polyBottomLeft = Polygon([coord3,coord4,coord7,coord6,coord3])
     polyBottomRight = Polygon([coord4,coord5,coord8,coord7,coord4])
     
+    polyTopLeft = polyTopLeft.buffer(0)
+    polyTopRight = polyTopRight.buffer(0)
+    polyBottomLeft = polyBottomLeft.buffer(0)
+    polyBottomRight = polyBottomRight.buffer(0)
+
     return polyTopLeft,polyTopRight,polyBottomLeft,polyBottomRight
 
-def area_season(timeseries):
+def area_season(timeseries, nodata=-9999):
     
     """
 
@@ -244,20 +256,28 @@ def area_season(timeseries):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64
-    	The area of the time series that intersected each quadrant that represents a season.
+        The area of the time series that intersected each quadrant that represents a season.
     
     """
+    
     #fix time series
     ts = fixseries(timeseries)
 
     #create polygon
-    polygon = create_polygon(ts) 
+    try:
+        polygon = create_polygon(ts)
+        polygon = polygon.buffer(0)
+    except:
+        return numpy.nan,numpy.nan,numpy.nan,numpy.nan
+    
     
     """
     area2----area1
@@ -282,7 +302,112 @@ def area_season(timeseries):
     
     return area1,area2,area3,area4
 
-def ecc_metric(timeseries):
+def area_q1(timeseries, nodata=-9999):
+    
+    """
+    Area_Q1 - Area of the closed shape over the first quadrant.
+    
+    Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
+    Land Cover Detection Using Temporal Features Based On Polar Representation. 
+    
+
+    Keyword arguments:
+    ------------------
+        timeseries : numpy.ndarray
+            Your time series.
+        nodata: int/float
+            nodata of the time series. Default is -9999.
+    Returns
+    -------
+        numpy.float64: Area of polygon.
+        
+    """
+    
+    try:
+        areas = area_season(timeseries, nodata)
+        return areas[0]
+    except:
+        return numpy.nan
+
+    
+
+def area_q2(timeseries, nodata=-9999):
+    """
+    Area_Q1 - Area of the closed shape over the second quadrant.
+    
+    Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
+    Land Cover Detection Using Temporal Features Based On Polar Representation. 
+    
+
+    Keyword arguments:
+    ------------------
+        timeseries : numpy.ndarray
+            Your time series.
+        nodata: int/float
+            nodata of the time series. Default is -9999.
+    Returns
+    -------
+        numpy.float64: Area of polygon.
+        
+    """
+
+    try:
+        areas = area_season(timeseries, nodata)
+        return areas[1]
+    except:
+        return numpy.nan
+
+def area_q3(timeseries, nodata=-9999):
+    """
+    Area_Q1 - Area of the closed shape over the thrid quadrant.
+    
+    Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
+    Land Cover Detection Using Temporal Features Based On Polar Representation. 
+    
+
+    Keyword arguments:
+    ------------------
+        timeseries : numpy.ndarray
+            Your time series.
+        nodata: int/float
+            nodata of the time series. Default is -9999.
+    Returns
+    -------
+        numpy.float64: Area of polygon.
+        
+    """
+    try:
+        areas = area_season(timeseries, nodata)
+        return areas[2]
+    except:
+        return numpy.nan
+
+def area_q4(timeseries, nodata=-9999):
+    """
+    Area_Q4 - Area of the closed shape over the last quadrant.
+    
+    Reference: Körting, Thales & Câmara, Gilberto & Fonseca, Leila. (2013). \\
+    Land Cover Detection Using Temporal Features Based On Polar Representation. 
+    
+
+    Keyword arguments:
+    ------------------
+        timeseries : numpy.ndarray
+            Your time series.
+        nodata: int/float
+            nodata of the time series. Default is -9999.
+    Returns
+    -------
+        numpy.float64: Area of polygon.
+        
+    """
+    try:
+        areas = area_season(timeseries, nodata)
+        return areas[3]
+    except:
+        return numpy.nan
+
+def ecc_metric(timeseries, nodata=-9999):
     
     """
 
@@ -292,30 +417,34 @@ def ecc_metric(timeseries):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64
-	Eccentricity of time series.
+    Eccentricity of time series.
     
     """
 
-    #filter time series
-    ts = fixseries(timeseries)
-    #create polygon
-    polygon = create_polygon(ts)     
-    #get MRR
-    rrec = polygon.minimum_rotated_rectangle
-    minx, miny, maxx, maxy = rrec.bounds
-    axis1 = maxx - minx
-    axis2 = maxy - miny
-    stats = numpy.array([axis1, axis2])
+    try:
+        #filter time series
+        ts = fixseries(timeseries)
+        #create polygon
+        polygon = create_polygon(ts)     
+        #get MRR
+        rrec = polygon.minimum_rotated_rectangle
+        minx, miny, maxx, maxy = rrec.bounds
+        axis1 = maxx - minx
+        axis2 = maxy - miny
+        stats = numpy.array([axis1, axis2])
+        return (stats.min() / stats.max())
+    except:
+        return numpy.nan
 
-    return (stats.min() / stats.max())
-
-def angle(timeseries):
+def angle(timeseries, nodata=-9999):
     
     """
     Angle - The main angle of the closed shape created by the polar visualization.
@@ -325,23 +454,29 @@ def angle(timeseries):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64:
-    	The main angle of time series.
+        The main angle of time series.
     
     """
-    #filter time series
-    ts = fixseries(timeseries)
-    #get polar transformation info
-    list_of_radius, list_of_angles = get_list_of_points(ts)
-  
-    return list_of_angles[numpy.argmax(list_of_radius)]
 
-def gyration_radius(timeseries):
+    try:
+        #filter time series
+        ts = fixseries(timeseries)
+        #get polar transformation info
+        list_of_radius, list_of_angles = get_list_of_points(ts)
+
+        return list_of_angles[numpy.argmax(list_of_radius)]
+    except:
+        return numpy.nan
+
+def gyration_radius(timeseries, nodata=-9999):
     
     """
     Gyration_radius - Equals the average distance between each point inside the shape and the shape’s centroid.
@@ -350,35 +485,43 @@ def gyration_radius(timeseries):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64
-	   Average distance between each point inside the shape and the shape’s centroid.
+       Average distance between each point inside the shape and the shape’s centroid.
     
     """
-    #filtered time series
-    ts = fixseries(timeseries)
-    #create polygon
-    polygon = create_polygon(ts)   
-    #get polygon centroids
-    lonc,latc = polygon.centroid.xy
-    #get polygon exterior coords
-    x,y = polygon.exterior.coords.xy
 
-    dist = []
-    #compute distances to the centroid.
-    for p in range(len(x)):
-        px = x[p]
-        py = y[p]
+    try:
 
-        dist = numpy.sqrt((px-lonc[0])**2 + (py-latc[0])**2)   
+        #filtered time series
+        ts = fixseries(timeseries)
     
-    return numpy.mean(dist)
+        #create polygon
+        polygon = create_polygon(ts)   
+        #get polygon centroids
+        lonc,latc = polygon.centroid.xy
+        #get polygon exterior coords
+        x,y = polygon.exterior.coords.xy
 
-def polar_balance(timeseries):
+        dist = []
+        #compute distances to the centroid.
+        for p in range(len(x)):
+            px = x[p]
+            py = y[p]
+
+            dist = numpy.sqrt((px-lonc[0])**2 + (py-latc[0])**2)   
+
+        return numpy.mean(dist)
+    except:
+        return numpy.nan
+
+def polar_balance(timeseries, nodata=-9999):
     
     """
     Polar_balance - The standard deviation of the areas per season, considering the 4 seasons. 
@@ -387,23 +530,35 @@ def polar_balance(timeseries):
     Land Cover Detection Using Temporal Features Based On Polar Representation. 
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-    
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64
-	   Standard deviation of the areas per season.
+       Standard deviation of the areas per season.
     
     """
-    #filter time series
-    ts = fixseries(timeseries)
-    #get area season
-    areas = area_season(ts)
-    #return polar balance    
-    return numpy.std(areas)
 
-def area_ts(timeseries):
+  
+   
+    try:
+        #filter time series
+        ts = fixseries(timeseries)
+
+        #get area season
+        areas = area_season(ts)
+
+        #return polar balance    
+        return numpy.std(areas)
+
+    except:
+        return numpy.nan
+
+
+def area_ts(timeseries, nodata=-9999):
     
     """
     Area - Area of the closed shape.
@@ -413,19 +568,26 @@ def area_ts(timeseries):
     
 
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
-
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
     numpy.float64
-	Area of polygon.
+    Area of polygon.
     
     """
-    #fix time series
-    ts = fixseries(timeseries)
 
-    #create polygon
-    polygon = create_polygon(ts)   
-    #return polygon area
-    return polygon.area
+    try:  
+        #fix time series
+        ts = fixseries(timeseries)
+
+        #create polygon
+        polygon = create_polygon(ts)   
+
+        #return polygon area
+        return polygon.area
+    except:
+        return numpy.nan

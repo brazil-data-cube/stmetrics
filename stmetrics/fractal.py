@@ -1,9 +1,8 @@
 import numpy
 import nolds
+from .utils import *
 
-from.utils import *
-
-def ts_fractal(timeseries,kmax=10):
+def ts_fractal(timeseries, funcs=['all'],nodata=-9999):
     
     """
     This function compute 4 fractal dimensions and the hurst exponential.
@@ -14,27 +13,41 @@ def ts_fractal(timeseries,kmax=10):
     PFD: This algorirhm computes the FD of a signal by translating the series into a binary sequence.
     
     Keyword arguments:
+    ------------------
         timeseries : numpy.ndarray
             Your time series.
+        nodata: int/float
+            nodata of the time series. Default is -9999.
     Returns
     -------
         numpy.array:
             array of fractal metrics values
     """
         
-    metrics_count = 3
+    metrics_count = 4
+    out_metrics = dict()
+    
+    try:
+        #Remove nodata on non masked arrays
+        timeseries[timeseries==nodata]=numpy.nan
+    except:
+        timeseries
 
+    timeseries = timeseries[~numpy.isnan(timeseries)]
+    
     #Fiz series
     ts = fixseries(timeseries)
-
-    if ts.size == numpy.ones((1,)).size :
-        return numpy.ones((1,metrics_count))
-
-    dfa = dfa_fd(ts)
-    he = hurst_exp(ts)
-    kfd = katz_fd(ts)
-
-    return numpy.array([dfa,he,kfd])
+    
+    if "all" in funcs:
+        funcs=['dfa_fd','hurst_exp','katz_fd']
+    
+    for f in funcs:
+        try:
+            out_metrics[f] = eval(f)(ts)
+        except:
+            print("Sorry, we dont have ", f)
+    
+    return out_metrics
 
 def dfa_fd(series):
     """
@@ -57,8 +70,10 @@ def dfa_fd(series):
     This functions uses the dfa implementation from the Nolds package.
     """
 
-    dfa = nolds.dfa(series)
-    return dfa
+    try:
+        return  nolds.dfa(series)
+    except:
+        return numpy.nan
 
 def hurst_exp(series):
     """
@@ -77,51 +92,10 @@ def hurst_exp(series):
     This property makes the Hurst exponent especially interesting for the analysis of stock data.
     """
 
-    h = nolds.hurst_rs(series)
-    return h
-
-def petrosian_fd(series):
-    """
-    Petrosian Algorithm.
-
-    This algorirhm computes the FD of a signal by translating the series into a binary sequence.
-
-    Keyword arguments:
-    ------------------
-        series : numpy.array
-            One dimensional time series.
-    Returns
-    -------
-        pfd : float
-            Petrosian fractal dimension.
-
-    Notes
-    -----
-    The Petrosian fractal dimension of a time-series ..:math:`x` is defined by:
-    .. math:: P = \\frac{\\log_{10}(N)}{\\log_{10}(N) +
-              \\log_{10}(\\frac{N}{N+0.4N_{\\delta}})}
-    where ..:math:`N` is the length of the time series, and
-    ..:math:`N_{\\delta}` is the number of sign changes in the signal derivative.
-
-    This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
-
-    References
-    ----------
-    .. [1] A. Petrosian, Kolmogorov complexity of finite sequences and
-       recognition of different preictal EEG patterns, in , Proceedings of the
-       Eighth IEEE Symposium on Computer-Based Medical Systems, 1995,
-       pp. 212-217.
-    .. [2] Goh, Cindy, et al. "Comparison of fractal dimension algorithms for
-       the computation of EEG biomarkers for dementia." 2nd International
-       Conference on Computational Intelligence in Medicine and Healthcare
-       (CIMED2005). 2005.
-    """
-    n = len(series)
-    # Number of sign changes in the first derivative of the signal
-    diff = numpy.ediff1d(series)
-    N_delta = (diff[1:-1] * diff[0:-2] < 0).sum()
-    return numpy.log10(n) / (numpy.log10(n) + numpy.log10(n / (n + 0.4 * N_delta)))
-
+    try:
+        return nolds.hurst_rs(series)
+    except:
+        return numpy.nan
 
 def katz_fd(series):
     """
@@ -161,10 +135,15 @@ def katz_fd(series):
            Conference on Computational Intelligence in Medicine and Healthcare
            (CIMED2005). 2005.
     """
-    x = numpy.array(series)
-    dists = numpy.abs(numpy.ediff1d(x))
-    ll = dists.sum()
-    ln = numpy.log10(numpy.divide(ll, dists.mean()))
-    aux_d = x - x[0]
-    d = numpy.max(numpy.abs(aux_d[1:]))
-    return numpy.divide(ln, numpy.add(ln, numpy.log10(numpy.divide(d, ll))))
+
+
+    try:
+        x = numpy.array(series)
+        dists = numpy.abs(numpy.ediff1d(x))
+        ll = dists.sum()
+        ln = numpy.log10(numpy.divide(ll, dists.mean()))
+        aux_d = x - x[0]
+        d = numpy.max(numpy.abs(aux_d[1:]))
+        return numpy.divide(ln, numpy.add(ln, numpy.log10(numpy.divide(d, ll))))
+    except:
+        return numpy.nan
