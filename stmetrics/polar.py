@@ -38,21 +38,20 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show = False):
         array of polar metrics values
     polar plot
     """
-
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-    
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-    
     out_metrics = dict()
   
     metrics_count = 9
    
     if "all" in funcs:
-        funcs=['ecc_metric','gyration_radius','area_ts','polar_balance','angle','area_q1','area_q2','area_q3','area_q4','compactness']
+        funcs=['ecc_metric',
+        'gyration_radius',
+        'area_ts',
+        'polar_balance',
+        'angle',
+        'area_q1',
+        'area_q2',
+        'area_q3',
+        'area_q4']
     
     for f in funcs:
         try:
@@ -61,7 +60,7 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show = False):
             print("Sorry, we dont have ", f)
     
     if show==True:
-        polar_plot(timeseries)
+        polar_plot(timeseries,nodata)
     
     return out_metrics
 
@@ -140,7 +139,7 @@ def symmetric_distance(time_series_1, time_series_2, nodata = -9999):
         
     return dist
 
-def polar_plot(timeseries):
+def polar_plot(timeseries, nodata):
     """
     
     This function create a plot of time series in polar space.
@@ -159,7 +158,7 @@ def polar_plot(timeseries):
     from descartes import PolygonPatch
 
     #filter time series
-    ts = fixseries(timeseries)
+    ts = fixseries(timeseries, nodata)
     #create polygon
     polygon = create_polygon(ts)
     #get polygon coords
@@ -269,7 +268,7 @@ def area_season(timeseries, nodata=-9999):
     """
     
     #fix time series
-    ts = fixseries(timeseries)
+    ts = fixseries(timeseries, nodata)
 
     #create polygon
     try:
@@ -431,7 +430,7 @@ def ecc_metric(timeseries, nodata=-9999):
 
     try:
         #filter time series
-        ts = fixseries(timeseries)
+        ts = fixseries(timeseries, nodata)
         #create polygon
         polygon = create_polygon(ts)     
         #get MRR
@@ -468,7 +467,7 @@ def angle(timeseries, nodata=-9999):
 
     try:
         #filter time series
-        ts = fixseries(timeseries)
+        ts = fixseries(timeseries, nodata)
         #get polar transformation info
         list_of_radius, list_of_angles = get_list_of_points(ts)
 
@@ -500,7 +499,7 @@ def gyration_radius(timeseries, nodata=-9999):
     try:
 
         #filtered time series
-        ts = fixseries(timeseries)
+        ts = fixseries(timeseries, nodata)
     
         #create polygon
         polygon = create_polygon(ts)   
@@ -546,7 +545,7 @@ def polar_balance(timeseries, nodata=-9999):
    
     try:
         #filter time series
-        ts = fixseries(timeseries)
+        ts = fixseries(timeseries, nodata)
 
         #get area season
         areas = area_season(ts)
@@ -582,7 +581,7 @@ def area_ts(timeseries, nodata=-9999):
 
     try:  
         #fix time series
-        ts = fixseries(timeseries)
+        ts = fixseries(timeseries, nodata)
 
         #create polygon
         polygon = create_polygon(ts)   
@@ -591,19 +590,3 @@ def area_ts(timeseries, nodata=-9999):
         return polygon.area
     except:
         return numpy.nan
-
-def compactness(timeseries):
-    import pointpats
-    from shapely.geometry import Point
-    
-    #fix time series
-    ts = fixseries(timeseries)
-    
-    #create polygon
-    polygon = create_polygon(ts)   
-
-    points = list(zip(*polygon.minimum_rotated_rectangle.exterior.coords.xy))
-    (radius, center), _, _, _ = pointpats.skyum(points)
-    mbc_poly = Point(*center).buffer(radius)
-
-    return mbc_poly.symmetric_difference(polygon).area

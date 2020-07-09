@@ -49,7 +49,7 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal"):
             ##READ FILE
             transform = dataset.transform
             crs = dataset.crs
-            img = numpy.squeeze(dataset.values)
+            img = numpy.squeeze(dataset.values).astype(float)
         except:
             print('Sorry we could not read your dataset.')
     else:
@@ -59,7 +59,7 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal"):
     #Normalize data
     for band in range(img.shape[0]):
         img[numpy.isnan(img)] = 0
-        img[band,:,:] = (img[band,:,:]/scale)#*0.5+0.5
+        img[band,:,:] = (img[band,:,:])/scale#*0.5+0.5
     
     #Get image dimensions
     bands = img.shape[0]
@@ -523,7 +523,7 @@ def seg_metrics(dataframe,feature=['mean'],merge=True):
         series = dataframe.filter(regex=f)
         metricas = _seg_ex_metrics(series.to_numpy())
 
-        header=["Mean", "Max", "Min", "Std", "Sum","Amplitude","First_slope","Skew","AMDS","AbSum","Area","Area_s1","Area_s2","Area_s3","Area_s4","Circle","Gyration","Polar_balance","Angle", "DFA","Hurst","Katz"]
+        header=['max_ts','min_ts','mean_ts','std_ts','sum_ts','amplitude_ts','mse_ts','fslope_ts','skew_ts','amd_ts','abs_sum_ts','iqr_ts','fqr_ts','tqr_ts','sqr_ts','ecc_metric','gyration_radius','area_ts','polar_balance','angle','area_q1','area_q2','area_q3','area_q4','dfa_fd','hurst_exp','katz_fd']
         
         metricsdf = pandas.DataFrame(metricas,columns = header)
     
@@ -559,7 +559,7 @@ def _seg_ex_metrics(series):
         
     #use pool to compute metrics for each pixel
     #return a list of arrays
-    metricas = pool.map(metrics.get_metrics,[serie for serie in series])
+    metricas = pool.map(metrics._sitsmetrics,[serie for serie in series])
         
     #close pool
     pool.close()    

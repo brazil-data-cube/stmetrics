@@ -6,7 +6,7 @@ from shapely.geometry.polygon import LinearRing
 
 warnings.filterwarnings("ignore")
 
-def fixseries(time_series):
+def fixseries(time_series, nodata=-9999):
     
     """
     
@@ -27,7 +27,15 @@ def fixseries(time_series):
     """
 
     check_input(time_series)
+
+    try:
+        #Remove nodata on non masked arrays
+        time_series[time_series==nodata]=numpy.nan
+    except:
+        time_series
     
+    time_series = time_series[~numpy.isnan(time_series)]
+
     if time_series.size == numpy.ones((1,)).size :
         return numpy.array([1])
     
@@ -222,8 +230,7 @@ def error_polar():
         'area_q1': numpy.nan,
         'area_q2': numpy.nan,
         'area_q3': numpy.nan,
-        'area_q4': numpy.nan,
-        'compactness': numpy.nan
+        'area_q4': numpy.nan
     }
     return polares
 
@@ -231,7 +238,6 @@ def error_fractal():
     fractais = {
         'dfa_fd': numpy.nan,
         'hurst_exp': numpy.nan,
-        'katz_fd': numpy.nan,
-        'petrosian_fd': numpy.nan
+        'katz_fd': numpy.nan
     }
     return fractais

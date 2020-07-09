@@ -45,7 +45,21 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
     ts = fixseries(timeseries)
 
     if "all" in funcs:
-        funcs=['max_ts','min_ts','mean_ts','std_ts','sum_ts','amplitude_ts','mse_ts','fslope_ts','skew_ts','amd_ts','abs_sum_ts','iqr_ts','fqr_ts','tqr_ts','sqr_ts']
+        funcs=['max_ts',
+        'min_ts',
+        'mean_ts',
+        'std_ts',
+        'sum_ts',
+        'amplitude_ts',
+        'mse_ts',
+        'fslope_ts',
+        'skew_ts',
+        'amd_ts',
+        'abs_sum_ts',
+        'iqr_ts',
+        'fqr_ts',
+        'tqr_ts',
+        'sqr_ts']
     
     for f in funcs:
         try:
@@ -73,16 +87,8 @@ def mean_ts(timeseries, nodata=-9999):
     Mean value of time series.
 
     """
-
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
     
-    ts = fixseries(timeseries)
+    ts = fixseries(timeseries,nodata)
 
     try:
         return numpy.mean(ts)
@@ -105,15 +111,8 @@ def max_ts(timeseries, nodata=-9999):
     numpy.float64:
         Maximum value of time series.
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
     
-    ts = fixseries(timeseries)
+    ts = fixseries(timeseries,nodata)
 
     try:
         return numpy.max(ts)
@@ -136,15 +135,8 @@ def min_ts(timeseries, nodata=-9999):
     numpy.float64:
         Minimum value of time series.
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
 
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    ts = fixseries(timeseries,nodata)
 
     try:
         return numpy.min(ts)
@@ -166,15 +158,8 @@ def std_ts(timeseries, nodata=-9999):
     numpy.float64:
         Standard deviation of time series.
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
 
     try:
         return numpy.std(ts)
@@ -197,15 +182,8 @@ def sum_ts(timeseries, nodata=-9999):
     numpy.float64:
         Sum of values of time series.
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
 
     try:
         return numpy.sum(ts)
@@ -228,15 +206,8 @@ def amplitude_ts(timeseries, nodata=-9999):
     numpy.float64:
         Amplitude of values of time series.
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
 
     try:
         return numpy.max(ts) - numpy.min(ts)
@@ -260,15 +231,8 @@ def fslope_ts(timeseries, nodata=-9999):
     numpy.float64:
         The maximum value of the first slope of time series.
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
     
     try:
         return numpy.max(abs(numpy.diff(ts)))
@@ -293,15 +257,8 @@ def abs_sum_ts(timeseries, nodata=-9999):
     numpy.float64:
         Sum of values of time series.
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
 
     try:
         return numpy.sum(numpy.abs(ts))
@@ -323,15 +280,8 @@ def skew_ts(timeseries, nodata=-9999):
     numpy.float64:
         The asymmetry of time series.
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
     
     try:
         return stats.skew(ts)
@@ -354,15 +304,8 @@ def amd_ts(timeseries, nodata=-9999):
     numpy.float64:
         The absolute mean derivative of time series.
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
     
     try:
         return numpy.mean(numpy.abs(numpy.diff(ts)))
@@ -387,15 +330,8 @@ def mse_ts(timeseries, nodata=-9999):
     
     note: this function was adapted from sglearn package
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
     
     try:
         return numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts))))
@@ -420,15 +356,8 @@ def fqr_ts(timeseries, nodata=-9999):
     
 
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
     
     try:
         return numpy.percentile(ts, 25, interpolation = 'midpoint') 
@@ -452,15 +381,8 @@ def tqr_ts(timeseries, nodata=-9999):
         The absolute mean derivative of time series.
     
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
 
     try:
         return numpy.percentile(ts, 75, interpolation = 'midpoint') 
@@ -484,15 +406,8 @@ def sqr_ts(timeseries, nodata=-9999):
         The interquaritle range of the time series.
     
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
     
     try:
         return numpy.percentile(ts, 50, interpolation = 'linear') 
@@ -516,15 +431,8 @@ def iqr_ts(timeseries, nodata=-9999):
         The interquaritle range of the time series.
     
     """
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-        
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-
-    ts = fixseries(timeseries)
+    
+    ts = fixseries(timeseries,nodata)
     
     if ts.size == numpy.ones((1,)).size :
         return numpy.array([1])

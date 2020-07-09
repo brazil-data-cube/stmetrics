@@ -1,5 +1,7 @@
 import numpy
 import nolds
+from scipy.signal import savgol_filter
+
 from .utils import *
 
 def ts_fractal(timeseries, funcs=['all'],nodata=-9999):
@@ -27,19 +29,13 @@ def ts_fractal(timeseries, funcs=['all'],nodata=-9999):
     metrics_count = 4
     out_metrics = dict()
     
-    try:
-        #Remove nodata on non masked arrays
-        timeseries[timeseries==nodata]=numpy.nan
-    except:
-        timeseries
-
-    timeseries = timeseries[~numpy.isnan(timeseries)]
-    
     #Fiz series
     ts = fixseries(timeseries)
     
     if "all" in funcs:
-        funcs=['dfa_fd','hurst_exp','katz_fd']
+        funcs=['dfa_fd',
+        'hurst_exp',
+        'katz_fd']
     
     for f in funcs:
         try:
@@ -49,7 +45,7 @@ def ts_fractal(timeseries, funcs=['all'],nodata=-9999):
     
     return out_metrics
 
-def dfa_fd(series):
+def dfa_fd(timeseries):
     """
     Detrended Fluctuation Analysis (DFA)
 
@@ -70,12 +66,19 @@ def dfa_fd(series):
     This functions uses the dfa implementation from the Nolds package.
     """
 
+    ts = fixseries(timeseries)
+
+    if len(ts)<5:
+        interp = savgol_filter(ts,int(len(ts)/2),2)
+    else:
+        interp = savgol_filter(ts,5,2)
+
     try:
-        return  nolds.dfa(series)
+        return  nolds.dfa(interp)
     except:
         return numpy.nan
 
-def hurst_exp(series):
+def hurst_exp(timeseries):
     """
     Hurst exponent is a self-similarity measure that assess long-range dependence in a time series.
     
@@ -91,13 +94,19 @@ def hurst_exp(series):
     It can be used to determine whether the time series is more, less, or equally likely to increase if it has increased in previous steps. 
     This property makes the Hurst exponent especially interesting for the analysis of stock data.
     """
+    ts = fixseries(timeseries)
+    
+    if len(ts)<5:
+        interp = savgol_filter(ts,int(len(ts)/2),2)
+    else:
+        interp = savgol_filter(ts,5,2)
 
     try:
-        return nolds.hurst_rs(series)
+        return nolds.hurst_rs(interp)
     except:
         return numpy.nan
 
-def katz_fd(series):
+def katz_fd(timeseries):
     """
     Katz Algorithm.
     
@@ -135,10 +144,15 @@ def katz_fd(series):
            Conference on Computational Intelligence in Medicine and Healthcare
            (CIMED2005). 2005.
     """
-
+    ts = fixseries(timeseries)
+    
+    if len(ts)<5:
+        interp = savgol_filter(ts,int(len(ts)/2),2)
+    else:
+        interp = savgol_filter(ts,5,2)
 
     try:
-        x = numpy.array(series)
+        x = numpy.array(interp)
         dists = numpy.abs(numpy.ediff1d(x))
         ll = dists.sum()
         ln = numpy.log10(numpy.divide(ll, dists.mean()))
