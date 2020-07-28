@@ -6,12 +6,12 @@ with open("README.rst", "r") as fh:
 setuptools.setup(
     name="stmetrics",
     version="0.1.4.8",
-    author="Anderson Soares, Thales Körting",
-    author_email="andersonreis.geo@gmail.com",
+    author="Brazil Data Cube Team",
+    author_email="brazildatacube@dpi.inpe.br",
     description="A package to compute features from Satellite Image Time Series (SITS).",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/andersonreisoares/stmetrics/",
+    url="https://github.com/brazil-data-cube/stmetrics/",
     packages=['stmetrics'],
     install_requires=[
     'scipy',

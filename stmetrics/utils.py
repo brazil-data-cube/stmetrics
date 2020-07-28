@@ -230,7 +230,11 @@ def error_polar():
         'area_q1': numpy.nan,
         'area_q2': numpy.nan,
         'area_q3': numpy.nan,
-        'area_q4': numpy.nan
+        'area_q4': numpy.nan,
+        'fill_rate': numpy.nan,
+        'shape_index': numpy.nan,
+        'fill_rate2': numpy.nan,
+        'symmetry_ts': numpy.nan
     }
     return polares
 
@@ -238,6 +242,7 @@ def error_fractal():
     fractais = {
         'dfa_fd': numpy.nan,
         'hurst_exp': numpy.nan,
-        'katz_fd': numpy.nan
+        'katz_fd': numpy.nan,
+        'entropy': numpy.nan
     }
     return fractais

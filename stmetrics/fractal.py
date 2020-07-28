@@ -35,7 +35,8 @@ def ts_fractal(timeseries, funcs=['all'],nodata=-9999):
     if "all" in funcs:
         funcs=['dfa_fd',
         'hurst_exp',
-        'katz_fd']
+        'katz_fd',
+        'entropy']
     
     for f in funcs:
         try:
@@ -69,7 +70,7 @@ def dfa_fd(timeseries):
     ts = fixseries(timeseries)
 
     if len(ts)<5:
-        interp = savgol_filter(ts,int(len(ts)/2),2)
+        interp = savgol_filter(ts,3,2)
     else:
         interp = savgol_filter(ts,5,2)
 
@@ -97,7 +98,7 @@ def hurst_exp(timeseries):
     ts = fixseries(timeseries)
     
     if len(ts)<5:
-        interp = savgol_filter(ts,int(len(ts)/2),2)
+        interp = savgol_filter(ts,3,2)
     else:
         interp = savgol_filter(ts,5,2)
 
@@ -127,12 +128,12 @@ def katz_fd(timeseries):
     .. math:: K = \\frac{\\log_{10}(n)}{\\log_{10}(d/L)+\\log_{10}(n)}
     
     where :math:`L` is the total length of the time series and :math:`d`
-    is the
-    `Euclidean distance <https://en.wikipedia.org/wiki/Euclidean_distance>`_
+    is the `Euclidean distance <https://en.wikipedia.org/wiki/Euclidean_distance>`_
     between the first point in the series and the point that provides the
     furthest distance with respect to the first point.
 
-    This function was extracted from the package, available at: https://github.com/raphaelvallat/entropy.
+    This function was adapted from the package entropy available 
+    at: https://github.com/raphaelvallat/entropy.
 
     References
     ----------
@@ -147,17 +148,46 @@ def katz_fd(timeseries):
     ts = fixseries(timeseries)
     
     if len(ts)<5:
-        interp = savgol_filter(ts,int(len(ts)/2),2)
+        interp = savgol_filter(ts,3,2)
     else:
         interp = savgol_filter(ts,5,2)
 
     try:
-        x = numpy.array(interp)
-        dists = numpy.abs(numpy.ediff1d(x))
-        ll = dists.sum()
-        ln = numpy.log10(numpy.divide(ll, dists.mean()))
-        aux_d = x - x[0]
-        d = numpy.max(numpy.abs(aux_d[1:]))
-        return numpy.divide(ln, numpy.add(ln, numpy.log10(numpy.divide(d, ll))))
+        # compute the absolute differences between consecutive elements of an array
+        dists = numpy.abs(numpy.ediff1d(interp))
+        # sum distances
+        l = dists.sum()
+        # compute ln using the accumulated distance and the average distance
+        ln = numpy.log10(numpy.divide(l, dists.mean()))
+        # define box limit 
+        d = numpy.max(interp) - numpy.min(interp) 
+        
+        #return katz fractal dimension
+        return numpy.divide(ln, numpy.add(ln, numpy.log10(numpy.divide(d, l))))
     except:
         return numpy.nan
+
+#generalized entropy
+def _entropy(series,delta,q):
+    v = []
+    
+    for i in numpy.arange( 1,numpy.ceil((series.max()-series.min())/delta)+1   ):
+        b = series[series>(i-1)*delta]
+        b = b[b < i*delta]
+        v.append(len(b))
+        
+    v = numpy.array(v)
+    
+    pi = v/v.sum()
+    
+    sq = (1/(q-1)) * (1 - (pi**q).sum())
+    
+    return sq
+
+def entropy(series, delta1=0.1, delta2=0.1, q=0.1):
+
+    sy = _entropy(series, delta1, q)
+
+    dsy = _entropy(numpy.diff(series), delta2, q)
+
+    return sy + dsy + (1-q)*sy*dsy

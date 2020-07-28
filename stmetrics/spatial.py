@@ -523,7 +523,7 @@ def seg_metrics(dataframe,feature=['mean'],merge=True):
         series = dataframe.filter(regex=f)
         metricas = _seg_ex_metrics(series.to_numpy())
 
-        header=['max_ts','min_ts','mean_ts','std_ts','sum_ts','amplitude_ts','mse_ts','fslope_ts','skew_ts','amd_ts','abs_sum_ts','iqr_ts','fqr_ts','tqr_ts','sqr_ts','ecc_metric','gyration_radius','area_ts','polar_balance','angle','area_q1','area_q2','area_q3','area_q4','dfa_fd','hurst_exp','katz_fd']
+        header=['max_ts','min_ts','mean_ts','std_ts','sum_ts','amplitude_ts','mse_ts','fslope_ts','skew_ts','amd_ts','abs_sum_ts','iqr_ts','fqr_ts','tqr_ts','sqr_ts','ecc_metric','gyration_radius','area_ts','polar_balance','angle','area_q1','area_q2','area_q3','area_q4','fill_rate','dfa_fd','hurst_exp','katz_fd','katz_fd2']
         
         metricsdf = pandas.DataFrame(metricas,columns = header)
     

@@ -14,7 +14,7 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show = False):
     
     Area - Area of the closed shape.
     Area_q1 - "Area_q4" - Partial area of the shape, proportional to some quadrant of the polar representation
-    Circle - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.
+    Eccenticity - Return values close to 0 if the shape is a circle and 1 if the shape is similar to a line.
     Gyration_radius - Equals the average distance between each point inside the shape and the shape’s centroid.
     Polar_balance - The standard deviation of the areas per season, considering the 4 seasons. 
     Angle - The main angle of the closed shape created by the polar visualization.
@@ -51,7 +51,11 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show = False):
         'area_q1',
         'area_q2',
         'area_q3',
-        'area_q4']
+        'area_q4',
+        'fill_rate',
+        'shape_index',
+        'fill_rate2',
+        'symmetry_ts']
     
     for f in funcs:
         try:
@@ -139,7 +143,7 @@ def symmetric_distance(time_series_1, time_series_2, nodata = -9999):
         
     return dist
 
-def polar_plot(timeseries, nodata):
+def polar_plot(timeseries, nodata=-9999):
     """
     
     This function create a plot of time series in polar space.
@@ -276,8 +280,7 @@ def area_season(timeseries, nodata=-9999):
         polygon = polygon.buffer(0)
     except:
         return numpy.nan,numpy.nan,numpy.nan,numpy.nan
-    
-    
+       
     """
     area2----area1
     |           | 
@@ -286,18 +289,21 @@ def area_season(timeseries, nodata=-9999):
     
     #get polygon coords
     x,y = polygon.envelope.exterior.coords.xy
+    
     #get season polygons
     polyTopLeft,polyTopRight,polyBottomLeft,polyBottomRight = get_seasons(x,y)
+
     #compute intersection of season polygons with time series polar representation
     quaterPolyTopLeft = polyTopLeft.intersection(polygon)
     quaterPolyTopRight =  polyTopRight.intersection(polygon)
     quaterPolyBottomLeft =  polyBottomLeft.intersection(polygon)
     quaterPolyBottomRight =  polyBottomRight.intersection(polygon)
+
     #compute areas
-    area1 =  quaterPolyTopRight.area
-    area2 = quaterPolyTopLeft.area
-    area3 =  quaterPolyBottomLeft.area
-    area4 =  quaterPolyBottomRight.area
+    #area1 =  quaterPolyTopRight.area
+    #area2 = quaterPolyTopLeft.area
+    #area3 =  quaterPolyBottomLeft.area
+    #area4 =  quaterPolyBottomRight.area
     
     return area1,area2,area3,area4
 
@@ -324,7 +330,7 @@ def area_q1(timeseries, nodata=-9999):
     
     try:
         areas = area_season(timeseries, nodata)
-        return areas[0]
+        return areas[0].area
     except:
         return numpy.nan
 
@@ -352,7 +358,7 @@ def area_q2(timeseries, nodata=-9999):
 
     try:
         areas = area_season(timeseries, nodata)
-        return areas[1]
+        return areas[1].area
     except:
         return numpy.nan
 
@@ -377,7 +383,7 @@ def area_q3(timeseries, nodata=-9999):
     """
     try:
         areas = area_season(timeseries, nodata)
-        return areas[2]
+        return areas[2].area
     except:
         return numpy.nan
 
@@ -402,7 +408,7 @@ def area_q4(timeseries, nodata=-9999):
     """
     try:
         areas = area_season(timeseries, nodata)
-        return areas[3]
+        return areas[3].area
     except:
         return numpy.nan
 
@@ -590,3 +596,97 @@ def area_ts(timeseries, nodata=-9999):
         return polygon.area
     except:
         return numpy.nan
+
+def fill_rate(timeseries, nodata = -9999):
+    import pointpats
+    from shapely.geometry import Point
+    
+    try:
+        #fix time series
+        ts = fixseries(timeseries, nodata)
+        
+        #create polygon
+        polygon = create_polygon(ts)   
+
+        #compute convex hull
+        convex = polygon.convex_hull 
+
+        return polygon.symmetric_difference(convex).area#   /polygon.area
+
+    except:
+        return numpy.nan
+
+def shape_index(timeseries, nodata=-9999):
+    """
+
+    Shape index - This is a dimensionless quantitative measure of morphology.
+    Characterize the standard deviation of an object from a circle.
+    
+    Reference: Volkan Müjdat Tiryaki and Usienemnfon Adia-Nimuwa and Virginia M. Ayres and Ijaz Ahmed and David I. Shreiber
+    Texture-based segmentation and a new cell shape index for quantitative analysis of cell spreading in AFM images. Cytometry Part A, 2015.
+    
+    Keyword arguments:
+    ------------------
+        timeseries : numpy.ndarray
+            Your time series.
+        nodata: int/float
+            nodata of the time series. Default is -9999.
+    Returns
+    -------
+    numpy.float64
+        Quantitative measure of morphology.
+    
+    """
+    
+    try:
+        #filter time series
+        ts = fixseries(timeseries, nodata)
+        
+        #create polygon
+        polygon = create_polygon(ts).buffer(0)   
+        
+        
+        #get polar transformation info
+        return (polygon.length**2)/(4*numpy.pi*polygon.area)
+    except:
+        return numpy.nan
+    
+    
+def fill_rate2(timeseries, nodata = -9999):
+    import pointpats
+    from shapely.geometry import Point   
+    
+    try:
+        #fix time series
+        ts = fixseries(timeseries, nodata)
+        
+        #create polygon
+        polygon = create_polygon(ts).buffer(0)
+        center = (0,0)
+        mbc_poly = Point(*center).buffer(numpy.max(ts))
+
+        return polygon.symmetric_difference(mbc_poly).area#/polygon.area
+
+    except:
+        return numpy.nan
+    
+def symmetry_ts(timeseries, nodata = -9999):
+    import pointpats
+    from shapely.geometry import Point
+    from shapely import affinity
+    from shapely.ops import cascaded_union
+    
+    try: 
+        #fix time series
+        ts = fixseries(timeseries, nodata)
+
+        #create polygon
+        polygon = create_polygon(ts).buffer(0)
+
+        rotated = create_polygon(numpy.roll(ts,int(numpy.ceil(len(ts)/2)))).buffer(0)
+
+        merge = cascaded_union([polygon,rotated]) 
+
+        return  merge.symmetric_difference(polygon).area
+    except:
+        return numpy.nan   
