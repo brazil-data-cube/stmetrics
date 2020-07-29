@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="stmetrics",
-    version="0.1.4.8",
+    version="0.1.4.9",
     author="Brazil Data Cube Team",
     author_email="brazildatacube@dpi.inpe.br",
     description="A package to compute features from Satellite Image Time Series (SITS).",
