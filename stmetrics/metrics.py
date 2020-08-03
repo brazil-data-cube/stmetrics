@@ -107,7 +107,7 @@ def sits2metrics(dataset,merge = False):
     series = image[:,:,:].T.reshape(new_shape)
   
     #Initialize pool
-    pool = mp.Pool(mp.cpu_count()-1)
+    pool = mp.Pool(mp.cpu_count())
         
     #use pool to compute metrics for each pixel
     #return a list of arrays

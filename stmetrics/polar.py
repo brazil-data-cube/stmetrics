@@ -52,8 +52,8 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show = False):
         'area_q2',
         'area_q3',
         'area_q4',
-        'fill_rate',
         'shape_index',
+        'fill_rate',
         'fill_rate2',
         'symmetry_ts']
     
@@ -305,7 +305,7 @@ def area_season(timeseries, nodata=-9999):
     #area3 =  quaterPolyBottomLeft.area
     #area4 =  quaterPolyBottomRight.area
     
-    return area1,area2,area3,area4
+    return quaterPolyTopLeft,quaterPolyTopRight,quaterPolyBottomLeft,quaterPolyBottomRight
 
 def area_q1(timeseries, nodata=-9999):
     
@@ -554,10 +554,10 @@ def polar_balance(timeseries, nodata=-9999):
         ts = fixseries(timeseries, nodata)
 
         #get area season
-        areas = area_season(ts)
+        a1,a2,a3,a4 = area_season(ts)
 
         #return polar balance    
-        return numpy.std(areas)
+        return numpy.std([a1.area,a2.area,a3.area,a4.area])
 
     except:
         return numpy.nan
@@ -597,25 +597,6 @@ def area_ts(timeseries, nodata=-9999):
     except:
         return numpy.nan
 
-def fill_rate(timeseries, nodata = -9999):
-    import pointpats
-    from shapely.geometry import Point
-    
-    try:
-        #fix time series
-        ts = fixseries(timeseries, nodata)
-        
-        #create polygon
-        polygon = create_polygon(ts)   
-
-        #compute convex hull
-        convex = polygon.convex_hull 
-
-        return polygon.symmetric_difference(convex).area#   /polygon.area
-
-    except:
-        return numpy.nan
-
 def shape_index(timeseries, nodata=-9999):
     """
 
@@ -651,6 +632,25 @@ def shape_index(timeseries, nodata=-9999):
     except:
         return numpy.nan
     
+
+def fill_rate(timeseries, nodata = -9999):
+    import pointpats
+    from shapely.geometry import Point
+    
+    try:
+        #fix time series
+        ts = fixseries(timeseries, nodata)
+        
+        #create polygon
+        polygon = create_polygon(ts)   
+
+        #compute convex hull
+        convex = polygon.convex_hull 
+
+        return polygon.symmetric_difference(convex).area#   /polygon.area
+
+    except:
+        return numpy.nan
     
 def fill_rate2(timeseries, nodata = -9999):
     import pointpats

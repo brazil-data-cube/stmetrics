@@ -97,7 +97,7 @@ def create_polygon(timeseries):
     r = LinearRing(ring)  
     
     try:
-        polygon = Polygon(r)
+        polygon = Polygon(r).buffer(0)
     except:
         print("Unable to create a valid polygon")
     
@@ -143,12 +143,9 @@ def check_input(timeseries):
         timeseries
     
     """
-    if timeseries.size == numpy.ones((1,)).size :
-        return None
-
     if isinstance(timeseries,numpy.ndarray):
 
-        if len(timeseries) < 3:
+        if len(timeseries) < 5:
             raise TypeError("Your time series is too short!")
         else:
             return timeseries
