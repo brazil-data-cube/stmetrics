@@ -209,7 +209,7 @@ def error_basics():
         'std_ts': numpy.nan,
         'sum_ts': numpy.nan,
         'amplitude_ts': numpy.nan,
-        "mse_ts": numpy.nan,
+        'mse_ts': numpy.nan,
         'fslope_ts': numpy.nan,
         'skew_ts': numpy.nan,
         'amd_ts': numpy.nan,
