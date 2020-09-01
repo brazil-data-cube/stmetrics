@@ -665,7 +665,7 @@ def fill_rate2(timeseries, nodata = -9999):
         center = (0,0)
         mbc_poly = Point(*center).buffer(numpy.max(ts))
 
-        return polygon.symmetric_difference(mbc_poly).area#/polygon.area
+        return (mbc_poly.area - polygon.area) / (polygon.area + mbc_poly.area)
 
     except:
         return numpy.nan
@@ -677,16 +677,29 @@ def symmetry_ts(timeseries, nodata = -9999):
     from shapely.ops import cascaded_union
     
     try: 
+
         #fix time series
         ts = fixseries(timeseries, nodata)
 
         #create polygon
         polygon = create_polygon(ts).buffer(0)
 
-        rotated = create_polygon(numpy.roll(ts,int(numpy.ceil(len(ts)/2)))).buffer(0)
+        acc_diff = []
+
+        rotated = create_polygon(ts).buffer(0)
 
         merge = cascaded_union([polygon,rotated]) 
 
-        return  merge.symmetric_difference(polygon).area
+        acc_diff.append(merge.symmetric_difference(polygon).area)
+
+        for roll in range(2,5):
+
+            rotated = create_polygon(numpy.roll(ts,int(numpy.ceil(len(ts)/roll)))).buffer(0)
+
+            merge = cascaded_union([polygon,rotated]) 
+
+            acc_diff.append(merge.symmetric_difference(polygon).area)
+
+        return numpy.var(acc_diff)*100
     except:
         return numpy.nan   

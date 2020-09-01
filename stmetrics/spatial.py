@@ -2,13 +2,16 @@ import numpy
 import xarray
 import rasterio
 from stmetrics import metrics
+from numba import njit,prange,jit
+import os
+from tqdm import tnrange, tqdm_notebook
 
 def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal"):
 
     """
     
     This function create spatial-temporal superpixels using a Satellite Image Time Series (SITS).
-
+    Version 1.1
     Keyword arguments:
     ------------------
         image : Rasterio dataset object or a xarray.DataArray
@@ -23,14 +26,12 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal"):
             Number of iterations to be performed.
         pattern: string
             Type of pattern initialization. it can be hexagonal (default) or regular (as SLIC).
-
     Returns
     -------
         Shapefile containing superpixels produced.
     
     """
-    import os
-    from tqdm import tnrange, tqdm_notebook
+
 
     print('Simple Non-Linear Iterative Temporal Clustering V 1.1')
     name = os.path.basename(dataset.name)[:-4]
@@ -76,7 +77,7 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal"):
     
     #Start clustering
     for n in tnrange(iter):
-        residual_error = 0
+
         for kk in range(k):
             # Get subimage around cluster
             rmin = int(numpy.floor(max(C[kk,bands]-S, 0)))
@@ -87,12 +88,17 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal"):
             #Create subimage 2D numpy.array
             subim = img[:,rmin:rmax,cmin:cmax]
             
+            #get cluster centres
+            c_series = C[kk, :subim.shape[0]]                       #Average time series
+            ic = int(numpy.floor(C[kk, subim.shape[0]])) - rmin       #X-coordinate
+            jc = int(numpy.floor(C[kk, subim.shape[0]+1])) - cmin     #Y-coordinate 
+            
             #Calculate Spatio-temporal distance
-            try:
-                D = distance_fast(C[kk, :], subim, S, m, rmin, cmin) #DTW fast
-            except:
-                print('dtaidistance package is not properly installed.')
-                D = distance(C[kk, :], subim, S, m, rmin, cmin) #DTW regular
+            #try:
+            D = distance_fast(c_series,ic,jc,subim,S,m,rmin,cmin)
+            #except:
+            #    print('dtaidistance package is not properly installed.')
+            #    D = distance(C[kk, :], subim, S, m, rmin, cmin) #DTW regular
 
             subd = d[rmin:rmax,cmin:cmax]
             subl = l[rmin:rmax,cmin:cmax]
@@ -105,22 +111,19 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal"):
             d[rmin:rmax,cmin:cmax] = subd
             l[rmin:rmax,cmin:cmax] = subl
             
-        C,_ = update_cluster(C,img,l,rows,columns,bands,k,residual_error)          #Update Clusters
+        C = update_cluster(img,l,rows,columns,bands,k)          #Update Clusters
 
-        
-    #print('Fixing segmentation')
     labelled = postprocessing(l, S)                 #Remove noise from segmentation
     
     segmentation = write_pandas(labelled, transform, crs)
             
     return segmentation                                 #Return labeled numpy.array for visualization on python
 
-def distance_fast(C, subim, S, m, rmin, cmin):
+def distance_fast(c_series,ic,jc,subim,S,m,rmin,cmin):
     """
     
     This function computes the spatial-temporal distance between
     two pixels using the dtw distance with C implementation.
-
     Keyword arguments:
     ------------------
         C : numpy.ndarray
@@ -137,7 +140,6 @@ def distance_fast(C, subim, S, m, rmin, cmin):
             Minimum column
         factor : float
             Corrective factor
-
     Returns
     -------
     D: numpy.ndarray
@@ -151,35 +153,29 @@ def distance_fast(C, subim, S, m, rmin, cmin):
     
     #Initialize submatrix
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
-
-    #get cluster centres
-    a2 = C[:subim.shape[0]]                                #Average time series
-    ic = (int(numpy.floor(C[subim.shape[0]])) - rmin)         #X-coordinate
-    jc = (int(numpy.floor(C[subim.shape[0]+1])) - cmin)       #Y-coordinate
     
     # Tranpose matrix to allow dtw fast computation with dtaidistance
     linear = subim.transpose(1,2,0).reshape(subim.shape[1]*subim.shape[2],subim.shape[0])
-    merge  = numpy.vstack((linear,a2))
+    merge  = numpy.vstack((linear,c_series))
 
     #Compute dtw distances
     c = dtw.distance_matrix_fast(merge, block=((0, merge.shape[0]), (merge.shape[0]-1,merge.shape[0])), compact=True, parallel=True)
     dc = c.reshape(subim.shape[1],subim.shape[2])
-    
-    # Critical Loop - need parallel implementation
-    for u in range(subim.shape[1]):
-        for v in range(subim.shape[2]):
-            ds[u,v] = (((u-ic)**2 + (v-jc)**2)**0.5)                         #Calculate Spatial Distance
-    
-    D =  (dc)/m + (ds/S)                                #Calculate SPatial-temporal distance
+
+    x = numpy.arange(subim.shape[1])
+    y = numpy.arange(subim.shape[2])
+    xx, yy = numpy.meshgrid(x, y, sparse=True, indexing='ij')
+    ds = (((xx-ic)**2 + (yy-jc)**2)**0.5)                       # Calculate Spatial Distance
+    D =  (dc)/m + (ds/S)   #Calculate SPatial-temporal distance
+
              
     return D
 
-def distance(C, subim, S, m, rmin, cmin):
+def distance(c_series,ic,jc,subim,S,m,rmin,cmin):
     """
     
     This function computes the spatial-temporal distance between
     two pixels using the DTW distance.
-
     Keyword arguments:
     ------------------
         C : numpy.ndarray
@@ -196,7 +192,6 @@ def distance(C, subim, S, m, rmin, cmin):
             Minimum column
         factor : float
             Corrective factor
-
     Returns
     -------
     D: numpy.ndarray
@@ -212,28 +207,27 @@ def distance(C, subim, S, m, rmin, cmin):
     dc = numpy.zeros([subim.shape[1],subim.shape[2]])
     ds = numpy.zeros([subim.shape[1],subim.shape[2]])
             
-    #get cluster centres
-    a2 = C[:subim.shape[0]]                                #Average time series
-    ic = (int(numpy.floor(C[subim.shape[0]])) - rmin)         #X-coordinate
-    jc = (int(numpy.floor(C[subim.shape[0]+1])) - cmin)       #Y-coordinate
-    
     # Critical Loop - need parallel implementation
     for u in range(subim.shape[1]):
         for v in range(subim.shape[2]):
             a1 = subim[:,u,v]                                              # Get pixel time series 
-            dc[u,v] = dtw.distance(a1.astype(float),a2.astype(float))      # Compute DTW distance
-            ds[u,v] = (((u-ic)**2 + (v-jc)**2)**0.5)                       # Calculate Spatial Distance
+            dc[u,v] = dtw.distance(a1.astype(float),c_series.astype(float))      # Compute DTW distance
+    
+    x = numpy.arange(subim.shape[1])
+    y = numpy.arange(subim.shape[2])
+    xx, yy = numpy.meshgrid(x, y, sparse=True, indexing='ij')
+    ds = (((xx-ic)**2 + (yy-jc)**2)**0.5)                       # Calculate Spatial Distance
     
     D =  (dc)/m + (ds/S)   #Calculate SPatial-temporal distance
           
     return D
 
-def update_cluster(C,img,l,rows,columns,bands,k,residual_error):
+@njit(parallel = True,fastmath=True)
+def update_cluster(img,l,rows,columns,bands,k):
 
     """
     
     This function update clusters' informations.
-
     Keyword arguments:
     ------------------
         C : numpy.ndarray
@@ -252,36 +246,29 @@ def update_cluster(C,img,l,rows,columns,bands,k,residual_error):
             Number os superpixels
         residual_error:
             residual_error from previous iteration
-
     Returns
     -------
     C: numpy.ndarray
         Updated cluster centres information.
     
     """
+    c_shape = (k,bands+3)
     
     #Allocate array info for centres
-    C_new = numpy.zeros([k,bands+3]).astype(float) 
-    error = numpy.zeros([k,1]).astype(float)
-
+    C_new = numpy.zeros(c_shape) 
+    
     #Update cluster centres with mean values
-    for r in range(rows):
+    for r in prange(rows):
         for c in range(columns):
             tmp = numpy.append(img[:,r,c],numpy.array([r,c,1]))
-            kk = l[r,c].astype(int)
+            kk = int(l[r,c])
             C_new[kk,:] = C_new[kk,:] + tmp
   
     #Compute mean
-    for kk in range(k):
+    for kk in prange(k):
         C_new[kk,:] = C_new[kk,:]/C_new[kk,bands+2]
         
-        partial_error = C[kk,:] - C_new[kk,:]
-     
-        error[kk,:] = residual_error + numpy.sqrt(partial_error.dot(partial_error.transpose()))
-        
-    residual_error = numpy.mean(error)
-        
-    return C_new,residual_error
+    return C_new
 
 
 def postprocessing(raster,S):
@@ -289,7 +276,6 @@ def postprocessing(raster,S):
     """
     
     This function forces conectivity.
-
     Keyword arguments:
     ------------------
         raster : numpy.ndarray
@@ -325,7 +311,6 @@ def write_pandas(segmentation, transform, crs):
     """
     
     This function creates the shapefile of the segmentation produced.
-
     Keyword arguments:
     ------------------
         segmentation : numpy.ndarray
@@ -353,12 +338,12 @@ def write_pandas(segmentation, transform, crs):
     gdf.crs = crs
     return gdf
 
+@njit(fastmath=True)
 def init_cluster_hex(rows,columns,ki,img,bands):
 
     """
     
     This function initialize the clusters using a hexagonal pattern.
-
     Keyword arguments:
     ------------------
         img : numpy.ndarray
@@ -371,7 +356,6 @@ def init_cluster_hex(rows,columns,ki,img,bands):
             Number of columns
         ki:
             Number of desired superpixel
-
     Returns
     -------
         C : numpy.ndarray
@@ -403,17 +387,17 @@ def init_cluster_hex(rows,columns,ki,img,bands):
 
     # Recompute k
     k = nodeRows * nodeColumns
-
+    c_shape = (k,bands+3)
     # Allocate memory and initialise clusters, labels and distances.
-    C = numpy.zeros([k,bands+3])                 # Cluster centre data  1:times is mean on each band of series
+    C = numpy.zeros(c_shape)                 # Cluster centre data  1:times is mean on each band of series
                                                  # times+1 and times+2 is row, col of centre, times+3 is No of pixels
-    l = -numpy.ones([rows,columns])              # Matrix labels.
-    d = numpy.full([rows,columns], numpy.inf)    # Pixel distance matrix from cluster centres.
+    l = -numpy.ones(img[0,:,:].shape)              # Matrix labels.
+    d = numpy.full(img[0,:,:].shape, numpy.inf)    # Pixel distance matrix from cluster centres.
 
     # Initialise grid
     kk = 0;
     r = vSpacing/2;
-    for ri in range(nodeRows):
+    for ri in prange(nodeRows):
         x = ri
         if x % 2:
             c = S/2
@@ -435,12 +419,12 @@ def init_cluster_hex(rows,columns,ki,img,bands):
     
     return C,S,l,d,k
 
+@njit(fastmath=True)
 def init_cluster_regular(rows,columns,ki,img,bands):
 
     """
     
     This function initialize the clusters using a square pattern.
-
     Keyword arguments:
     ------------------
         img : numpy.ndarray
@@ -453,7 +437,6 @@ def init_cluster_regular(rows,columns,ki,img,bands):
             Number of columns
         ki:
             Number of desired superpixel
-
     Returns
     -------
         C : numpy.ndarray
@@ -477,11 +460,12 @@ def init_cluster_regular(rows,columns,ki,img,bands):
     # Recompute k
     k = numpy.floor(rows/base)*numpy.floor(columns/base)
 
+    c_shape = (k,bands+3)
     # Allocate memory and initialise clusters, labels and distances.
-    C = numpy.zeros([int(k),bands+3])            # Cluster centre data  1:times is mean on each band of series
-                                              # times+1 and times+2 is row, col of centre, times+3 is No of pixels
-    l = -numpy.ones([rows,columns])              # Matrix labels.
-    d = numpy.full([rows,columns], numpy.inf)       # Pixel distance matrix from cluster centres.
+    C = numpy.zeros(c_shape)                 # Cluster centre data  1:times is mean on each band of series
+                                                 # times+1 and times+2 is row, col of centre, times+3 is No of pixels
+    l = -numpy.ones(img[0,:,:].shape)              # Matrix labels.
+    d = numpy.full(img[0,:,:].shape, numpy.inf)    # Pixel distance matrix from cluster centres.
 
     vSpacing = int(numpy.floor(rows / ki**0.5))
     hSpacing = int(numpy.floor(columns / ki**0.5))
@@ -500,6 +484,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
         w = S/2
         
     return C,int(S),l,d,int(kk)
+
 
 def seg_metrics(dataframe,feature=['mean'],merge=True):
     

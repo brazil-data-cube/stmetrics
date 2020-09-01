@@ -92,11 +92,11 @@ To find the correct ``distutils`` path, run the following lines in ``python``::
 Install dtaidistance package
 ----------------------------
 
-The dtaidistance package is a key factor of stmetrics. However, due to some issues, windows users need to compiled and install directly from source.
+The dtaidistance package is a key factor of stmetrics. However, due to some issues, windows users need to compiled and install directly from source. This was tested with version 1.2.2. **Make sure that you have numpy and cython already installed!**
 
-* Download the source from https://github.com/wannesm/dtaidistance
-* Compile the C extensions: ``python3 setup.py build_ext --inplace``
-* Install into your site-package directory: ``python3 setup.py install``
+* Download the source from https://github.com/wannesm/dtaidistance/archive/v1.2.4.zip
+* Compile the C extensions: ``python setup.py build_ext --inplace``
+* Install into your site-package directory: ``python setup.py install``
 
 This requires OpenMP to be available on your system. If this is not the case, use:
 
@@ -113,6 +113,8 @@ Using conda do this::
     conda install shapely
 
     conda install rasterio
+
+    conda install geopandas
 
 Installing stmetrics
 --------------------

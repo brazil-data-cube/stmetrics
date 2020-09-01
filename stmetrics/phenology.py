@@ -313,7 +313,7 @@ def pheno(time_series, minimum_up, treshold = 0.125, window = 7, show=True):
     """
     
     #This function perform the filtering with the savitky-golay mehtod
-    y = get_filtered_series(time_series,window,max_dist_fitting)
+    y = get_filtered_series(time_series,window,treshold)
     
     #This function detect peaks on the timesries
     peaks = get_peaks(y,window,minimum_up) 

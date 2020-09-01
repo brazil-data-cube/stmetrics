@@ -86,7 +86,7 @@ def sits2metrics(dataset,merge = False):
 
     Keyword arguments:
     ------------------
-        dataset : rasterio dataset            
+        dataset : rasterio dataset  or numpy array (ZxMxN) - Z is the time series lenght.
         merge : Boolean
             Indicate if the matrix of features should be merged with the input matrix.
     Returns
@@ -98,9 +98,22 @@ def sits2metrics(dataset,merge = False):
 
     import multiprocessing as mp
 
-
-    image = dataset.read()
-
+    if isinstance(dataset, rasterio.io.DatasetReader):
+        try:
+            image = dataset.read()
+            del dataset
+        except:
+            print('Sorry we could not open your dataset.')
+    elif isinstance(dataset, numpy.ndarray): 
+        try:
+            image = dataset.copy()
+            del dataset
+        except:
+            print('Sorry we could not open your dataset.')
+    else:
+         print("Sorry we can't read this type of file. Please use Rasterio or Numpy array.")
+    
+    
     # Take our full image, ignore the Fmask band, and reshape into long 2d array (nrow * ncol, nband) for classification
     new_shape = (image.shape[1] * image.shape[2], image.shape[0])
 

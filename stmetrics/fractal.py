@@ -51,7 +51,7 @@ def dfa_fd(timeseries):
     Detrended Fluctuation Analysis (DFA)
 
     DFA measures the Hurst parameter H, which is very similar to the Hurst exponent. 
-    The main difference is that DFA can be used for non-stationary processes (whose mean and/or variance change over time).
+    The main difference is that DFA can be used for non-stationary time series (whose mean and/or variance change over time).
 
     Keyword arguments:
     ------------------
@@ -93,7 +93,11 @@ def hurst_exp(timeseries):
     
     The hurst exponent is a measure of the “long-term memory” of a time series. 
     It can be used to determine whether the time series is more, less, or equally likely to increase if it has increased in previous steps. 
-    This property makes the Hurst exponent especially interesting for the analysis of stock data.
+    
+     Notes
+    -----
+
+    This function was adapted from the package Nolds.
     """
     ts = fixseries(timeseries)
     
