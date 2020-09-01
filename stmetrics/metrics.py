@@ -97,6 +97,7 @@ def sits2metrics(dataset,merge = False):
     '''
 
     import multiprocessing as mp
+    import rasterio
 
     if isinstance(dataset, rasterio.io.DatasetReader):
         try:
@@ -138,6 +139,6 @@ def sits2metrics(dataset,merge = False):
         
     if merge==True:
         #Concatenate time series and metrics
-       return numpy.concatenate((image,im_metrics), axis=0).shape     
+        return numpy.concatenate((image,im_metrics), axis=0).shape     
     else:
         return im_metrics

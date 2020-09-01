@@ -35,8 +35,7 @@ def ts_fractal(timeseries, funcs=['all'],nodata=-9999):
     if "all" in funcs:
         funcs=['dfa_fd',
         'hurst_exp',
-        'katz_fd',
-        'entropy']
+        'katz_fd']
     
     for f in funcs:
         try:

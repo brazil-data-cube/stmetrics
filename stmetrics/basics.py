@@ -59,8 +59,7 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
         'iqr_ts',
         'fqr_ts',
         'tqr_ts',
-        'sqr_ts',
-        'abs_log']
+        'sqr_ts']
     
     for f in funcs:
         try:
@@ -444,41 +443,5 @@ def iqr_ts(timeseries, nodata=-9999):
 
     try:
         return q3-q1
-    except:
-        return numpy.nan 
-
-
-def abs_log(timeseries, nodata=-9999):
-
-    """
-    "Mean" - Average value of the curve along one cycle.
-
-    Keyword arguments:
-    ------------------
-        timeseries : numpy.ndarray
-            Your time series.
-        nodata: int/float
-            nodata of the time series. Default is -9999.
-    Returns
-    -------
-    numpy.float64:
-    Mean value of time series.
-
-    """
-    
-    ts = fixseries(timeseries,nodata)
-
-    try:
-        return numpy.abs(numpy.log(ts))*ts
-    except:
-        return numpy.nan
-
-def acf(timeseries, nodata=-9999):
-    from statsmodels.tsa.stattools import acf
-
-    ts = fixseries(timeseries,nodata)
-
-    try:
-        return acf(ts) 
     except:
         return numpy.nan
