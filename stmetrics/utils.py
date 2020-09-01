@@ -239,7 +239,6 @@ def error_fractal():
     fractais = {
         'dfa_fd': numpy.nan,
         'hurst_exp': numpy.nan,
-        'katz_fd': numpy.nan,
-        'entropy': numpy.nan
+        'katz_fd': numpy.nan
     }
     return fractais
