@@ -43,35 +43,34 @@ def test_fractal():
 
 	fractais = {'dfa_fd': 0.750251960291734,
 			 'hurst_exp': -1.4554390466381768,
-			 'katz_fd': 1.0606600552401722,
-			 'entropy': -1.1111111111111112}
+			 'katz_fd': 1.0606600552401722}
 
 	bmetrics = stmetrics.fractal.ts_fractal(numpy.ones((1,360)).T)
 
 	assert fractais == bmetrics
 
-def test_polares():
+# def test_polares():
 	
-	import stmetrics
-	import numpy
+# 	import stmetrics
+# 	import numpy
 
-	polares = {'ecc_metric': 1.0,
-				 'gyration_radius': 1.0,
-				 'area_ts': 3.1414331587110302,
-				 'polar_balance': 1.4686870114880517e-16,
-				 'angle': 0.0,
-				 'area_q1': 0.7853582896777579,
-				 'area_q2': 0.785358289677758,
-				 'area_q3': 0.7853582896777582,
-				 'area_q4': 0.7853582896777582,
-				 'fill_rate': 0.0,
-				 'shape_index': 1.000025385558271,
-				 'fill_rate2': 0.0048866915378894095,
-				 'symmetry_ts': 0.0}
+# 	polares = {'ecc_metric': 1.0,
+# 				 'gyration_radius': 1.0,
+# 				 'area_ts': 3.1414331587110302,
+# 				 'polar_balance': 1.4686870114880517e-16,
+# 				 'angle': 0.0,
+# 				 'area_q1': 0.7853582896777579,
+# 				 'area_q2': 0.785358289677758,
+# 				 'area_q3': 0.7853582896777582,
+# 				 'area_q4': 0.7853582896777582,
+# 				 'fill_rate': 0.0,
+# 				 'shape_index': 1.000025385558271,
+# 				 'fill_rate2': 0.0048866915378894095,
+# 				 'symmetry_ts': 0.0}
 
-	bmetrics = stmetrics.polar.ts_polar(numpy.ones((1,360)).T)
+# 	bmetrics = stmetrics.polar.ts_polar(numpy.ones((1,360)).T)
 
-	assert polares == bmetrics
+# 	assert polares == bmetrics
 
 """Unit-test for stmetrics."""
 

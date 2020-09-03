@@ -27,6 +27,7 @@ Welcome to stmetrics's documentation!
    :numbered:
    :hidden:
 
+   benchmarks.rst
    jupyter.rst
 
 

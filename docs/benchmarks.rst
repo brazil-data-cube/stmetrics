@@ -1,39 +1,32 @@
-# Benchmarks
+Benchmark
+----------
 
 We assessed the performance of two main functions of stmetrics: `get_metrics` and `sits2metrics`. For that, we used a core i7-8700 CPU @ 3.2 GHz and 16GB of RAM memory. With this test we wanted to assess the performance of the package to compute the metrics available under different scenarios.
 
-We compared the time and memory performance of those functions using different approaches. For `get_metrics` function, we assessed the performance using randomn time series, created with numpy, with different leghts. For the `sits2metrics` function we used images with different dimensions in columns and rows, maitaining the same length. 
+We compared the performance of those functions regarding execution time. For `get_metrics` function, we assessed the performance using randomn time series, created with numpy, with different leghts. For the `sits2metrics` function we used images with different dimensions in columns and rows, maitaining the same length. 
 
-# `get-metrics` analysis
+`get-metrics` analysis
+======================
 
-To evaluate the performance of `get_metrics` function, we implemented a simple test using radomn time series built with `numpy` package, using the following code.
+To evaluate the performance of `get_metrics` function, we implemented a simple test using radomn time series built with `numpy` package that can be acessed at: .
 
+.. figure:: figures/stmetrics_getmetrics.png
+	:width: 600
+	:align: center
+	
+	Fig 1. Execution time of get_metrics functions with different time series lenghts.
 
-```python
-import time
-import stmetrics
-import numpy
-import matplotlib.pyplot as plt
+As shown above, the `get_metrics` function presents a quadratic response regarding the length of the time series. It is able to compute the metrics for a time series with 1,000 data points in less than **two second**. This beahaviour is explained by some polar metrics that requires more computational time, for example the `symmetry_ts` function. For the following versions, we will try to improve the performance of the package.
 
-tempos = []
-for i in range(5,1000):
-    start = time.time()
-    stmetrics.metrics.get_metrics(numpy.random.rand(1,i)[0])
-    end = time.time()
-    tempos.append(end - start)
+`sits2metrics` analysis
+=======================
 
-```
+To evaluate the `sits2metrics` function we used a sample image with the following dimensions: 249x394 and 12 dates. With this test, we aim to assess how the size of the image impacts the total time to compute the metrics. 
 
-<p style="font-style: italics;" align="center">
-<img height=384 src="figures/get_metrics.png" alt="Execution time of get_metrics functions with different time series lenghts." /><br>
-Fig. 1: Executation time of get_metrics with time series with different lenghts.
-</p>
+This function uses the multiprocessing library to speed up the process. According to the previous test, a time series with 12 dates as our sample requires 0.015s to compute the metrics for one pixel, therefore using a single core this should require 1,318s or approximately 21minutes. With the parallel implementation, according to our tests, the package perform the same task in 6 minutes.
 
-The `get_metrics` function presents a linear response regarding the lenght of the time series, been able to compute the metrics for a time series with 1,000 data points in less than one second. Despite of that, for the following versions, we will try to improve this performance.
-
-# `sits2metrics` analysis
-
-<p style="font-style: italics;" align="center">
-<img height=384 src="https://github.com/seung-lab/connected-components-3d/blob/master/benchmarks/cc3d_vs_scipy_single_label_10x.png" alt="Fig. 2: SciPy vs cc3d run ten times on a 512x512x512 connectomics segmentation masked to only contain one label. (black) SciPy 1.3.0 (blue) cc3d 1.2.2" /><br>
-Fig. 2: SciPy vs cc3d run ten times on a 512x512x512 connectomics segmentation masked to only contain one label. (black) SciPy 1.3.0 (blue) cc3d 1.2.2
-</p> 
+.. figure:: figures/stmetrics_sits2metrics.png
+	:width: 600
+	:align: center
+	
+	Fig 2. Execution time of sits2metrics with different sizes images.

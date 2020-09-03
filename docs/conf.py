@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'stmetrics'
-copyright = '2020, Anderson Soares'
-author = 'Anderson Soares'
+copyright = '2020, Brazil Data Cube'
+author = 'Brazil Data Cube'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1.4'

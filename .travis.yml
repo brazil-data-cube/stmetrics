@@ -1,13 +1,18 @@
 language: python
+
 python:
   - 3.7
+
 before_install:
   - python --version
   - pip install -U pip
   - pip install -U pytest
   - pip install codecov
+
 install:
-  - pip install ".[tests,docs,example]" . # install package + test dependencies
+  - pip install ".[tests,docs]" # install package + test dependencies
+
 script: pytest # run tests
+
 after_success:
   - codecov # submit coverage

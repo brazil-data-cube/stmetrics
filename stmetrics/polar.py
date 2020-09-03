@@ -412,6 +412,7 @@ def area_q4(timeseries, nodata=-9999):
     except:
         return numpy.nan
 
+
 def ecc_metric(timeseries, nodata=-9999):
     
     """
@@ -449,6 +450,7 @@ def ecc_metric(timeseries, nodata=-9999):
     except:
         return numpy.nan
 
+
 def angle(timeseries, nodata=-9999):
     
     """
@@ -481,6 +483,7 @@ def angle(timeseries, nodata=-9999):
     except:
         return numpy.nan
 
+
 def gyration_radius(timeseries, nodata=-9999):
     
     """
@@ -503,7 +506,6 @@ def gyration_radius(timeseries, nodata=-9999):
     """
 
     try:
-
         #filtered time series
         ts = fixseries(timeseries, nodata)
     
@@ -620,6 +622,7 @@ def shape_index(timeseries, nodata=-9999):
     """
     
     try:
+        
         #filter time series
         ts = fixseries(timeseries, nodata)
         

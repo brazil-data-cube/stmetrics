@@ -12,6 +12,7 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal"):
     
     This function create spatial-temporal superpixels using a Satellite Image Time Series (SITS).
     Version 1.1
+    
     Keyword arguments:
     ------------------
         image : Rasterio dataset object or a xarray.DataArray
@@ -124,6 +125,7 @@ def distance_fast(c_series,ic,jc,subim,S,m,rmin,cmin):
     
     This function computes the spatial-temporal distance between
     two pixels using the dtw distance with C implementation.
+    
     Keyword arguments:
     ------------------
         C : numpy.ndarray
@@ -176,6 +178,7 @@ def distance(c_series,ic,jc,subim,S,m,rmin,cmin):
     
     This function computes the spatial-temporal distance between
     two pixels using the DTW distance.
+    
     Keyword arguments:
     ------------------
         C : numpy.ndarray
@@ -228,6 +231,7 @@ def update_cluster(img,l,rows,columns,bands,k):
     """
     
     This function update clusters' informations.
+   
     Keyword arguments:
     ------------------
         C : numpy.ndarray
@@ -276,6 +280,7 @@ def postprocessing(raster,S):
     """
     
     This function forces conectivity.
+    
     Keyword arguments:
     ------------------
         raster : numpy.ndarray
@@ -311,6 +316,7 @@ def write_pandas(segmentation, transform, crs):
     """
     
     This function creates the shapefile of the segmentation produced.
+
     Keyword arguments:
     ------------------
         segmentation : numpy.ndarray
@@ -344,6 +350,7 @@ def init_cluster_hex(rows,columns,ki,img,bands):
     """
     
     This function initialize the clusters using a hexagonal pattern.
+
     Keyword arguments:
     ------------------
         img : numpy.ndarray
@@ -425,6 +432,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
     """
     
     This function initialize the clusters using a square pattern.
+
     Keyword arguments:
     ------------------
         img : numpy.ndarray

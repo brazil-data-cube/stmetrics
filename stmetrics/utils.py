@@ -6,6 +6,7 @@ from shapely.geometry.polygon import LinearRing
 
 warnings.filterwarnings("ignore")
 
+
 def fixseries(time_series, nodata=-9999):
     
     """
