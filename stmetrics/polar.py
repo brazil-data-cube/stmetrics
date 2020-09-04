@@ -203,13 +203,7 @@ def polar_plot(timeseries, nodata=-9999):
 
 def get_seasons(x, y):
     """This function polygons that represents the four season of a year.
-    They are used to compute the metric "area_season."
-
-    coord0----coord1----coord2
-    |           |           |
-    coord3----coord4----coord5
-    |           |           |
-    coord6----coord7----coord8
+    They are used to compute the metric `area_season`.
 
     :param x: x-coordinate in polar space.
     :type x: numpy.array
@@ -519,12 +513,12 @@ def csi(timeseries, nodata=-9999):
     :return shape_index: Quantitative measure of morphology.
     :rtype shape_index: numpy.float64
 
-    .. admonition:: Cell?
+    .. note:: 
+        Cell?
+
         After polar transformation time series usually have a round shape, \
         which can be releate do cell in some cases. \
-        Therefore, we tried to insert as many as possible metrics, that can \
-        well characterize it. That's why cell shape index is available at\
-        the package.
+        That's why cell shape index is available here.
     """
     try:
         # filter time series
