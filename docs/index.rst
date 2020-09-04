@@ -12,6 +12,7 @@ Welcome to stmetrics's documentation!
    :maxdepth: 2
    :hidden:
 
+   metrics.rst
    polar.rst
    basics.rst
    fractal.rst
