@@ -26,40 +26,20 @@ def get_metrics(series, metrics_dict={
 
     time_metrics = dict()
 
-    if numpy.all(series == 0) is True:
-        time_metrics["basics"] = utils.error_basics()
-        time_metrics["polar"] = utils.error_polar()
-        time_metrics["fractal"] = utils.error_fractal()
-        return time_metrics
-
-    if (not numpy.any(series)) is True:
-        time_metrics["basics"] = utils.error_basics()
-        time_metrics["polar"] = utils.error_polar()
-        time_metrics["fractal"] = utils.error_fractal()
-        return time_metrics
-
     # call functions
     if "basics" in metrics_dict:
-        try:
-            time_metrics["basics"] = basics.ts_basics(series, metrics_dict["basics"], nodata)
-        except:
-            time_metrics["basics"] = utils.error_basics()
+        time_metrics["basics"] = basics.ts_basics(series, metrics_dict["basics"], nodata)
 
     if "polar" in metrics_dict:
-        try:
-            time_metrics["polar"] = polar.ts_polar(series, metrics_dict["polar"], nodata, show)
-        except:
-            time_metrics["polar"] = utils.error_polar()
-
+        time_metrics["polar"] = polar.ts_polar(series, metrics_dict["polar"], nodata, show)
+    
     if "fractal" in metrics_dict:
-        try:
             time_metrics["fractal"] = fractal.ts_fractal(series, metrics_dict["fractal"], nodata)
-        except:
-            time_metrics["fractal"] = utils.error_fractal()
+
     return time_metrics
 
 
-def _sitsmetrics(timeseries):
+def _getmetrics(timeseries):
 
     metrics = {
         "basics": ["all"],
@@ -78,41 +58,36 @@ def _sitsmetrics(timeseries):
     return metricas
 
 
-def sits2metrics(dataset, merge=False):
+def sits2metrics(dataset):
     """This function performs the computation of the metrics using \
     multiprocessing.
 
     :param dataset: Your time series.
-    :type dataset: rasterio dataset  or numpy array (ZxMxN) - Z \
-    is the time series lenght.
+    :type dataset: rasterio dataset, numpy array (ZxMxN) - Z \
+    is the time series lenght or xarray.Dataset
 
-    :param merge: Indicate if the matrix of features should be \
-    merged with the input matrix.
-    :type nodata: Boolean
-
-    :returns image: Numpy matrix of metrics and/or image.
-    :rtype image: numpy.array.
+    :returns image: Numpy matrix of metrics or xarray.Dataset \
+    with the metrics as an dataset..
+    :rtype image: numpy.array or xarray.Dataset.
     """
-
-    import multiprocessing as mp
     import rasterio
+    import xarray
 
-    if isinstance(dataset, rasterio.io.DatasetReader):
-        try:
+    try:
+        if isinstance(dataset, rasterio.io.DatasetReader):
             image = dataset.read()
-            del dataset
-        except:
-            print('Sorry we could not open your dataset.')
-    elif isinstance(dataset, numpy.ndarray):
-        try:
+            return _sits2metrics(image)
+        elif isinstance(dataset, numpy.ndarray):
             image = dataset.copy()
-            del dataset
-        except:
-            print('Sorry we could not open your dataset.')
-    else:
+            return _sits2metrics(image)
+        elif isinstance(dataset, xarray.Dataset):
+            return _compute_from_xarray(dataset)
+    except:
         print("Sorry we can't read this type of file.\
-            Please use Rasterio or Numpy array.")
+              Please use Rasterio, Numpy array or xarray.")
 
+def _sits2metrics(image):
+    import multiprocessing as mp
     # Take our full image, ignore the Fmask band, and reshape into long \
     # 2d array (nrow * ncol, nband) for classification
     new_shape = (image.shape[1] * image.shape[2], image.shape[0])
@@ -122,7 +97,7 @@ def sits2metrics(dataset, merge=False):
     pool = mp.Pool(mp.cpu_count())
     # use pool to compute metrics for each pixel
     # return a list of arrays
-    X_m = pool.map(_sitsmetrics, [serie for serie in series])
+    X_m = pool.map(_getmetrics, [serie for serie in series])
     # close pool
     pool.close()
     # Conver list to numpy array
@@ -132,8 +107,35 @@ def sits2metrics(dataset, merge=False):
                         order='F') for b in range(metricas.shape[1])]
     im_metrics = numpy.rollaxis(numpy.dstack(ma), 2)
 
-    if merge is True:
-        # Concatenate time series and metrics
-        return numpy.concatenate((image, im_metrics), axis=0).shape
-    else:
-        return im_metrics
+    return im_metrics
+
+
+def _compute_from_xarray(dataset):
+    
+    band_list = list(dataset.data_vars)
+    
+    metrics = xarray.Dataset()
+
+    for key in band_list:
+
+        series = numpy.squeeze(dataset[key].values)
+
+        metricas = stmetrics.metrics.sits2metrics(series)
+        
+        metrics_list = list_metrics()
+        
+        lista = []
+        
+        for m, m_name in zip(range(0,metricas.shape[0]), metrics_list):
+            c = xarray.DataArray(metricas[m,:,:],
+                                 dims = ['y','x'],
+                                 coords = {'y': xdc.coords['y'],
+                                           'x': xdc.coords['x']})
+            
+            c.coords['metric'] = m_name
+                                 
+            lista.append(c)
+            
+        dataset[key+'_metrics'] = xarray.concat(lista, dim='metric')
+            
+    return dataset

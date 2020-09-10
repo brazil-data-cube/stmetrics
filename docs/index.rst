@@ -28,9 +28,8 @@ Welcome to stmetrics's documentation!
    :numbered:
    :hidden:
 
-   benchmarks.rst
-   jupyter.rst
-
+   examples/TimeMetrics
+   examples/Benchmark
 
 Produce reliable land use and land cover maps to support the deployment and operation of public policies is a necessity, especially when environmental management and economic development are considered. To increase the accuracy of these maps, satellite image time-series have been used, as they allow the understanding of land cover dynamics through the time.
 

@@ -1,7 +1,8 @@
 import numpy
 import nolds
 from scipy.signal import savgol_filter
-from .utils import fixseries
+
+from . import utils
 
 
 def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
@@ -22,11 +23,7 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
     :return out_metrics: Array of fractal metrics values
     :rtype out_metrics: numpy.array
     """
-    metrics_count = 4
     out_metrics = dict()
-
-    # Fix series
-    ts = fixseries(timeseries)
 
     if "all" in funcs:
         funcs = [
@@ -35,9 +32,14 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
                 'katz_fd'
                 ]
 
+    if numpy.all(timeseries == 0) == True:
+        out_metrics["fractal"] = utils.error_fractal()
+        return out_metrics
+
+
     for f in funcs:
         try:
-            out_metrics[f] = eval(f)(ts)
+            out_metrics[f] = eval(f)(timeseries)
         except:
             print("Sorry, we had a problem with ", f)
 
@@ -61,18 +63,11 @@ def dfa_fd(timeseries):
     .. Note::
         This functions uses the dfa implementation from the Nolds package.
     """
-    ts = fixseries(timeseries)
+    ts = utils.fixseries(timeseries)
 
-    if len(ts) < 5:
-        interp = savgol_filter(ts, 3, 2)
-    else:
-        interp = savgol_filter(ts, 5, 2)
-
-    try:
-        return nolds.dfa(interp)
-    except:
-        return numpy.nan
-
+    interp = savgol_filter(ts, 5, 2)
+    return nolds.dfa(interp)
+    
 
 def hurst_exp(timeseries):
     """Hurst exponent is a self-similarity measure that assess long-range \
@@ -90,17 +85,10 @@ def hurst_exp(timeseries):
     .. Note::
         This function was adapted from the package Nolds.
     """
-    ts = fixseries(timeseries)
+    ts = utils.fixseries(timeseries)
 
-    if len(ts) < 5:
-        interp = savgol_filter(ts, 3, 2)
-    else:
-        interp = savgol_filter(ts, 5, 2)
-
-    try:
-        return nolds.hurst_rs(interp)
-    except:
-        return numpy.nan
+    interp = savgol_filter(ts, 5, 2)
+    return nolds.hurst_rs(interp)
 
 
 def katz_fd(timeseries):
@@ -134,24 +122,17 @@ def katz_fd(timeseries):
          Conference on Computational Intelligence in Medicine and Healthcare \
          (CIMED2005). 2005.
     """
-    ts = fixseries(timeseries)
+    ts = utils.fixseries(timeseries)
 
-    if len(ts) < 5:
-        interp = savgol_filter(ts, 3, 2)
-    else:
-        interp = savgol_filter(ts, 5, 2)
-
-    try:
-        # absolute differences between consecutive elements of an array
-        dists = numpy.abs(numpy.ediff1d(interp))
-        # sum distances
-        d_sum = dists.sum()
-        # compute ln using the accumulated distance and the average distance
-        ln = numpy.log10(numpy.divide(d_sum, dists.mean()))
-        # define box limit
-        d = numpy.max(interp) - numpy.min(interp)
-        ln_sum = numpy.add(ln, numpy.log10(numpy.divide(d, d_sum)))
-        # return katz fractal dimension
-        return numpy.divide(ln, ln_sum)
-    except:
-        return numpy.nan
+    interp = savgol_filter(ts, 5, 2)
+    # absolute differences between consecutive elements of an array
+    dists = numpy.abs(numpy.ediff1d(interp))
+    # sum distances
+    d_sum = dists.sum()
+    # compute ln using the accumulated distance and the average distance
+    ln = numpy.log10(numpy.divide(d_sum, dists.mean()))
+    # define box limit
+    d = numpy.max(interp) - numpy.min(interp)
+    ln_sum = numpy.add(ln, numpy.log10(numpy.divide(d, d_sum)))
+    # return katz fractal dimension
+    return numpy.divide(ln, ln_sum)

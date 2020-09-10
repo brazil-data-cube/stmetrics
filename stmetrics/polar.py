@@ -2,7 +2,8 @@ import numpy
 from shapely import geometry
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.polygon import LinearRing
-from .utils import *
+
+from . import utils
 
 
 def ts_polar(timeseries, funcs=["all"], nodata=-9999, show=False):
@@ -69,6 +70,10 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show=False):
             'symmetry_ts'
             ]
 
+    if numpy.all(timeseries == 0) == True:
+        out_metrics["polar"] = utils.error_polar()
+        return out_metrics
+
     for f in funcs:
         try:
             out_metrics[f] = eval(f)(timeseries, nodata)
@@ -108,19 +113,15 @@ def symmetric_distance(time_series_1, time_series_2, nodata=-9999):
     time_series_2 = time_series_2[~numpy.isnan(time_series_2)]
 
     # filtering timeseries
-    time_series_1 = fixseries(time_series_1)
+    time_series_1 = utils.fixseries(time_series_1)
     # filtering timeseries
-    time_series_2 = fixseries(time_series_2)
+    time_series_2 = utils.fixseries(time_series_2)
     # create polygon
-    polygon_1 = create_polygon(time_series_1)
-
-    # check validity
-    if polygon_1.is_valid is False:
-        polygon_1 = polygon_1.buffer(0)
+    polygon_1 = utils.create_polygon(time_series_1).buffer(0)
 
     # Check if one polygon is completly inside other, if not start rolling
     if min(time_series_1) > max(time_series_2) or min(time_series_2) > max(time_series_1):
-        polygon_2 = create_polygon(time_series_2)
+        polygon_2 = utils.create_polygon(time_series_2)
         poly_sym_difference = polygon_1.symmetric_difference(polygon_2)
         dist = poly_sym_difference.area
     else:
@@ -135,18 +136,13 @@ def symmetric_distance(time_series_1, time_series_2, nodata=-9999):
                 dist = temp
                 pos = i
 
-        time_series_2 = numpy.roll(time_series_2, pos)       # roll time series
-        polygon_2 = create_polygon(time_series_2)           # create polygon
+        time_series_2 = numpy.roll(time_series_2, pos)        # roll time series
+        polygon_2 = utils.create_polygon(time_series_2).buffer(0)   # create polygon
 
-        # check validity
-        if polygon_2.is_valid:
-            # compute symmetric difference of time series
-            poly_sym_difference = polygon_1.symmetric_difference(polygon_2)
-            dist = poly_sym_difference.area
-        else:
-            polygon_2 = polygon_2.buffer(0)
-            poly_sym_difference = polygon_1.symmetric_difference(polygon_2)
-            dist = poly_sym_difference.area
+        # compute symmetric difference of time series
+        poly_sym_difference = polygon_1.symmetric_difference(polygon_2)
+        dist = poly_sym_difference.area
+
     return dist
 
 
@@ -165,9 +161,9 @@ def polar_plot(timeseries, nodata=-9999):
     from descartes import PolygonPatch
 
     # filter time series
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
     # create polygon
-    polygon = create_polygon(ts)
+    polygon = utils.create_polygon(ts)
     # get polygon coords
     x, y = polygon.envelope.exterior.coords.xy
     minX = -numpy.max(numpy.abs(x))
@@ -264,14 +260,12 @@ def area_season(timeseries, nodata=-9999):
     :rtype area: numpy.float64
     """
     # fix time series
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
     # create polygon
-    try:
-        polygon = create_polygon(ts)
-        polygon = polygon.buffer(0)
-    except:
-        return numpy.nan, numpy.nan, numpy.nan, numpy.nan
-
+    
+    polygon = utils.create_polygon(ts)
+    polygon = polygon.buffer(0)
+    
     # get polygon coords
     x, y = polygon.envelope.exterior.coords.xy
 
@@ -302,11 +296,9 @@ def area_q1(timeseries, nodata=-9999):
     :return area_q1: Area of polygon that covers quadrant 1.
     :rtype area_q1: numpy.float64
     """
-    try:
-        areas = area_season(timeseries, nodata)
-        return areas[0].area
-    except:
-        return numpy.nan
+
+    areas = area_season(timeseries, nodata)
+    return areas[0].area
 
 
 def area_q2(timeseries, nodata=-9999):
@@ -321,11 +313,9 @@ def area_q2(timeseries, nodata=-9999):
     :return area_q2: Area of polygon that covers quadrant 2.
     :rtype area_q2: numpy.float64
     """
-    try:
-        areas = area_season(timeseries, nodata)
-        return areas[1].area
-    except:
-        return numpy.nan
+
+    areas = area_season(timeseries, nodata)
+    return areas[1].area
 
 
 def area_q3(timeseries, nodata=-9999):
@@ -340,11 +330,9 @@ def area_q3(timeseries, nodata=-9999):
     :return area_q3: Area of polygon that covers quadrant 3.
     :rtype area_q3: numpy.float64
     """
-    try:
-        areas = area_season(timeseries, nodata)
-        return areas[2].area
-    except:
-        return numpy.nan
+
+    areas = area_season(timeseries, nodata)
+    return areas[2].area
 
 
 def area_q4(timeseries, nodata=-9999):
@@ -359,11 +347,9 @@ def area_q4(timeseries, nodata=-9999):
     :return area_q4: Area of polygon that covers quadrant 4.
     :type area_q4: numpy.float64
     """
-    try:
-        areas = area_season(timeseries, nodata)
-        return areas[3].area
-    except:
-        return numpy.nan
+
+    areas = area_season(timeseries, nodata)
+    return areas[3].area
 
 
 def ecc_metric(timeseries, nodata=-9999):
@@ -380,20 +366,18 @@ def ecc_metric(timeseries, nodata=-9999):
     transformation.
     :rtype eccentricity: numpy.float64
     """
-    try:
-        # filter time series
-        ts = fixseries(timeseries, nodata)
-        # create polygon
-        polygon = create_polygon(ts)
-        # get MRR
-        rrec = polygon.minimum_rotated_rectangle
-        minx, miny, maxx, maxy = rrec.bounds
-        axis1 = maxx - minx
-        axis2 = maxy - miny
-        stats = numpy.array([axis1, axis2])
-        return (stats.min() / stats.max())
-    except:
-        return numpy.nan
+
+    # filter time series
+    ts = utils.fixseries(timeseries, nodata)
+    # create polygon
+    polygon = utils.create_polygon(ts)
+    # get MRR
+    rrec = polygon.minimum_rotated_rectangle
+    minx, miny, maxx, maxy = rrec.bounds
+    axis1 = maxx - minx
+    axis2 = maxy - miny
+    stats = numpy.array([axis1, axis2])
+    return (stats.min() / stats.max())
 
 
 def angle(timeseries, nodata=-9999):
@@ -410,14 +394,14 @@ def angle(timeseries, nodata=-9999):
     :return angle: The main angle of time series.
     :rtype angle: numpy.float64
     """
-    try:
-        # filter time series
-        ts = fixseries(timeseries, nodata)
-        # get polar transformation info
-        list_of_radius, list_of_angles = get_list_of_points(ts)
-        return list_of_angles[numpy.argmax(list_of_radius)]
-    except:
-        return numpy.nan
+
+    # filter time series
+    ts = utils.fixseries(timeseries, nodata)
+
+    # get polar transformation info
+    list_of_radius, list_of_angles = utils.get_list_of_points(ts)
+    
+    return list_of_angles[numpy.argmax(list_of_radius)]
 
 
 def gyration_radius(timeseries, nodata=-9999):
@@ -434,24 +418,22 @@ def gyration_radius(timeseries, nodata=-9999):
     inside the shape and the shape’s centroid.
     :rtype Gyration_radius: numpy.float64
     """
-    try:
-        # filtered time series
-        ts = fixseries(timeseries, nodata)
-        # create polygon
-        polygon = create_polygon(ts)
-        # get polygon centroids
-        lonc, latc = polygon.centroid.xy
-        # get polygon exterior coords
-        x, y = polygon.exterior.coords.xy
-        dist = []
-        # compute distances to the centroid.
-        for p in range(len(x)):
-            px = x[p]
-            py = y[p]
-            dist = numpy.sqrt((px - lonc[0])**2 + (py - latc[0])**2)
-        return numpy.mean(dist)
-    except:
-        return numpy.nan
+
+    # filtered time series
+    ts = utils.fixseries(timeseries, nodata)
+    # create polygon
+    polygon = utils.create_polygon(ts)
+    # get polygon centroids
+    lonc, latc = polygon.centroid.xy
+    # get polygon exterior coords
+    x, y = polygon.exterior.coords.xy
+    dist = []
+    # compute distances to the centroid.
+    for p in range(len(x)):
+        px = x[p]
+        py = y[p]
+        dist = numpy.sqrt((px - lonc[0])**2 + (py - latc[0])**2)
+    return numpy.mean(dist)
 
 
 def polar_balance(timeseries, nodata=-9999):
@@ -467,14 +449,12 @@ def polar_balance(timeseries, nodata=-9999):
     :return polar_balance:  Standard deviation of the areas per season.
     :rtype polar_balance: numpy.float64
     """
-    try:
-        # filter time series
-        ts = fixseries(timeseries, nodata)
-        # get area season
-        a1, a2, a3, a4 = area_season(ts)
-        return numpy.std([a1.area, a2.area, a3.area, a4.area])
-    except:
-        return numpy.nan
+
+    # filter time series
+    ts = utils.fixseries(timeseries, nodata)
+    # get area season
+    a1, a2, a3, a4 = area_season(ts)
+    return numpy.std([a1.area, a2.area, a3.area, a4.area])
 
 
 def area_ts(timeseries, nodata=-9999):
@@ -489,14 +469,13 @@ def area_ts(timeseries, nodata=-9999):
     :return area_ts: Area of polygon.
     :rtype area_ts: numpy.float64
     """
-    try:
-        # fix time series
-        ts = fixseries(timeseries, nodata)
-        # create polygon
-        polygon = create_polygon(ts)
-        return polygon.area
-    except:
-        return numpy.nan
+
+    # fix time series
+    ts = utils.fixseries(timeseries, nodata)
+    # create polygon
+    polygon = utils.create_polygon(ts)
+
+    return polygon.area
 
 
 def csi(timeseries, nodata=-9999):
@@ -520,49 +499,42 @@ def csi(timeseries, nodata=-9999):
         which can be releate do cell in some cases. \
         That's why cell shape index is available here.
     """
-    try:
-        # filter time series
-        ts = fixseries(timeseries, nodata)
-        # create polygon
-        polygon = create_polygon(ts).buffer(0)
-        return (polygon.length ** 2)/(4 * numpy.pi * polygon.area)
-    except:
-        return numpy.nan
+
+    # filter time series
+    ts = utils.fixseries(timeseries, nodata)
+    # create polygon
+    polygon = utils.create_polygon(ts).buffer(0)
+    return (polygon.length ** 2)/(4 * numpy.pi * polygon.area)
 
 
 def fill_rate(timeseries, nodata=-9999):
     import pointpats
     from shapely.geometry import Point
 
-    try:
-        # fix time series
-        ts = fixseries(timeseries, nodata)
-        # create polygon
-        polygon = create_polygon(ts)
-        # compute convex hull
-        convex = polygon.convex_hull
-        # polygon.area
-        return polygon.symmetric_difference(convex).area
-    except:
-        return numpy.nan
+
+    # fix time series
+    ts = utils.fixseries(timeseries, nodata)
+    # create polygon
+    polygon = utils.create_polygon(ts)
+    # compute convex hull
+    convex = polygon.convex_hull
+    # polygon.area
+    return polygon.symmetric_difference(convex).area
 
 
 def fill_rate2(timeseries, nodata=-9999):
     import pointpats
     from shapely.geometry import Point
 
-    try:
-        # fix time series
-        ts = fixseries(timeseries, nodata)
-        # create polygon
-        polygon = create_polygon(ts).buffer(0)
-        center = (0, 0)
-        mbc_poly = Point(*center).buffer(numpy.max(ts))
+    # fix time series
+    ts = utils.fixseries(timeseries, nodata)
+    # create polygon
+    polygon = utils.create_polygon(ts).buffer(0)
+    center = (0, 0)
+    mbc_poly = Point(*center).buffer(numpy.max(ts))
 
-        return (mbc_poly.area - polygon.area) / (polygon.area + mbc_poly.area)
-    except:
-        return numpy.nan
-
+    return (mbc_poly.area - polygon.area) / (polygon.area + mbc_poly.area)
+    
 
 def symmetry_ts(timeseries, nodata=-9999):
     import pointpats
@@ -570,30 +542,27 @@ def symmetry_ts(timeseries, nodata=-9999):
     from shapely import affinity
     from shapely.ops import cascaded_union
 
-    try:
-        # fix time series
-        ts = fixseries(timeseries, nodata)
-        # create polygon
-        polygon = create_polygon(ts).buffer(0)
+    # fix time series
+    ts = utils.fixseries(timeseries, nodata)
+    # create polygon
+    polygon = utils.create_polygon(ts).buffer(0)
 
-        acc_diff = []
+    acc_diff = []
 
-        rotated = create_polygon(ts).buffer(0)
+    rotated = utils.create_polygon(ts).buffer(0)
+
+    merge = cascaded_union([polygon, rotated])
+
+    acc_diff.append(merge.symmetric_difference(polygon).area)
+
+    for roll in range(2, 5):
+
+        rotated = utils.create_polygon(
+            numpy.roll(ts, int(numpy.ceil(len(ts)/roll)))
+                                    ).buffer(0)
 
         merge = cascaded_union([polygon, rotated])
 
         acc_diff.append(merge.symmetric_difference(polygon).area)
 
-        for roll in range(2, 5):
-
-            rotated = create_polygon(
-                numpy.roll(ts, int(numpy.ceil(len(ts)/roll)))
-                                        ).buffer(0)
-
-            merge = cascaded_union([polygon, rotated])
-
-            acc_diff.append(merge.symmetric_difference(polygon).area)
-
-        return numpy.var(acc_diff)*100
-    except:
-        return numpy.nan
+    return numpy.var(acc_diff)*100

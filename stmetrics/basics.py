@@ -1,6 +1,6 @@
 import numpy
 from scipy import stats
-from .utils import fixseries
+from . import utils
 
 
 def ts_basics(timeseries, funcs=["all"], nodata=-9999):
@@ -32,12 +32,11 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
     :returns: Dictionary of basic metrics
     :rtype: dictionary
     """
+    from .utils import error_basics
+
     out_metrics = dict()
 
     metrics_count = 15
-
-    # compute mean, maximum, minimum, standart deviation and amplitude
-    ts = fixseries(timeseries)
 
     if "all" in funcs:
         funcs = [
@@ -57,10 +56,14 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
                 'tqr_ts',
                 'sqr_ts'
                 ]
+    
+    if numpy.all(timeseries == 0) == True:
+        out_metrics["basics"] = utils.error_basics()
+        return out_metrics
 
     for f in funcs:
         try:
-            out_metrics[f] = eval(f)(ts, nodata)
+            out_metrics[f] = eval(f)(timeseries, nodata)
         except:
             print("Sorry, we had a problem with ", f)
 
@@ -79,12 +82,9 @@ def mean_ts(timeseries, nodata=-9999):
     :returns: Mean value of time series.
     :rtype: numpy.float64
     """
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.mean(ts)
-    except:
-        return numpy.nan
+    return numpy.mean(ts)
 
 
 def max_ts(timeseries, nodata=-9999):
@@ -99,11 +99,9 @@ def max_ts(timeseries, nodata=-9999):
     :returns: Maximum value of time series.
     :rtype: numpy.float64
     """
-    ts = fixseries(timeseries, nodata)
-    try:
-        return numpy.max(ts)
-    except:
-        return numpy.nan
+    ts = utils.fixseries(timeseries, nodata)
+    
+    return numpy.max(ts)
 
 
 def min_ts(timeseries, nodata=-9999):
@@ -118,13 +116,9 @@ def min_ts(timeseries, nodata=-9999):
     :returns: Minimum value of time series.
     :rtype: numpy.float64
     """
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.min(ts)
-    except:
-        return numpy.nan
-
+    return numpy.min(ts)
 
 def std_ts(timeseries, nodata=-9999):
     """Std - Standard deviation of the cycle’s values.
@@ -139,12 +133,9 @@ def std_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.std(ts)
-    except:
-        return numpy.nan
+    return numpy.std(ts)
 
 
 def sum_ts(timeseries, nodata=-9999):
@@ -160,12 +151,9 @@ def sum_ts(timeseries, nodata=-9999):
     :returns: Sum of values of time series.
     :rtype: numpy.float64
     """
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.sum(ts)
-    except:
-        return numpy.nan
+    return numpy.sum(ts)
 
 
 def amplitude_ts(timeseries, nodata=-9999):
@@ -182,12 +170,9 @@ def amplitude_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.max(ts) - numpy.min(ts)
-    except:
-        return numpy.nan
+    return numpy.max(ts) - numpy.min(ts)
 
 
 def fslope_ts(timeseries, nodata=-9999):
@@ -205,13 +190,9 @@ def fslope_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.max(abs(numpy.diff(ts)))
-    except:
-        return numpy.nan
-
+    return numpy.max(abs(numpy.diff(ts)))
 
 def abs_sum_ts(timeseries, nodata=-9999):
     """Sum - Sum of values over a cycle.
@@ -227,12 +208,9 @@ def abs_sum_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.sum(numpy.abs(ts))
-    except:
-        return numpy.nan
+    return numpy.sum(numpy.abs(ts))
 
 
 def skew_ts(timeseries, nodata=-9999):
@@ -248,12 +226,9 @@ def skew_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return stats.skew(ts)
-    except:
-        return numpy.nan
+    return stats.skew(ts)
 
 
 def amd_ts(timeseries, nodata=-9999):
@@ -270,12 +245,9 @@ def amd_ts(timeseries, nodata=-9999):
     :returns: The absolute mean derivative of time series.
     :rtype: numpy.float64
     """
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.mean(numpy.abs(numpy.diff(ts)))
-    except:
-        return numpy.nan
+    return numpy.mean(numpy.abs(numpy.diff(ts)))
 
 
 def mse_ts(timeseries, nodata=-9999):
@@ -295,12 +267,9 @@ def mse_ts(timeseries, nodata=-9999):
         This function was adapted from sglearn package.
     """
 
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts))))
-    except:
-        return numpy.nan
+    return numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts))))
 
 
 def fqr_ts(timeseries, nodata=-9999):
@@ -317,12 +286,9 @@ def fqr_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.percentile(ts, 25, interpolation='midpoint')
-    except:
-        return numpy.nan
+    return numpy.percentile(ts, 25, interpolation='midpoint')
 
 
 def tqr_ts(timeseries, nodata=-9999):
@@ -339,12 +305,9 @@ def tqr_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.percentile(ts, 75, interpolation='midpoint')
-    except:
-        return numpy.nan
+    return numpy.percentile(ts, 75, interpolation='midpoint')
 
 
 def sqr_ts(timeseries, nodata=-9999):
@@ -360,12 +323,9 @@ def sqr_ts(timeseries, nodata=-9999):
     :returns: The interquaritle range of the time series.
     :rtype: numpy.float64
     """
-    ts = fixseries(timeseries, nodata)
+    ts = utils.fixseries(timeseries, nodata)
 
-    try:
-        return numpy.percentile(ts, 50, interpolation='linear')
-    except:
-        return numpy.nan
+    return numpy.percentile(ts, 50, interpolation='linear')
 
 
 def iqr_ts(timeseries, nodata=-9999):
@@ -381,16 +341,11 @@ def iqr_ts(timeseries, nodata=-9999):
     :returns: The interquaritle range of the time series.
     :rtype: numpy.float64
     """
-    ts = fixseries(timeseries, nodata)
-
-    if ts.size == numpy.ones((1,)).size:
-        return numpy.array([1])
+    ts = utils.fixseries(timeseries, nodata)
 
     # interpolation is linear by deafult
     q1 = numpy.percentile(ts, 25, interpolation='linear')
     q3 = numpy.percentile(ts, 75, interpolation='linear')
 
-    try:
-        return q3 - q1
-    except:
-        return numpy.nan
+    return q3 - q1
+    

@@ -7,7 +7,6 @@ warnings.filterwarnings("ignore")
 
 
 def fixseries(time_series, nodata=-9999):
-
     """This function fix the time series.
 
     As some time series may have very significant noises. When coverted to \
@@ -26,20 +25,17 @@ def fixseries(time_series, nodata=-9999):
     check_input(time_series)
 
     # Remove nodata on non masked arrays
-    try:
+    if any(time_series[time_series == nodata]):
         time_series[time_series == nodata] = numpy.nan
-    except:
-        time_series
-
+    
     time_series = time_series[~numpy.isnan(time_series)]
 
-    if time_series.size == numpy.ones((1,)).size:
-        return numpy.array([1])
-
-    time_series2 = time_series
+    time_series2 = time_series.copy()
 
     idxs = numpy.where(time_series == 0)[0]
+
     spikes = list()
+    
     for i in range(len(idxs)-1):
         di = idxs[i+1]-idxs[i]
         if di == 2:
@@ -49,9 +45,6 @@ def fixseries(time_series, nodata=-9999):
         idx = spikes[pos]
         time_series2[idx] = 0
 
-    if len(time_series2) <= 3:
-        raise TypeError("Your time series has too much noise we \
-            cant compute metrics!")
     return time_series2
 
 
@@ -67,29 +60,32 @@ def create_polygon(timeseries):
     :rtype polygon: shapely polygon
     """
     # remove weird spikes on timeseries
-    ts = fixseries(timeseries)
-
-    if ts.size == numpy.ones((1,)).size:
-        return numpy.array([1])
-
-    list_of_radius, list_of_angles = get_list_of_points(ts)
-
-    ring = list()           # create polygon geometry
-
-    N = len(list_of_radius)         # add points in the polygon
-
-    # start to build up polygon
-    for i in range(N):
-        a = list_of_radius[i] * numpy.cos(2 * numpy.pi * i / N)
-        o = list_of_radius[i] * numpy.sin(2 * numpy.pi * i / N)
-        ring.append([a, o])
-    r = LinearRing(ring)
-
     try:
+        ts = fixseries(timeseries)
+
+        if ts.size == numpy.ones((1,)).size:
+            return numpy.array([1])
+
+        list_of_radius, list_of_angles = get_list_of_points(ts)
+
+        ring = list()           # create polygon geometry
+
+        N = len(list_of_radius)         # add points in the polygon
+
+        # start to build up polygon
+        for i in range(N):
+            a = list_of_radius[i] * numpy.cos(2 * numpy.pi * i / N)
+            o = list_of_radius[i] * numpy.sin(2 * numpy.pi * i / N)
+            ring.append([a, o])
+        r = LinearRing(ring)
+    
         polygon = Polygon(r).buffer(0)
+        return polygon
+    
     except:
         print("Unable to create a valid polygon")
-    return polygon
+        return None
+    
 
 
 def get_list_of_points(ts):
@@ -116,7 +112,6 @@ def get_list_of_points(ts):
 
 
 def check_input(timeseries):
-
     """This function check the input and raise exception if it is too short\
     or has the wrong type.
 
@@ -237,3 +232,14 @@ def error_fractal():
         'katz_fd': numpy.nan
     }
     return fractais
+
+
+def list_metrics():
+    '''This function list the available metrics in stmetrics.
+    '''
+    import stmetrics
+    metrics = [*error_basics().keys(),
+               *error_polar().keys(),
+               *error_fractal().keys()]
+
+    return metrics
