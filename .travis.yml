@@ -7,7 +7,8 @@ before_install:
   - python --version
   - pip install -U pip
   - pip install -U pytest
-  - pip install -U codecov
+  - pip install codecov
+  - pip install pytest-cov
 
 install:
   - pip install ".[tests,docs]" # install package + test dependencies
