@@ -30,7 +30,8 @@ setuptools.setup(
     'connected-components-3d',
     'rasterstats',
     'xarray',
-    'affine'
+    'affine',
+    'numba'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
