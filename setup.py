@@ -31,7 +31,8 @@ setuptools.setup(
     'rasterstats',
     'xarray',
     'affine',
-    'numba'
+    'numba',
+    'tqdm'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
