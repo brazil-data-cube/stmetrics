@@ -90,5 +90,4 @@ ENV/
 .ropeproject
 
 # Ignore spatial and phenometrics
-./stmetrics/phenometrics.py
 ./stmetrics/spatial.py
