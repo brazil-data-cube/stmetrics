@@ -25,7 +25,7 @@ setuptools.setup(
     'dtaidistance',
     'rasterio',
     'geopandas',
-    'pointpats',
+    'pointpats==2.1.0',
     'fastremap',
     'connected-components-3d',
     'rasterstats',
