@@ -78,7 +78,8 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show=False):
         try:
             out_metrics[f] = eval(f)(timeseries, nodata)
         except:
-            print("Sorry, we had a problem with ", f)
+            out_metrics[f] = numpy.nan
+            print("Sorry, we had a problem with", f)
 
     if show is True:
         polar_plot(timeseries, nodata)
@@ -143,7 +144,7 @@ def symmetric_distance(time_series_1, time_series_2, nodata=-9999):
         poly_sym_difference = polygon_1.symmetric_difference(polygon_2)
         dist = poly_sym_difference.area
 
-    return dist
+    return utils.truncate(dist)
 
 
 def polar_plot(timeseries, nodata=-9999):
@@ -298,7 +299,7 @@ def area_q1(timeseries, nodata=-9999):
     """
 
     areas = area_season(timeseries, nodata)
-    return areas[0].area
+    return utils.truncate(areas[0].area)
 
 
 def area_q2(timeseries, nodata=-9999):
@@ -315,7 +316,7 @@ def area_q2(timeseries, nodata=-9999):
     """
 
     areas = area_season(timeseries, nodata)
-    return areas[1].area
+    return utils.truncate(areas[1].area)
 
 
 def area_q3(timeseries, nodata=-9999):
@@ -332,7 +333,7 @@ def area_q3(timeseries, nodata=-9999):
     """
 
     areas = area_season(timeseries, nodata)
-    return areas[2].area
+    return utils.truncate(areas[2].area)
 
 
 def area_q4(timeseries, nodata=-9999):
@@ -349,7 +350,7 @@ def area_q4(timeseries, nodata=-9999):
     """
 
     areas = area_season(timeseries, nodata)
-    return areas[3].area
+    return utils.truncate(areas[3].area)
 
 
 def ecc_metric(timeseries, nodata=-9999):
@@ -377,7 +378,7 @@ def ecc_metric(timeseries, nodata=-9999):
     axis1 = maxx - minx
     axis2 = maxy - miny
     stats = numpy.array([axis1, axis2])
-    return (stats.min() / stats.max())
+    return utils.truncate((stats.min() / stats.max()))
 
 
 def angle(timeseries, nodata=-9999):
@@ -401,7 +402,7 @@ def angle(timeseries, nodata=-9999):
     # get polar transformation info
     list_of_radius, list_of_angles = utils.get_list_of_points(ts)
     
-    return list_of_angles[numpy.argmax(list_of_radius)]
+    return utils.truncate(list_of_angles[numpy.argmax(list_of_radius)])
 
 
 def gyration_radius(timeseries, nodata=-9999):
@@ -433,7 +434,8 @@ def gyration_radius(timeseries, nodata=-9999):
         px = x[p]
         py = y[p]
         dist = numpy.sqrt((px - lonc[0])**2 + (py - latc[0])**2)
-    return numpy.mean(dist)
+    
+    return utils.truncate(numpy.mean(dist))
 
 
 def polar_balance(timeseries, nodata=-9999):
@@ -454,7 +456,7 @@ def polar_balance(timeseries, nodata=-9999):
     ts = utils.fixseries(timeseries, nodata)
     # get area season
     a1, a2, a3, a4 = area_season(ts)
-    return numpy.std([a1.area, a2.area, a3.area, a4.area])
+    return utils.truncate(numpy.std([a1.area, a2.area, a3.area, a4.area]))
 
 
 def area_ts(timeseries, nodata=-9999):
@@ -475,7 +477,7 @@ def area_ts(timeseries, nodata=-9999):
     # create polygon
     polygon = utils.create_polygon(ts)
 
-    return polygon.area
+    return utils.truncate(polygon.area)
 
 
 def csi(timeseries, nodata=-9999):
@@ -504,7 +506,7 @@ def csi(timeseries, nodata=-9999):
     ts = utils.fixseries(timeseries, nodata)
     # create polygon
     polygon = utils.create_polygon(ts).buffer(0)
-    return (polygon.length ** 2)/(4 * numpy.pi * polygon.area)
+    return utils.truncate((polygon.length ** 2)/(4 * numpy.pi * polygon.area))
 
 
 def fill_rate(timeseries, nodata=-9999):
@@ -519,7 +521,7 @@ def fill_rate(timeseries, nodata=-9999):
     # compute convex hull
     convex = polygon.convex_hull
     # polygon.area
-    return polygon.symmetric_difference(convex).area
+    return utils.truncate(polygon.symmetric_difference(convex).area)
 
 
 def fill_rate2(timeseries, nodata=-9999):
@@ -533,7 +535,7 @@ def fill_rate2(timeseries, nodata=-9999):
     center = (0, 0)
     mbc_poly = Point(*center).buffer(numpy.max(ts))
 
-    return (mbc_poly.area - polygon.area) / (polygon.area + mbc_poly.area)
+    return utils.truncate((mbc_poly.area - polygon.area) / (polygon.area + mbc_poly.area))
     
 
 def symmetry_ts(timeseries, nodata=-9999):
@@ -565,4 +567,4 @@ def symmetry_ts(timeseries, nodata=-9999):
 
         acc_diff.append(merge.symmetric_difference(polygon).area)
 
-    return numpy.var(acc_diff)*100
+    return utils.truncate(numpy.var(acc_diff)*100)

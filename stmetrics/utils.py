@@ -243,3 +243,8 @@ def list_metrics():
                *error_fractal().keys()]
 
     return metrics
+
+
+def truncate(n, decimals=6):
+    multiplier = 10 ** decimals
+    return int(n * multiplier) / multiplier

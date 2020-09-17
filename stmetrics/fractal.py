@@ -41,6 +41,7 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
         try:
             out_metrics[f] = eval(f)(timeseries)
         except:
+            out_metrics[f] = numpy.nan
             print("Sorry, we had a problem with ", f)
 
     return out_metrics
@@ -65,8 +66,7 @@ def dfa_fd(timeseries):
     """
     ts = utils.fixseries(timeseries)
 
-    interp = savgol_filter(ts, 5, 2)
-    return nolds.dfa(interp)
+    return utils.truncate(nolds.dfa(ts))
     
 
 def hurst_exp(timeseries):
@@ -87,8 +87,7 @@ def hurst_exp(timeseries):
     """
     ts = utils.fixseries(timeseries)
 
-    interp = savgol_filter(ts, 5, 2)
-    return nolds.hurst_rs(interp)
+    return utils.truncate(nolds.hurst_rs(ts))
 
 
 def katz_fd(timeseries):
@@ -124,15 +123,14 @@ def katz_fd(timeseries):
     """
     ts = utils.fixseries(timeseries)
 
-    interp = savgol_filter(ts, 5, 2)
     # absolute differences between consecutive elements of an array
-    dists = numpy.abs(numpy.ediff1d(interp))
+    dists = numpy.abs(numpy.ediff1d(ts))
     # sum distances
     d_sum = dists.sum()
     # compute ln using the accumulated distance and the average distance
     ln = numpy.log10(numpy.divide(d_sum, dists.mean()))
     # define box limit
-    d = numpy.max(interp) - numpy.min(interp)
+    d = numpy.max(ts) - numpy.min(ts)
     ln_sum = numpy.add(ln, numpy.log10(numpy.divide(d, d_sum)))
     # return katz fractal dimension
-    return numpy.divide(ln, ln_sum)
+    return utils.truncate(numpy.divide(ln, ln_sum))
