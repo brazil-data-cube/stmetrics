@@ -74,8 +74,8 @@ def create_polygon(timeseries):
 
         # start to build up polygon
         for i in range(N):
-            a = list_of_radius[i] * numpy.cos(2 * numpy.pi * i / N)
-            o = list_of_radius[i] * numpy.sin(2 * numpy.pi * i / N)
+            a = list_of_radius[i] * numpy.cos(list_of_angles[i])
+            o = list_of_radius[i] * numpy.sin(list_of_angles[i])
             ring.append([a, o])
         r = LinearRing(ring)
     
