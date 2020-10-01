@@ -22,7 +22,7 @@ The stmetrics, is a python package that provides the extraction of state-of-the-
 Installation
 ===========
 
-See `Installation <./docs/installation.rst>`_.
+See `Installation <./docs/source/installation.rst>`_.
 
 Documentation
 =============
@@ -34,7 +34,7 @@ Windows users, please check the installation procedures in our documentation!
 Examples
 ========
 
-See `Example Notebook <./docs/examples/TimeMetrics.ipynb>`_.
+See `Example Notebook <./docs/source/examples/TimeMetrics.ipynb>`_.
 
 License
 =======
