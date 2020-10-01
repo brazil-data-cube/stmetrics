@@ -17,3 +17,4 @@ xarray
 affine
 numba
 tqdm
+nbsphinx

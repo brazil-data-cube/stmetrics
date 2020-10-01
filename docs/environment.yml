@@ -22,4 +22,5 @@ dependencies:
   - affine
   - numba
   - tqdm
-  - nbsphinx
+  - pip:
+    - nbsphinx
