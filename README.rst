@@ -21,12 +21,12 @@ The stmetrics, is a python package that provides the extraction of state-of-the-
 Instalation
 ===========
 
-See `installation.rst <./docs/installation.rst>`_.
+See `Installation <./docs/installation.rst>`_.
 
 Documentation
 =============
 
-See https://stmetrics.readthedocs.io/en/latest/
+See [https://stmetrics.readthedocs.io/en/latest/](https://stmetrics.readthedocs.io/en/latest/).
 
 Windows users, please check the installation procedures in our documentation!
 
