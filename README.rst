@@ -9,7 +9,10 @@ Spatio-Temporal Metrics
         :target: https://github.com/andersonreisoares/stmetrics/master/LICENSE
         :alt: License
 
-[![codecov](https://codecov.io/gh/andersonreisoares/stmetrics/branch/master/graph/badge.svg)](https://codecov.io/gh/andersonreisoares/stmetrics)
+
+.. image:: https://codecov.io/gh/andersonreisoares/stmetrics/branch/master/graph/badge.svg?token=Y4WGJR12GF
+		:target: https://codecov.io/gh/andersonreisoares/stmetrics
+    
 
 Produce reliable land use and land cover maps to support the deployment and operation of public policies is a necessity, especially when environmental management and economic development are considered. To increase the accuracy of these maps, satellite image time-series have been used, as they allow the understanding of land cover dynamics through the time.
 
@@ -30,7 +33,7 @@ Windows users, please check the installation procedures in our documentation!
 Examples
 ========
 
-See `TimeMetrics.rst <./docs/examples/TimeMetrics.ipynb>`_.
+See `Example Notebook <./docs/examples/TimeMetrics.ipynb>`_.
 
 License
 =======
