@@ -5,7 +5,6 @@ channels:
   - defaults
 dependencies:
   - pip=10.0.1=py36_0
-  - nbsphinx
   - scipy
   - sklearn
   - pandas
@@ -23,3 +22,5 @@ dependencies:
   - affine
   - numba
   - tqdm
+  - pip:
+    - nbsphinx
