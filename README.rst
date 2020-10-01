@@ -1,18 +1,19 @@
 Spatio-Temporal Metrics
 =======================
 
-.. image:: https://readthedocs.org/projects/stmetrics/badge/?version=latest
-		:target: https://stmetrics.readthedocs.io/en/latest/?badge=latest
-		:alt: Documentation Status
-
 .. image:: https://img.shields.io/badge/license-MIT-green
         :target: https://github.com/andersonreisoares/stmetrics/master/LICENSE
         :alt: License
-
+	
+.. image:: https://travis-ci.org/andersonreisoares/stmetrics.svg?branch=master
+    :target: https://travis-ci.org/andersonreisoares/stmetrics
 
 .. image:: https://codecov.io/gh/andersonreisoares/stmetrics/branch/master/graph/badge.svg?token=Y4WGJR12GF
 		:target: https://codecov.io/gh/andersonreisoares/stmetrics
-    
+		
+.. image:: https://readthedocs.org/projects/stmetrics/badge/?version=latest
+		:target: https://stmetrics.readthedocs.io/en/latest/?badge=latest
+		:alt: Documentation Status   
 
 Produce reliable land use and land cover maps to support the deployment and operation of public policies is a necessity, especially when environmental management and economic development are considered. To increase the accuracy of these maps, satellite image time-series have been used, as they allow the understanding of land cover dynamics through the time.
 
