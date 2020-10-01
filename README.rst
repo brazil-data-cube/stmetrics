@@ -26,7 +26,7 @@ See `Installation <./docs/installation.rst>`_.
 Documentation
 =============
 
-See `https://stmetrics.readthedocs.io/en/latest/ <https://stmetrics.readthedocs.io/en/latest/`_
+See https://stmetrics.readthedocs.io/en/latest/
 
 Windows users, please check the installation procedures in our documentation!
 
