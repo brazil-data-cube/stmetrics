@@ -64,22 +64,14 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show=False):
             'area_q2',
             'area_q3',
             'area_q4',
-            'csi',
-            'fill_rate',
-            'fill_rate2',
-            'symmetry_ts'
+            'csi'
             ]
-
-    if numpy.all(timeseries == 0) == True:
-        out_metrics["polar"] = utils.error_polar()
-        return out_metrics
 
     for f in funcs:
         try:
             out_metrics[f] = eval(f)(timeseries, nodata)
         except:
             out_metrics[f] = numpy.nan
-            print("Sorry, we had a problem with", f)
 
     if show is True:
         polar_plot(timeseries, nodata)
@@ -507,64 +499,3 @@ def csi(timeseries, nodata=-9999):
     # create polygon
     polygon = utils.create_polygon(ts).buffer(0)
     return utils.truncate((polygon.length ** 2)/(4 * numpy.pi * polygon.area))
-
-
-def fill_rate(timeseries, nodata=-9999):
-    import pointpats
-    from shapely.geometry import Point
-
-
-    # fix time series
-    ts = utils.fixseries(timeseries, nodata)
-    # create polygon
-    polygon = utils.create_polygon(ts)
-    # compute convex hull
-    convex = polygon.convex_hull
-    # polygon.area
-    return utils.truncate(polygon.symmetric_difference(convex).area)
-
-
-def fill_rate2(timeseries, nodata=-9999):
-    import pointpats
-    from shapely.geometry import Point
-
-    # fix time series
-    ts = utils.fixseries(timeseries, nodata)
-    # create polygon
-    polygon = utils.create_polygon(ts).buffer(0)
-    center = (0, 0)
-    mbc_poly = Point(*center).buffer(numpy.max(ts))
-
-    return utils.truncate((mbc_poly.area - polygon.area) / (polygon.area + mbc_poly.area))
-    
-
-def symmetry_ts(timeseries, nodata=-9999):
-    import pointpats
-    from shapely.geometry import Point
-    from shapely import affinity
-    from shapely.ops import cascaded_union
-
-    # fix time series
-    ts = utils.fixseries(timeseries, nodata)
-    # create polygon
-    polygon = utils.create_polygon(ts).buffer(0)
-
-    acc_diff = []
-
-    rotated = utils.create_polygon(ts).buffer(0)
-
-    merge = cascaded_union([polygon, rotated])
-
-    acc_diff.append(merge.symmetric_difference(polygon).area)
-
-    for roll in range(2, 5):
-
-        rotated = utils.create_polygon(
-            numpy.roll(ts, int(numpy.ceil(len(ts)/roll)))
-                                    ).buffer(0)
-
-        merge = cascaded_union([polygon, rotated])
-
-        acc_diff.append(merge.symmetric_difference(polygon).area)
-
-    return utils.truncate(numpy.var(acc_diff)*100)

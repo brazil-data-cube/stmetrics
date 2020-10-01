@@ -49,10 +49,7 @@ def test_getmetrics():
 						  'area_q2': 0.033173,
 						  'area_q3': 0.186429,
 						  'area_q4': 0.00977,
-						  'csi': 2.658336,
-						  'fill_rate': 0.087298,
-						  'fill_rate2': 0.701086,
-						  'symmetry_ts': 0.800411},
+						  'csi': 2.658336},
 						 'fractal': {'dfa_fd': 2.053765, 'hurst_exp': 0.87168, 'katz_fd': 1.437053}}
 
 	out = stmetrics.metrics.get_metrics(series,nodata=0.157327502966)
@@ -112,10 +109,7 @@ def test_polares():
               'area_q2': 0.785358,
               'area_q3': 0.785358,
               'area_q4': 0.785358,
-              'csi': 1.000025,
-              'fill_rate': 0.0,
-              'fill_rate2': -0.000778,
-              'symmetry_ts': 0.0}
+              'csi': 1.000025}
 
  	bmetrics = stmetrics.polar.ts_polar(numpy.ones((360)))
 
@@ -232,13 +226,11 @@ def test_getmetrics_sits():
     import numpy
     from stmetrics import metrics
 
-    out = numpy.array([ 1.000000e+00,  1.000000e+00,  1.000000e+00,  0.000000e+00,
-        3.600000e+02,  0.000000e+00,  3.600000e+02,  0.000000e+00,
-        0.000000e+00,  0.000000e+00,  3.600000e+02,  0.000000e+00,
-        1.000000e+00,  1.000000e+00,  1.000000e+00,  1.000000e+00,
-        1.000000e+00,  3.141433e+00,  0.000000e+00,  0.000000e+00,
-        7.853580e-01,  7.853580e-01,  7.853580e-01,  7.853580e-01,
-        1.000025e+00,  0.000000e+00, -7.780000e-04,  0.000000e+00])
+    out = numpy.array([  1.      ,   1.      ,   1.      ,   0.      , 360.      ,
+				         0.      , 360.      ,   0.      ,   0.      ,   0.      ,
+				       360.      ,   0.      ,   1.      ,   1.      ,   1.      ,
+				         1.      ,   1.      ,   3.141433,   0.      ,   0.      ,
+				         0.785358,   0.785358,   0.785358,   0.785358,   1.000025])
 
     res = metrics._getmetrics(numpy.ones((360)))
     res = res[~numpy.isnan(res)]
@@ -271,10 +263,7 @@ def test_list_metrics():
 		 'area_q2',
 		 'area_q3',
 		 'area_q4',
-		 'fill_rate',
 		 'csi',
-		 'fill_rate2',
-		 'symmetry_ts',
 		 'dfa_fd',
 		 'hurst_exp',
 		 'katz_fd']
@@ -417,15 +406,6 @@ def test_sits2metrics():
 					       [[ 3.372378e+00,  1.761302e+00],
 					        [ 2.543674e+00,  1.508493e+00]],
 
-					       [[ 5.967160e-01,  2.280010e-01],
-					        [ 3.085640e-01,  3.100030e-01]],
-
-					       [[ 6.158050e-01,  4.796070e-01],
-					        [ 5.849460e-01,  2.728260e-01]],
-
-					       [[ 3.651646e+00,  7.218506e+00],
-					        [ 3.109716e+00,  7.336012e+00]],
-
 					       [[-4.280310e-01, -7.486000e-03],
 					        [ 1.888369e+00, -4.988190e-01]],
 
@@ -440,7 +420,7 @@ def test_sits2metrics():
 	r1 = res.reshape(res.shape[0]*res.shape[1]*res.shape[2])
 	r2 = output.reshape(output.shape[0]*output.shape[1]*output.shape[2])
 
-	assert all(numpy.round(r1) == numpy.round(r2))
+	assert all(r1 == r2)
 
 
 if __name__ == '__main__':

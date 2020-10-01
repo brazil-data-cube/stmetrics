@@ -30,7 +30,7 @@ Windows users, please check the installation procedures in our documentation!
 Examples
 ========
 
-
+See `TimeMetrics.rst <./docs/examples/TimeMetrics.ipynb>`_.
 
 License
 =======

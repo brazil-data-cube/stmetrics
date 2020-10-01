@@ -32,17 +32,11 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
                 'katz_fd'
                 ]
 
-    if numpy.all(timeseries == 0) == True:
-        out_metrics["fractal"] = utils.error_fractal()
-        return out_metrics
-
-
     for f in funcs:
         try:
             out_metrics[f] = eval(f)(timeseries)
         except:
             out_metrics[f] = numpy.nan
-            print("Sorry, we had a problem with ", f)
 
     return out_metrics
 

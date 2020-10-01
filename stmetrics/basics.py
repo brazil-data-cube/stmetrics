@@ -57,16 +57,11 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
                 'sqr_ts'
                 ]
     
-    if numpy.all(timeseries == 0) == True:
-        out_metrics["basics"] = utils.error_basics()
-        return out_metrics
-
     for f in funcs:
         try:
             out_metrics[f] = eval(f)(timeseries, nodata)
         except:
             out_metrics[f] = numpy.nan
-            print("Sorry, we had a problem with ", f)
 
     return out_metrics
 

@@ -45,7 +45,8 @@ def fixseries(time_series, nodata=-9999):
         idx = spikes[pos]
         time_series2[idx] = 0
 
-    return time_series2
+    #force float as final array
+    return time_series2.astype(float)
 
 
 def create_polygon(timeseries):
@@ -74,8 +75,8 @@ def create_polygon(timeseries):
 
         # start to build up polygon
         for i in range(N):
-            a = list_of_radius[i] * numpy.cos(list_of_angles[i])
-            o = list_of_radius[i] * numpy.sin(list_of_angles[i])
+            a = list_of_radius[i] * numpy.cos(2 * numpy.pi * i / N )
+            o = list_of_radius[i] * numpy.sin(2 * numpy.pi * i / N )
             ring.append([a, o])
         r = LinearRing(ring)
     
@@ -123,6 +124,10 @@ def check_input(timeseries):
     if isinstance(timeseries, numpy.ndarray):
         if len(timeseries) < 5:
             raise TypeError("Your time series is too short!")
+        elif all(numpy.isnan(timeseries)):
+            raise Exception("Your time series has only nans!")
+        elif all(timeseries == 0):
+            raise Exception("Your time series has only zeros!")
         else:
             return timeseries
     else:
@@ -141,8 +146,9 @@ def file_to_da(filepath):
 
     # find datetime
     match = re.findall(r'\d{4}-\d{2}-\d{2}', filepath)[-1]
-    pandas.to_datetime(match)
+    
     da.coords['time'] = match
+
     return da
 
 
@@ -217,10 +223,7 @@ def error_polar():
         'area_q2': numpy.nan,
         'area_q3': numpy.nan,
         'area_q4': numpy.nan,
-        'fill_rate': numpy.nan,
-        'csi': numpy.nan,
-        'fill_rate2': numpy.nan,
-        'symmetry_ts': numpy.nan
+        'csi': numpy.nan
     }
     return polares
 

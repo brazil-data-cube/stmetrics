@@ -1,6 +1,5 @@
 import numpy
 
-
 def get_metrics(series, metrics_dict={
         "basics": ["all"],
         "polar": ["all"],
@@ -51,10 +50,14 @@ def _getmetrics(timeseries):
 
     metricas = numpy.array([])
 
-    for metric in out_metrics.keys():
-        metricas = numpy.append(metricas,
-            numpy.fromiter(out_metrics[metric].values(),
-                                dtype=float), axis=0)
+    for ki, vi in out_metrics.items():
+        for ki2, vi2 in vi.items():
+            metricas = numpy.append(metricas,vi2)
+
+    #for metric in out_metrics.keys():
+    #    vals = out_metrics[metric].values()
+    #    metricas = numpy.append(metricas,
+    #        numpy.fromiter(vals, dtype=float), axis=0)
     return metricas
 
 
@@ -73,16 +76,16 @@ def sits2metrics(dataset):
     import rasterio
     import xarray
 
-    try:
-        if isinstance(dataset, rasterio.io.DatasetReader):
-            image = dataset.read()
-            return _sits2metrics(image)
-        elif isinstance(dataset, numpy.ndarray):
-            image = dataset.copy()
-            return _sits2metrics(image)
-        elif isinstance(dataset, xarray.Dataset):
-            return _compute_from_xarray(dataset)
-    except:
+    
+    if isinstance(dataset, rasterio.io.DatasetReader):
+        image = dataset.read()
+        return _sits2metrics(image)
+    elif isinstance(dataset, numpy.ndarray):
+        image = dataset.copy()
+        return _sits2metrics(image)
+    elif isinstance(dataset, xarray.Dataset):
+        return _compute_from_xarray(dataset)
+    else:
         print("Sorry we can't read this type of file.\
               Please use Rasterio, Numpy array or xarray.")
 
@@ -111,6 +114,9 @@ def _sits2metrics(image):
 
 
 def _compute_from_xarray(dataset):
+
+    import xarray
+    from . import utils
     
     band_list = list(dataset.data_vars)
     
@@ -120,17 +126,17 @@ def _compute_from_xarray(dataset):
 
         series = numpy.squeeze(dataset[key].values)
 
-        metricas = stmetrics.metrics.sits2metrics(series)
+        metricas = _sits2metrics(series)
         
-        metrics_list = list_metrics()
+        metrics_list = utils.list_metrics()
         
         lista = []
         
         for m, m_name in zip(range(0,metricas.shape[0]), metrics_list):
             c = xarray.DataArray(metricas[m,:,:],
                                  dims = ['y','x'],
-                                 coords = {'y': xdc.coords['y'],
-                                           'x': xdc.coords['x']})
+                                 coords = {'y': dataset.coords['y'],
+                                           'x': dataset.coords['x']})
             
             c.coords['metric'] = m_name
                                  
