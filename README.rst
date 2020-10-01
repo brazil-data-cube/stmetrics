@@ -18,7 +18,7 @@ Produce reliable land use and land cover maps to support the deployment and oper
 
 The stmetrics, is a python package that provides the extraction of state-of-the-art time-series features. These features can be used for remote sensing time-series image classification and analysis.
 
-Instalation
+Installation
 ===========
 
 See `Installation <./docs/installation.rst>`_.
