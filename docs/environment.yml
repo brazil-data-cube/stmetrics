@@ -1,0 +1,26 @@
+name: stmetrics
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - pip=10.0.1=py36_0
+  - scipy
+  - sklearn
+  - pandas
+  - shapely
+  - descartes
+  - nolds
+  - dtaidistance
+  - rasterio
+  - geopandas
+  - pointpats==2.1.0
+  - fastremap
+  - connected-components-3d
+  - rasterstats
+  - xarray
+  - affine
+  - numba
+  - tqdm
+  - pip:
+    - nbsphinx

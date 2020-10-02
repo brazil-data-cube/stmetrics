@@ -1,4 +1,0 @@
-Jupyter Notebook
-================
-
-In development!
