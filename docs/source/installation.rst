@@ -78,7 +78,7 @@ The dtaidistance package is a key factor of stmetrics. However, due to some issu
 .. Caution::
     **Make sure that you have numpy and cython already installed!**
 
-* Download the source from :download:`https://github.com/wannesm/dtaidistance/archive/v1.2.4.zip<static/https://github.com/wannesm/dtaidistance/archive/v1.2.4.zip>`
+* Download the source from :download:`https://github.com/wannesm/dtaidistance<static/https://github.com/wannesm/dtaidistance>`
 * Compile the C extensions: ``python setup.py build_ext --inplace``
 * Install into your site-package directory: ``python setup.py install``
 
@@ -89,6 +89,10 @@ The dtaidistance package is a key factor of stmetrics. However, due to some issu
 
 .. WARNING::
     We strongly advise install OpenMP to use spatial-temporal segmentation algorithm.
+
+.. Hint::
+    If after installation fast computation using DTW be not available, try to follow the steps from this page:
+    https://dtaidistance.readthedocs.io/en/latest/usage/installation.html#from-pypi
 
 Install proper 3rd-party packages
 ---------------------------------

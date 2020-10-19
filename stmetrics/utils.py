@@ -147,7 +147,7 @@ def file_to_da(filepath):
     # find datetime
     match = re.findall(r'\d{4}-\d{2}-\d{2}', filepath)[-1]
     
-    da.coords['time'] = match
+    xda.coords['time'] = match
 
     return da
 
