@@ -518,7 +518,7 @@ def seg_metrics(dataframe, feature=['mean']):
 
     for f in feature:
         series = dataframe.filter(regex=f)
-        metricas = metrics.sits2metrics(series.to_numpy())
+        metricas = _seg_ex_metrics(series.to_numpy())
 
         header = utils.list_metrics()
 
