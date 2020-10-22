@@ -14,7 +14,7 @@ Installation
 
 **stmetrics** requires a working C++ compiler, due to the spatial-temporal segmentation algorithm available. Configuring such a compiler is the critical step in getting the spatial-temporal algorithm running.
 
-The package is tested against the mingw-w64 compiler which works on both Python versions (3.x)
+The package was already tested with the mingw-w64 compiler which works on both Python versions (3.x)
 and supports x86 and x64.
 
 
@@ -31,7 +31,7 @@ With `Anaconda Prompt` update conda package manager to the latest version::
 
     conda update conda
 
-Create a conda virtual environment (recomended)
+Create a conda virtual environment (recommended)
 -----------------------------------------------
 
 To do it, use::
@@ -40,7 +40,7 @@ To do it, use::
 
 where ``new_env`` is the name of the environment.
 
-After this activate environment with::
+After this, activate the environment with::
 
     conda activate new_env
 
@@ -59,8 +59,8 @@ This will install
 
 .. Hint::
 
-    ``libpython`` setups automatically ``distutils.cfg`` file, but if that is failed
-    use the following instructions to setup it manually. Go to enviroment Lib path in ``Anaconda3\\envs\\new_env\\Lib\\distutils`` and create a ``distutils.cfg`` file with a text editor (e.g. Notepad) and add the following lines::
+    ``libpython`` creates automatically ``distutils.cfg`` file, but if that is failed
+    use the following instructions to setup it manually. Go to environment Lib path in ``Anaconda3\\envs\\new_env\\Lib\\distutils`` and create a ``distutils.cfg`` file with a text editor (e.g. Notepad) and add the following lines::
 
         [build]
         compiler=mingw32
@@ -73,7 +73,7 @@ This will install
 Install dtaidistance package
 ----------------------------
 
-The dtaidistance package is a key factor of stmetrics. However, due to some issues, windows users need to compiled and install directly from source. This was tested with version 1.2.2 and 1.2.4. 
+The dtaidistance package is mandatory for stmetrics. However, due to some issues, Windows users need to compile and install directly from source. This was tested with version 1.2.2 and 1.2.4. 
 
 .. Caution::
     **Make sure that you have numpy and cython already installed!**
@@ -83,7 +83,7 @@ The dtaidistance package is a key factor of stmetrics. However, due to some issu
 * Install into your site-package directory: ``python setup.py install``
 
 .. Caution::
-    If OpenMP is not available at your system use::
+    If OpenMP is not installed in your system use::
 
         python3 setup.py --noopenmp build_ext --inplace
 
@@ -91,15 +91,15 @@ The dtaidistance package is a key factor of stmetrics. However, due to some issu
     We strongly advise install OpenMP to use spatial-temporal segmentation algorithm.
 
 .. Hint::
-    If after installation fast computation using DTW be not available, try to follow the steps from this page:
+    If after installation fast computation using DTW be not available, follow the steps from this page:
     https://dtaidistance.readthedocs.io/en/latest/usage/installation.html#from-pypi
 
 Install proper 3rd-party packages
 ---------------------------------
 
-Before installing the package make sure that you have correctly installed Shapely and Rasterio packages.
+Before installing the package, make sure that you have correctly installed Shapely and Rasterio packages.
 
-Using conda do this::
+Using conda, do this::
 
     conda config --add channels conda-forge
 
@@ -112,7 +112,7 @@ Using conda do this::
 Installing stmetrics
 --------------------
 
-You can pip install it straight from git::
+You can use pip install, and download stmetrics directly from our git repository::
 
 	pip install git+https://github.com/brazil-data-cube/stmetrics
 
