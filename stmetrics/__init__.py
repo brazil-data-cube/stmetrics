@@ -7,6 +7,6 @@ from . import spatial
 
 # Version of the package
 
-__version__ = "0.1.4.9"
+__version__ = "0.1.6"
 
 name = "stmetrics"
