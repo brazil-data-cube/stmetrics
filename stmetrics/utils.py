@@ -20,7 +20,6 @@ def fixseries(time_series, nodata=-9999):
     :type nodata: int
 
     :return fixed_timeseries: Numpy array of time series without spikes.
-    :rtype fixed_timeseries: numpy.ndarray
     """
     check_input(time_series)
 
@@ -57,8 +56,7 @@ def create_polygon(timeseries):
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
 
-    :return polygon: Numpy array of time series without spikes.
-    :rtype polygon: shapely polygon
+    :return polygon: Shapely polygon of time series without spikes.
     """
     # remove weird spikes on timeseries
     try:
@@ -78,9 +76,13 @@ def create_polygon(timeseries):
             a = list_of_radius[i] * numpy.cos(2 * numpy.pi * i / N )
             o = list_of_radius[i] * numpy.sin(2 * numpy.pi * i / N )
             ring.append([a, o])
+
+        #Build geometry    
         r = LinearRing(ring)
     
+        #Buffer to try make polygon valid
         polygon = Polygon(r).buffer(0)
+
         return polygon
     
     except:
@@ -89,7 +91,7 @@ def create_polygon(timeseries):
     
 
 
-def get_list_of_points(ts):
+def get_list_of_points(timeseries):
     """This function creates a list of angles based on the time series.
     This list is used for convert the time series to a polygon.
 
@@ -102,10 +104,9 @@ def get_list_of_points(ts):
 
     :return list_of_angles: Numpy array of lists of angles after polar \
     transformation.
-    :rtype list_of_observations: numpy.ndarray
     """
 
-    list_of_observations = abs(ts)
+    list_of_observations = abs(timeseries)
 
     list_of_angles = numpy.linspace(0, 2 * numpy.pi, len(list_of_observations))
 
@@ -147,7 +148,7 @@ def file_to_da(filepath):
     # find datetime
     match = re.findall(r'\d{4}-\d{2}-\d{2}', filepath)[-1]
     
-    da.coords['time'] = match
+    xda.coords['time'] = match
 
     return da
 

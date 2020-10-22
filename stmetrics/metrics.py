@@ -1,11 +1,11 @@
 import numpy
 
 def get_metrics(series, metrics_dict={
-        "basics": ["all"],
-        "polar": ["all"],
-        "fractal": ["all"]
-        },
-        nodata=-9999, show=False):
+                                      "basics": ["all"],
+                                      "polar": ["all"],
+                                      "fractal": ["all"]
+                                      },
+                                      nodata=-9999, show=False):
     """This function perform the computation and plot of the \
     spectral-polar-fractal metrics available in the stmetrics package.
 
@@ -16,7 +16,6 @@ def get_metrics(series, metrics_dict={
     :type nodata: int
 
     :returns time_metrics: Dicitionary of metrics.
-    :rtype time_metrics: dictionary
     """
     from . import basics
     from . import polar
@@ -54,10 +53,6 @@ def _getmetrics(timeseries):
         for ki2, vi2 in vi.items():
             metricas = numpy.append(metricas,vi2)
 
-    #for metric in out_metrics.keys():
-    #    vals = out_metrics[metric].values()
-    #    metricas = numpy.append(metricas,
-    #        numpy.fromiter(vals, dtype=float), axis=0)
     return metricas
 
 
@@ -70,8 +65,7 @@ def sits2metrics(dataset):
     is the time series lenght or xarray.Dataset
 
     :returns image: Numpy matrix of metrics or xarray.Dataset \
-    with the metrics as an dataset..
-    :rtype image: numpy.array or xarray.Dataset.
+    with the metrics as an dataset.
     """
     import rasterio
     import xarray
@@ -114,7 +108,6 @@ def _sits2metrics(image):
 
 
 def _compute_from_xarray(dataset):
-
     import xarray
     from . import utils
     
@@ -143,5 +136,8 @@ def _compute_from_xarray(dataset):
             lista.append(c)
             
         dataset[key+'_metrics'] = xarray.concat(lista, dim='metric')
-            
+    
+    band_list = None
+    lista = None
+
     return dataset

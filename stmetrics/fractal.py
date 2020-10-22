@@ -21,7 +21,6 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
     :type nodata: int
 
     :return out_metrics: Array of fractal metrics values
-    :rtype out_metrics: numpy.array
     """
     out_metrics = dict()
 
@@ -53,8 +52,6 @@ def dfa_fd(timeseries):
     :type timeseries: numpy.ndarray
 
     :return dfa: Detrended Fluctuation Analysis.
-    :rtype dfa: float
-
     .. Note::
         This functions uses the dfa implementation from the Nolds package.
     """
@@ -74,7 +71,6 @@ def hurst_exp(timeseries):
     :type timeseries: numpy.ndarray
 
     :return hurst: Hurst expoent.
-    :rtype hurst: float
 
     .. Note::
         This function was adapted from the package Nolds.
@@ -98,7 +94,6 @@ def katz_fd(timeseries):
     :type timeseries: numpy.ndarray
 
     :return kfd: Katz fractal dimension.
-    :rtype kfd: float
 
     .. Note::
         This function was adapted from the package entropy available \
@@ -111,9 +106,9 @@ def katz_fd(timeseries):
         Theory and Applications, 48(2), 177-183.
 
         Goh, Cindy, et al. "Comparison of fractal dimension algorithms for the\
-         computation of EEG biomarkers for dementia." 2nd International \
-         Conference on Computational Intelligence in Medicine and Healthcare \
-         (CIMED2005). 2005.
+        computation of EEG biomarkers for dementia." 2nd International \
+        Conference on Computational Intelligence in Medicine and Healthcare \
+        (CIMED2005). 2005.
     """
     ts = utils.fixseries(timeseries)
 
