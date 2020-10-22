@@ -32,11 +32,8 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal", output="shp
     :type pattern: int
 
     :returns segmentation: Shapefile containing superpixels produced.
-    :rtype segmentation: geopandas.Dataframe
     """
-
-
-    print('Simple Non-Linear Iterative Temporal Clustering V 1.1')
+    print('Simple Non-Linear Iterative Temporal Clustering V 1.3')
     name = os.path.basename(dataset.name)[:-4]
 
     if isinstance(dataset, rasterio.io.DatasetReader):
@@ -260,7 +257,6 @@ def update_cluster(img,la,rows,columns,bands,k):
     :type k: int
 
     :returns C_new: ND-array containing updated cluster centres information.
-    :rtype C_new: numpy.ndarray
     """
     c_shape = (k,bands+3)
     
@@ -273,11 +269,13 @@ def update_cluster(img,la,rows,columns,bands,k):
             tmp = numpy.append(img[:,r,c],numpy.array([r,c,1]))
             kk = int(la[r,c])
             C_new[kk,:] = C_new[kk,:] + tmp
-  
+    
     #Compute mean
     for kk in prange(k):
         C_new[kk,:] = C_new[kk,:]/C_new[kk,bands+2]
-        
+    
+    tmp = None
+    
     return C_new
 
 
@@ -348,6 +346,9 @@ def write_pandas(segmentation, transform, crs):
         
     gdf = geopandas.GeoDataFrame(geometry=mypoly,crs=crs)
     gdf.crs = crs
+
+    mypoly = None
+
     return gdf
 
 @njit(fastmath=True)
@@ -423,6 +424,7 @@ def init_cluster_hex(rows,columns,ki,img,bands):
 
         r = r+vSpacing
     
+    st = None
     #Cast S
     S = round(S)
     
@@ -492,8 +494,10 @@ def init_cluster_regular(rows,columns,ki,img,bands):
             kk = kk+1
             
         w = S/2
-        
-    return C,int(S),l,d,int(kk)
+    
+    st = None
+
+    return C,S,l,d,kk
 
 
 def seg_metrics(dataframe, feature=['mean']):
@@ -510,21 +514,20 @@ def seg_metrics(dataframe, feature=['mean']):
     :returns out_dataframe: Geopandas dataframe with the features added.
     """
     import pandas
+    from . import utils
 
     for f in feature:
         series = dataframe.filter(regex=f)
         metricas = metrics.sits2metrics(series.to_numpy())
 
-        header = ['max_ts', 'min_ts', 'mean_ts', 'std_ts', 'sum_ts',
-                  'amplitude_ts', 'mse_ts', 'fslope_ts', 'skew_ts',
-                  'amd_ts', 'abs_sum_ts', 'iqr_ts', 'fqr_ts', 'tqr_ts',
-                  'sqr_ts', 'ecc_metric', 'gyration_radius', 'area_ts',
-                  'polar_balance', 'angle', 'area_q1', 'area_q2', 'area_q3',
-                   'area_q4', 'fill_rate', 'dfa_fd', 'hurst_exp', 'katz_fd']
+        header = utils.list_metrics()
 
         metricsdf = pandas.DataFrame(metricas, columns=header)
 
     out_dataframe = pandas.concat([dataframe, metricsdf], axis=1)
+
+    header = None
+
     return out_dataframe
 
 
@@ -715,7 +718,10 @@ def _extract_xray(dataset, segmentation, features, nodata):
 
             stats.columns = names
             segmentation = pandas.concat([segmentation, stats], axis=1)
-
+    
+    c = None
+    names = None
+    
     return segmentation
 
 
@@ -790,7 +796,9 @@ def fx2parallel(dataset, geoms, features, transform, nodata):
     _zonal_stats_partial = _zonal_stats_wrapper(dataset, features,
                                                 affine=transform,
                                                 nodata=nodata)
+
     stats_lst = p.map(_zonal_stats_partial, _chunks(geoms, (cores - 1)))
+
     stats = pandas.DataFrame(list(itertools.chain(*stats_lst)))
 
     p.close()
@@ -809,7 +817,6 @@ def aspect_ratio(geom):
     :type geom: shapely.geometry.Polygon
 
     :returns aspect_ratio: Polygon aspect_ratio.
-    :rtype aspect_ratio: float
     """
 
     from shapely.geometry import Polygon, LineString
@@ -843,7 +850,6 @@ def symmetry(geom):
     :type geom: shapely.geometry.Polygon
 
     :returns symmetry: Polygon symmetry.
-    :rtype symmetry: float
     """
     from shapely import affinity
 
@@ -868,11 +874,12 @@ def reock_compactness(geom):
     :type geom: shapely.geometry.Polygon
 
     :returns reock: Polygon reock compactness.
-    :rtype reock: float
+    
+    .. Tip:: To know more about it:
 
-    Reock, Ernest C. 1961. “A note: Measuring compactness as a requirement \
-    of legislative apportionment.” Midwest Journal of Political Science \
-    1(5), 70–74.
+        Reock, Ernest C. 1961. “A note: Measuring compactness as a requirement \
+        of legislative apportionment.” Midwest Journal of Political Science \
+        1(5), 70–74.
     """
     import pointpats
     from shapely.geometry import Point
@@ -898,12 +905,13 @@ def rectangular_fit(geom):
     :type geom: shapely.geometry.Polygon
 
     :returns rectangular_fit: Polygon rectangular fit.
-    :rtype rectangular_fit: float
 
-    Sun, Z., Fang, H., Deng, M., Chen, A., Yue, P. and Di, L.. "Regular \
-    Shape Similarity Index: A Novel Index for Accurate Extraction of Regular \
-    Objects From Remote Sensing Images," IEEE Transactions on Geoscience and \
-    Remote Sensing, v.53, 2015, p. 3737. doi:10.1109/TGRS.2014.2382566
+    .. Tip:: To know more about it:
+
+        Sun, Z., Fang, H., Deng, M., Chen, A., Yue, P. and Di, L.. "Regular \
+        Shape Similarity Index: A Novel Index for Accurate Extraction of Regular \
+        Objects From Remote Sensing Images," IEEE Transactions on Geoscience and \
+        Remote Sensing, v.53, 2015, p. 3737. doi:10.1109/TGRS.2014.2382566
     """
 
     mrc = geom.minimum_rotated_rectangle
@@ -918,7 +926,6 @@ def width(geom):
     :type geom: shapely.geometry.Polygon
 
     :returns width: Polygon width.
-    :rtype width: float
     """
 
     minx, miny, maxx, maxy = geom.bounds
@@ -933,7 +940,6 @@ def length(geom):
     :type geom: shapely.geometry.Polygon
 
     :returns length: Polygon length.
-    :rtype length: float
     """
 
     minx, miny, maxx, maxy = geom.bounds
