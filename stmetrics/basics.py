@@ -1,18 +1,16 @@
 import numpy
-from scipy import stats
-from . import utils
+from .utils import fixseries, truncate
 
 
 def ts_basics(timeseries, funcs=["all"], nodata=-9999):
     """This function compute 7 basic metrics:
-
-        - "Mean" - Average value of the curve along one cycle.
-        - "Max" - Maximum value of the cycle.
-        - "Min" - Minimum value of the curve along one cycle.
-        - "Std" - Standard deviation of the cycle’s values.
+        - "Mean" - Average value of the time series.
+        - "Max" - Maximum value of the time series.
+        - "Min" - Minimum value of the time series.
+        - "Std" - Standard deviation of the time series.
         - "Sum" - Sum of values over a cycle. Usually is an indicator of the \
             annual production of vegetation.
-        - "Amplitude" - The difference between the cycle’s maximum and \
+        - "Amplitude" - The difference between the time series’s maximum and \
             minimum values.
         - "First_slope" - Maximum value of the first slope of the cycle.
         - "MSE" - Mean Spectral Energy.
@@ -23,16 +21,13 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
         - "TQR" - Third quaritle of the time series.
         - "IQR" - Interquaritle range (IQR) of the time series.
 
-    :param timeseries: Your time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
-    :type nodata: int
-
+    :type nodata: real number
     :returns: Dictionary of basic metrics
     :rtype: dictionary
     """
-    from .utils import error_basics
 
     out_metrics = dict()
 
@@ -56,7 +51,7 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
                 'tqr_ts',
                 'sqr_ts'
                 ]
-    
+
     for f in funcs:
         try:
             out_metrics[f] = eval(f)(timeseries, nodata)
@@ -67,281 +62,235 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
 
 
 def mean_ts(timeseries, nodata=-9999):
-    """Mean - Average value of the curve along one cycle.
-
-    :param timeseries: Your time series.
+    """Mean - Average value of the time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: Mean value of time series.
     :rtype: numpy.float64
     """
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.mean(ts))
+    return truncate(numpy.mean(ts))
 
 
 def max_ts(timeseries, nodata=-9999):
-    """ Max - Maximum value of the cycle.
-
-    :param timeseries: Your time series.
+    """ Max - Maximum value of the time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: Maximum value of time series.
     :rtype: numpy.float64
     """
-    ts = utils.fixseries(timeseries, nodata)
-    
-    return utils.truncate(numpy.max(ts))
+    ts = fixseries(timeseries, nodata)
+
+    return truncate(numpy.max(ts))
 
 
 def min_ts(timeseries, nodata=-9999):
-    """Min - Minimum value of the curve along one cycle.
-
-    :param timeseries: Your time series.
+    """Min - Minimum value of the time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: Minimum value of time series.
     :rtype: numpy.float64
     """
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.min(ts))
+    return truncate(numpy.min(ts))
+
 
 def std_ts(timeseries, nodata=-9999):
-    """Std - Standard deviation of the cycle’s values.
-
-    :param timeseries: Your time series.
+    """Std - Standard deviation of the time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: Standard deviation of time series.
     :rtype: numpy.float64
     """
 
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.std(ts))
+    return truncate(numpy.std(ts))
 
 
 def sum_ts(timeseries, nodata=-9999):
-    """Sum - Sum of values over a cycle.
+    """Sum - Sum of values of the time series.
     Usually is an indicator of the annual production of vegetation.
-
-    :param timeseries: Your time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: Sum of values of time series.
     :rtype: numpy.float64
     """
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.sum(ts))
+    return truncate(numpy.sum(ts))
 
 
 def amplitude_ts(timeseries, nodata=-9999):
-    """Amplitude - The difference between the cycle’s maximum and minimum \
-    values.
-
-    :param timeseries: Your time series.
+    """Amplitude - The difference between the maximum and minimum \
+    values of the time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: Amplitude of values of time series.
     :rtype: numpy.float64
     """
 
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.max(ts) - numpy.min(ts))
+    return truncate(numpy.max(ts) - numpy.min(ts))
 
 
 def fslope_ts(timeseries, nodata=-9999):
-
-    """First_slope - Maximum value of the first slope of the cycle.
-    It indicates when the cycle presents some abrupt change in the curve.
-
-    :param timeseries: Your time series.
+    """First_slope - Maximum value of the first slope of the time series.
+    It indicates when some abrupt change happened in the time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: The maximum value of the first slope of time series.
     :rtype: numpy.float64
     """
 
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.max(abs(numpy.diff(ts))))
+    return truncate(numpy.max(abs(numpy.diff(ts))))
+
 
 def abs_sum_ts(timeseries, nodata=-9999):
-    """Sum - Sum of values over a cycle.
+    """Sum - Sum of values of the time series.
     Usually is an indicator of the annual production of vegetation.
-
-    :param timeseries: Your time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
-    :returns: Sum of values of time series.
+    :returns: Sum of absolute values of time series.
     :rtype: numpy.float64
     """
 
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.sum(numpy.abs(ts)))
+    return truncate(numpy.sum(numpy.abs(ts)))
 
 
 def skew_ts(timeseries, nodata=-9999):
     """skew - Measures the asymmetry of the time series.
-
-    :param timeseries: Your time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: The asymmetry of time series.
     :rtype: numpy.float64
     """
+    from scipy import stats
 
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(stats.skew(ts))
+    return truncate(stats.skew(ts))
 
 
 def amd_ts(timeseries, nodata=-9999):
-    """amd - Absolute mean derivative (AMD)
-    It provides information on the growth rate of vegetation, allowing \
-    discrimination of natural cycles from crop cycles.
-
-    :param timeseries: Your time series.
+    """amd - Absolute mean derivative (AMD) - Computes the mean of \
+    the absolute derivative of time series.
+    Regarding to vegetation it provides information on the growth rate of \
+    vegetation, allowing discrimination of natural cycles from crop cycles.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: The absolute mean derivative of time series.
     :rtype: numpy.float64
     """
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.mean(numpy.abs(numpy.diff(ts))))
+    return truncate(numpy.mean(numpy.abs(numpy.diff(ts))))
 
 
 def mse_ts(timeseries, nodata=-9999):
-    """mse - Mean Spectral Energy
-    It computes mean spectral energy of a time series.
-
-    :param timeseries: Your time series.
+    """mse - Mean Spectral Energy Density - Computes mean spectral energy \
+    of a time series.
+    Mean Energy spectral density computesthe energy of the time series that \
+    is distributed with frequency. High frequencies time series usually \
+    have lower spectral energy.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: The absolute mean derivative of time series.
     :rtype: numpy.float64
-
-    .. Important::
-        This function was adapted from sglearn package.
     """
 
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts)))))
+    return truncate(numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts)))))
 
 
 def fqr_ts(timeseries, nodata=-9999):
-    """fqr - Mean Spectral Energy
-    It computes the first quartileof a time series.
-
-    :param timeseries: Your time series.
+    """fqr - First Quartile - Computes the first quartile of a time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: The absolute mean derivative of time series.
     :rtype: numpy.float64
     """
 
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.percentile(ts, 25, interpolation='midpoint'))
+    return truncate(numpy.percentile(ts, 25, interpolation='midpoint'))
 
 
 def tqr_ts(timeseries, nodata=-9999):
-    """tqr - First quartile
-    It computes the third quartileof a time series.
-
-    :param timeseries: Your time series.
+    """tqr - Third quartile - Computes the third quartileof a time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: The absolute mean derivative of time series.
     :rtype: numpy.float64
     """
 
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.percentile(ts, 75, interpolation='midpoint'))
+    return truncate(numpy.percentile(ts, 75, interpolation='midpoint'))
 
 
 def sqr_ts(timeseries, nodata=-9999):
-    """sqr - Interquaritle range (IQR)
-    It computes the interquaritle range of the time series.
-
-    :param timeseries: Your time series.
+    """sqr - Second quartile - Computes the second quartile the time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: The interquaritle range of the time series.
     :rtype: numpy.float64
     """
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.percentile(ts, 50, interpolation='linear'))
+    return truncate(numpy.percentile(ts, 50, interpolation='linear'))
 
 
 def iqr_ts(timeseries, nodata=-9999):
-    """iqr - Interquaritle range (IQR).
-    It computes the interquaritle range of the time series.
-
-    :param timeseries: Your time series.
+    """iqr - Interquaritle range (IQR) - Computes the interquaritle \
+    range of the time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :returns: The interquaritle range of the time series.
     :rtype: numpy.float64
     """
-    ts = utils.fixseries(timeseries, nodata)
+    ts = fixseries(timeseries, nodata)
 
     # interpolation is linear by deafult
     q1 = numpy.percentile(ts, 25, interpolation='linear')
     q3 = numpy.percentile(ts, 75, interpolation='linear')
 
-    return utils.truncate(q3 - q1)
-    
+    return truncate(q3 - q1)

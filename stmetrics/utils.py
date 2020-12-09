@@ -247,4 +247,4 @@ def list_metrics():
 
 def truncate(n, decimals=6):
     multiplier = 10 ** decimals
-    return (n * multiplier).astype(int) / multiplier
+    return int(n * multiplier) / multiplier
