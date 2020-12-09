@@ -185,6 +185,11 @@ def polar_plot(timeseries, nodata=-9999):
     ax.add_patch(patch3)
     ax.add_patch(patch4)
     ax.add_patch(patch5)
+    #adjust ticks
+    locs, labels = plt.xticks()
+    locsy, labelsy = plt.yticks()
+    plt.xticks(locs[1:-1],abs(locs).astype(int)[1:-1])
+    plt.yticks(locsy[1:-1],abs(locsy).astype(int)[1:-1])
     plt.show()
 
     return None
