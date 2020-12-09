@@ -1,40 +1,35 @@
 import numpy
-import warnings
-from shapely import geometry
-from shapely.geometry.polygon import LinearRing
-from shapely.geometry import MultiPolygon, Polygon, mapping, shape
-warnings.filterwarnings("ignore")
 
 
-def fixseries(time_series, nodata=-9999):
-    """This function fix the time series.
-
+def fixseries(timeseries, nodata=-9999):
+    """This function ajust the time series to polar transformation.
     As some time series may have very significant noises. When coverted to \
     polar space it may produce inconsistent polygons. To avoid this, this \
     function remove this spikes.
-
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :return fixed_timeseries: Numpy array of time series without spikes.
     """
-    check_input(time_series)
+    # check input
+    check_input(timeseries)
+
+    # casting to float
+    timeseries = timeseries.astype(float)
 
     # Remove nodata on non masked arrays
-    if any(time_series[time_series == nodata]):
-        time_series[time_series == nodata] = numpy.nan
-    
-    time_series = time_series[~numpy.isnan(time_series)]
+    if timeseries[timeseries == nodata].any():
+        timeseries[timeseries == nodata] = numpy.nan
 
-    time_series2 = time_series.copy()
+    timeseries = timeseries[~numpy.isnan(timeseries)]
 
-    idxs = numpy.where(time_series == 0)[0]
+    timeseries2 = timeseries.copy()
+
+    idxs = numpy.where(timeseries == 0)[0]
 
     spikes = list()
-    
+
     for i in range(len(idxs)-1):
         di = idxs[i+1]-idxs[i]
         if di == 2:
@@ -42,71 +37,65 @@ def fixseries(time_series, nodata=-9999):
 
     for pos in range(len(spikes)):
         idx = spikes[pos]
-        time_series2[idx] = 0
+        timeseries2[idx] = 0
 
-    #force float as final array
-    return time_series2.astype(float)
+    return timeseries2
 
 
 def create_polygon(timeseries):
     """This function converts the time series to the polar space.
     If the time series has lenght smaller than 3, it cannot be properly\
     converted to polar space.
-
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
-
     :return polygon: Shapely polygon of time series without spikes.
     """
+    from shapely.geometry import Polygon
+    from shapely.geometry.polygon import LinearRing
+
     # remove weird spikes on timeseries
     try:
         ts = fixseries(timeseries)
 
-        if ts.size == numpy.ones((1,)).size:
-            return numpy.array([1])
-
         list_of_radius, list_of_angles = get_list_of_points(ts)
 
-        ring = list()           # create polygon geometry
+        # create polygon geometry
+        ring = list()
 
-        N = len(list_of_radius)         # add points in the polygon
+        # add points in the polygon
+        N = list_of_radius.shape[0]
 
         # start to build up polygon
         for i in range(N):
-            a = list_of_radius[i] * numpy.cos(2 * numpy.pi * i / N )
-            o = list_of_radius[i] * numpy.sin(2 * numpy.pi * i / N )
+            a = list_of_radius[i] * numpy.cos(2 * numpy.pi * i / N)
+            o = list_of_radius[i] * numpy.sin(2 * numpy.pi * i / N)
             ring.append([a, o])
 
-        #Build geometry    
+        # Build geometry
         r = LinearRing(ring)
-    
-        #Buffer to try make polygon valid
+
+        # Buffer to try make polygon it valid
         polygon = Polygon(r).buffer(0)
 
         return polygon
-    
+
     except:
-        print("Unable to create a valid polygon")
-        return None
-    
+        raise ValueError("Unable to create a valid polygon")
 
 
 def get_list_of_points(timeseries):
     """This function creates a list of angles based on the time series.
     This list is used for convert the time series to a polygon.
-
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
-
     :return list_of_observations: Numpy array of lists of observations after \
     polar transformation.
     :r type list_of_observations: numpy.ndarray
-
     :return list_of_angles: Numpy array of lists of angles after polar \
     transformation.
     """
 
-    list_of_observations = abs(timeseries)
+    list_of_observations = numpy.abs(timeseries)
 
     list_of_angles = numpy.linspace(0, 2 * numpy.pi, len(list_of_observations))
 
@@ -116,23 +105,33 @@ def get_list_of_points(timeseries):
 def check_input(timeseries):
     """This function check the input and raise exception if it is too short\
     or has the wrong type.
-
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray.
-
     :raises ValueError: When ``timeseries`` is not valid.
     """
+    dimensions = timeseries.ndim
+
+    if dimensions == 2:
+        if timeseries.shape[0] > timeseries.shape[1]:
+            dim = 0
+        else:
+            dim =1
+    elif dimensions == 1:
+        dim = 0
+    else:
+        raise TypeError('Make sure you are using a 2D-array')
+
     if isinstance(timeseries, numpy.ndarray):
-        if len(timeseries) < 5:
-            raise TypeError("Your time series is too short!")
-        elif all(numpy.isnan(timeseries)):
+        if timeseries.shape[dim] < 5:
+            raise Exception("Your time series is too short!")
+        elif numpy.isnan(timeseries).all():
             raise Exception("Your time series has only nans!")
-        elif all(timeseries == 0):
+        elif (timeseries == 0).all():
             raise Exception("Your time series has only zeros!")
         else:
             return timeseries
     else:
-        raise Exception('Incorrect type: Please use numpy.array as input.')
+        raise TypeError('Please use numpy.array as input.')
 
 
 def file_to_da(filepath):
@@ -147,8 +146,8 @@ def file_to_da(filepath):
 
     # find datetime
     match = re.findall(r'\d{4}-\d{2}-\d{2}', filepath)[-1]
-    
-    xda.coords['time'] = match
+
+    da.coords['time'] = match
 
     return da
 
@@ -171,15 +170,12 @@ def img2xarray(path, band):
     return dataset
 
 
-def images2xarray(cube_path, list_bands):
-    """This function read a path with images and create a xarray dataset.
-
+def bdc2xarray(cube_path, list_bands):
+    """This function read a path with BDC ARD data and create a xarray dataset.
     :param cube_path: Path of folder with images.
     :type cube_path: string
-
     :param list_bands: List of bands that will be available on xarray.
     :type list_bands: list
-
     :return cube_dataset: Xarray dataset.
     :rtype: xarray.dataset
     """
@@ -239,8 +235,8 @@ def error_fractal():
 
 
 def list_metrics():
-    '''This function list the available metrics in stmetrics.
-    '''
+    """This function list the available metrics in stmetrics.
+    """
     import stmetrics
     metrics = [*error_basics().keys(),
                *error_polar().keys(),
@@ -251,4 +247,4 @@ def list_metrics():
 
 def truncate(n, decimals=6):
     multiplier = 10 ** decimals
-    return int(n * multiplier) / multiplier
+    return (n * multiplier).astype(int) / multiplier

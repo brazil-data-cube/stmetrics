@@ -1,4 +1,3 @@
-import os
 import numpy
 import xarray
 import rasterio
@@ -34,7 +33,6 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal", output="shp
     :returns segmentation: Shapefile containing superpixels produced.
     """
     print('Simple Non-Linear Iterative Temporal Clustering V 1.3')
-    name = os.path.basename(dataset.name)[:-4]
 
     if isinstance(dataset, rasterio.io.DatasetReader):
         try:
@@ -500,7 +498,7 @@ def init_cluster_regular(rows,columns,ki,img,bands):
     return C,S,l,d,kk
 
 
-def seg_metrics(dataframe, feature=['mean']):
+def seg_metrics(dataframe, bands, features=['mean']):
     """This function compute time metrics from a geopandas \
     with time features.
     Currently, basic, polar and fractal metrics are extracted.
@@ -512,21 +510,33 @@ def seg_metrics(dataframe, feature=['mean']):
     :type segmentation: list
 
     :returns out_dataframe: Geopandas dataframe with the features added.
+    :rtype out_dataframe: geopandas.Dataframe
     """
     import pandas
     from . import utils
+    
+    out_dataframe = dataframe.copy()
 
-    for f in feature:
-        series = dataframe.filter(regex=f)
-        metricas = _seg_ex_metrics(series.to_numpy())
+    for band in bands:
+        
+        df = dataframe.filter(regex=band)
 
-        header = utils.list_metrics()
+        for f in features:
+            
+            series = df.filter(regex=f)
+            
+            metricas = _seg_ex_metrics(series.to_numpy().astype(float))
 
-        metricsdf = pandas.DataFrame(metricas, columns=header)
+            header = utils.list_metrics()
 
-    out_dataframe = pandas.concat([dataframe, metricsdf], axis=1)
+            names = [i + '_' + j + '_' + k \
+                        for i, j, k in zip([band] * len(header),
+                                            [f] * len(header),
+                                            header)]
+            
+            metricsdf = pandas.DataFrame(metricas, columns=names)
 
-    header = None
+        out_dataframe = pandas.concat([ out_dataframe, metricsdf], axis=1)
 
     return out_dataframe
 
@@ -687,7 +697,6 @@ def _extract_xray(dataset, segmentation, features, nodata):
     """This function is used to extract features from images \
     that are stored in a xarray.
     """
-    import numpy
     import pandas
     import rasterstats
     from affine import Affine
@@ -747,18 +756,16 @@ def _extract_from_path(path, segmentation, features, nodata):
         affine = dataset.transform
 
         # find datetime and att
-        key = os.path.basename(f).split('_')[-1][:-4]
-        match = re.findall(r'\d{4}-\d{2}-\d{2}', f)[-1]
-
+        key = os.path.basename(f).split('.')[0]
+        
         stats = fx2parallel(dataset.read(1),
                             geoms, features,
                             dataset.transform,
                             int(dataset.nodata))
 
-        stats.columns = [y + j + g + f + k for y, j, g, f, k in
+        stats.columns = [y + j + g + k for y, j, g, k in
                          zip([key] * len(features),
                              ['_'] * len(features),
-                             [match] * len(features),
                              ['_'] * len(features),
                              stats.columns)]
 
@@ -791,13 +798,13 @@ def fx2parallel(dataset, geoms, features, transform, nodata):
     import multiprocessing
 
     cores = multiprocessing.cpu_count()
-    p = multiprocessing.Pool(cores - 1)
+    p = multiprocessing.Pool(cores)
 
     _zonal_stats_partial = _zonal_stats_wrapper(dataset, features,
                                                 affine=transform,
                                                 nodata=nodata)
 
-    stats_lst = p.map(_zonal_stats_partial, _chunks(geoms, (cores - 1)))
+    stats_lst = p.map(_zonal_stats_partial, _chunks(geoms, (cores)))
 
     stats = pandas.DataFrame(list(itertools.chain(*stats_lst)))
 

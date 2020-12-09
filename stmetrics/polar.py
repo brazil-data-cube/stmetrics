@@ -259,8 +259,8 @@ def area_season(timeseries, nodata=-9999):
     """
     # fix time series
     ts = utils.fixseries(timeseries, nodata)
-    # create polygon
     
+    # create polygon
     polygon = utils.create_polygon(ts)
     polygon = polygon.buffer(0)
     
@@ -294,8 +294,10 @@ def area_q1(timeseries, nodata=-9999):
     :return area_q1: Area of polygon that covers quadrant 1.
     :rtype area_q1: numpy.float64
     """
+    # filter time series
+    ts = utils.fixseries(timeseries, nodata)
 
-    areas = area_season(timeseries, nodata)
+    areas = area_season(ts, nodata)
     return utils.truncate(areas[0].area)
 
 
@@ -311,8 +313,10 @@ def area_q2(timeseries, nodata=-9999):
     :return area_q2: Area of polygon that covers quadrant 2.
     :rtype area_q2: numpy.float64
     """
+    # filter time series
+    ts = utils.fixseries(timeseries, nodata)
 
-    areas = area_season(timeseries, nodata)
+    areas = area_season(ts, nodata)
     return utils.truncate(areas[1].area)
 
 
@@ -328,8 +332,10 @@ def area_q3(timeseries, nodata=-9999):
     :return area_q3: Area of polygon that covers quadrant 3.
     :rtype area_q3: numpy.float64
     """
+    # filter time series
+    ts = utils.fixseries(timeseries, nodata)
 
-    areas = area_season(timeseries, nodata)
+    areas = area_season(ts, nodata)
     return utils.truncate(areas[2].area)
 
 
@@ -345,8 +351,10 @@ def area_q4(timeseries, nodata=-9999):
     :return area_q4: Area of polygon that covers quadrant 4.
     :type area_q4: numpy.float64
     """
+    # filter time series
+    ts = utils.fixseries(timeseries, nodata)
 
-    areas = area_season(timeseries, nodata)
+    areas = area_season(ts, nodata)
     return utils.truncate(areas[3].area)
 
 
