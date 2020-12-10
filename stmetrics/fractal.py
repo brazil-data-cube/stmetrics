@@ -1,25 +1,18 @@
 import numpy
-import nolds
-from scipy.signal import savgol_filter
-
-from . import utils
+from .utils import fixseries, truncate
 
 
 def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
     """This function compute 4 fractal dimensions and the hurst exponential.
-
         - DFA: measures the Hurst parameter H, which is very similar to the \
         Hurst exponent.
         - HE: self-similarity measure that assess long-range dependence in a \
         time series.
         - KFD: This algorirhm computes the FD using Katz algorithm.
-
-    :param timeseries: Your time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-
     :return out_metrics: Array of fractal metrics values
     """
     out_metrics = dict()
@@ -33,64 +26,93 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
 
     for f in funcs:
         try:
-            out_metrics[f] = eval(f)(timeseries)
+            out_metrics[f] = eval(f)(timeseries, nodata=nodata)
         except:
             out_metrics[f] = numpy.nan
 
     return out_metrics
 
 
-def dfa_fd(timeseries):
-    """Detrended Fluctuation Analysis (DFA)
+def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
+    """dfa_fd - Detrended Fluctuation Analysis (DFA) - Measures the Hurst \
+    parameter H, which is very similar to the Hurst exponent.
+    The main difference is that DFA can be used for non-stationary \
+    time series.
 
-    DFA measures the Hurst parameter H, which is very similar to the Hurst \
-    exponent.
-    The main difference is that DFA can be used for non-stationary time series\
-    (whose mean and/or variance change over time).
-
-    :param timeseries: Your time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
+
+    :param nvals: Sizes of subseries to use.
+    :type nvals: int
+
+    :param overlap : if True, there will be a 50% overlap on windows \
+    otherwise non-overlapping windows will be used.
+    :type overlap : Boolean
+
+    :param order : Polynomial order of trend to remove.
+    :type order : Boolean
 
     :return dfa: Detrended Fluctuation Analysis.
     .. Note::
         This functions uses the dfa implementation from the Nolds package.
+
+        Due to time series carachteristcs we use by default the 'RANSAC' \
+        fitting method as it is more robust to outliers.
+
+        For more details regarding the hurst implementation, check nolds \
+        documentation page: \
+        https://cschoel.github.io/nolds/_modules/nolds/measures.html#hurst_rs
     """
-    ts = utils.fixseries(timeseries)
+    import nolds
 
-    return utils.truncate(nolds.dfa(ts))
-    
+    ts = fixseries(timeseries, nodata)
 
-def hurst_exp(timeseries):
-    """Hurst exponent is a self-similarity measure that assess long-range \
-    dependence in a time series. The hurst exponent is a measure of the \
-    “long-term memory” of a time series.
-    It can be used to determine whether the time series is more, less, or \
-    equally likely to increase if it has increased in previous steps.
+    return truncate(nolds.dfa(ts, nvals, overlap, order))
 
-    :param timeseries: Your time series.
+
+def hurst_exp(timeseries, nvals=None, nodata=-9999):
+    """hurst_exp - Hurst exponent - Computes the H exponent by a standard \
+    rescaled range (R/S) approach.
+
+    Hurst exponent is a self-similarity measure that assess long-range \
+    dependence in a time series. It can be used to determine whether the \
+    time series is more, less, or equally likely to increase if it has \
+    increased in previous steps.
+
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
 
-    :return hurst: Hurst expoent.
+    :param nvals: Sizes of subseries to use.
+    :type nvals: int
 
+    :return hurst: Hurst expoent.
     .. Note::
         This function was adapted from the package Nolds.
+
+        Due to time series carachteristcs we use by default the 'RANSAC' \
+        fitting method as it is more robust to outliers.
+
+        For more details regarding the hurst implementation, check nolds \
+        documentation page: \
+        https://cschoel.github.io/nolds/_modules/nolds/measures.html#hurst_rs
     """
-    ts = utils.fixseries(timeseries)
+    import nolds
+    ts = fixseries(timeseries, nodata)
 
-    return utils.truncate(nolds.hurst_rs(ts))
+    return truncate(nolds.hurst_rs(ts, nvals))
 
 
-def katz_fd(timeseries):
-    """The Katz fractal dimension is defined by:
+def katz_fd(timeseries, nodata):
+    """katz_fd - Katz fractal dimension - Computes Katz fractal dimension.
 
+    It is defined by:
     .. math:: K = \\frac{\\log_{10}(n)}{\\log_{10}(d/L)+\\log_{10}(n)}
-
     where :math:`L` is the total length of the time series and :math:`d` \
     is the Euclidean distancebetween the first point in the series and \
     the point that provides the furthest distance with respect to \
     the first point.
 
-    :param timeseries: Your time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
 
     :return kfd: Katz fractal dimension.
@@ -100,17 +122,19 @@ def katz_fd(timeseries):
         at: https://github.com/raphaelvallat/entropy.
 
     .. Tip:: To know more about it:
-
+        Michael J. Katz, Fractals and the analysis of waveforms, \
+        Computers in Biology and Medicine, volume 18, Issue 3,1988,\
+        Pages 145-156,ISSN 0010-4825,\
+        https://doi.org/10.1016/0010-4825(88)90041-8.
         Esteller, R. et al. (2001). A comparison of waveform fractal dimension\
         algorithms. IEEE Transactions on Circuits and Systems I: Fundamental \
         Theory and Applications, 48(2), 177-183.
-
         Goh, Cindy, et al. "Comparison of fractal dimension algorithms for the\
         computation of EEG biomarkers for dementia." 2nd International \
         Conference on Computational Intelligence in Medicine and Healthcare \
         (CIMED2005). 2005.
     """
-    ts = utils.fixseries(timeseries)
+    ts = fixseries(timeseries, nodata)
 
     # absolute differences between consecutive elements of an array
     dists = numpy.abs(numpy.ediff1d(ts))
@@ -122,4 +146,4 @@ def katz_fd(timeseries):
     d = numpy.max(ts) - numpy.min(ts)
     ln_sum = numpy.add(ln, numpy.log10(numpy.divide(d, d_sum)))
     # return katz fractal dimension
-    return utils.truncate(numpy.divide(ln, ln_sum))
+    return truncate(numpy.divide(ln, ln_sum))
