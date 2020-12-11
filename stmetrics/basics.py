@@ -21,14 +21,14 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
         - "FQR" - First quartile of the time series.
         - "SQR" - Second quartile of the time series.
         - "TQR" - Third quaritle of the time series.
-        
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
+
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: real number
+
     :returns: Dictionary of basic metrics
-    :rtype: dictionary
     """
 
     out_metrics = dict()

@@ -4,26 +4,37 @@ from .utils import fixseries, truncate, create_polygon, get_list_of_points
 
 def ts_polar(timeseries, funcs=["all"], nodata=-9999, show=False):
     """This function compute 9 polar metrics:
+
     - Area - Area of the closed shape.
+
     - Angle - The main angle of the closed shape created after transformation.
+
     - Area_q1 - Partial area of the shape, proportional to quadrant 1 of the \
     polar representation.
+
     - Area_q2 - Partial area of the shape, proportional to quadrant 2 of the \
     polar representation.
+
     - Area_q3 - Partial area of the shape, proportional to quadrant 3 of the \
     polar representation.
+
     - Area_q4 - Partial area of the shape, proportional to quadrant 4 of the \
     polar representation.
+
     - Polar_balance - The standard deviation of the areas per season,\
     considering the 4 seasons.
+
     - Eccenticity - Return values close to 0 if the shape is a circle and 1\
     if the shape is similar to a line.
+
     - Gyration_radius - Equals the average distance between each point inside\
      the shape and the shape’s centroid.
+
     - CSI - This is a dimensionless quantitative measure of morphology, \
     that characterize the standard deviation of an object from a circle.
-    To visualize the time series on polar space use: \
-    ts_polar(timeseries,show=True)
+    
+    To visualize the time series on polar space use: ts_polar(timeseries,\
+     show=True)
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
@@ -35,9 +46,11 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show=False):
     :type nodata: boolean
 
     :returns out_metrics: Dictionary with polar metrics values.
+
     .. Tip::
+
         Check the original publication of the metrics: Körting, Thales \
-        & Câmara, Gilberto & Fonseca, Leila. (2013).
+        & Câmara, Gilberto & Fonseca, Leila. (2013). \
         Land Cover Detection Using Temporal Features \
         Based On Polar Representation.
     """
@@ -336,7 +349,7 @@ def area_q4(timeseries, nodata=-9999):
     :type timeseries: numpy.ndarray
 
     :param nodata: nodata of the time series. Default is -9999.
-    :rtype nodata: int
+    :type nodata: int
 
     :return area_q4: Area of polygon that covers quadrant 4.
     """
@@ -482,7 +495,7 @@ def csi(timeseries, nodata=-9999):
 
     .. note::
         Rational of this metric:
-        
+
         After polar transformation time series usually have a round shape, \
         which can be releate do cell in some cases. \
         That's why cell shape index is available here.

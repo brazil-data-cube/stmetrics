@@ -38,7 +38,7 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
 
 
 def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
-    """Detrended Fluctuation Analysis (DFA) - Measures the Hurst \
+    """Detrended Fluctuation Analysis (DFA) measures the Hurst \
     parameter H, which is very similar to the Hurst exponent.
     The main difference is that DFA can be used for non-stationary \
     time series.
@@ -49,23 +49,26 @@ def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
     :param nvals: Sizes of subseries to use.
     :type nvals: int
 
-    :param overlap : if True, there will be a 50% overlap on windows \
+    :param overlap: if True, there will be a 50% overlap on windows\
     otherwise non-overlapping windows will be used.
-    :type overlap : Boolean
+    :type overlap: Boolean
 
-    :param order : Polynomial order of trend to remove.
-    :type order : Boolean
+    :param order: Polynomial order of trend to remove.
+    :type order: Boolean
+
+    :param nodata: nodata of the time series. Default is -9999.
+    :type nodata: int
 
     :return dfa: Detrended Fluctuation Analysis.
-    .. Note::
-        This functions uses the dfa implementation from the Nolds package.
 
+    .. Note::
+
+        This functions uses the dfa implementation from the Nolds package.
         Due to time series carachteristcs we use by default the 'RANSAC' \
         fitting method as it is more robust to outliers.
-
         For more details regarding the hurst implementation, check nolds \
-        documentation page: \
-        https://cschoel.github.io/nolds/_modules/nolds/measures.html#hurst_rs
+        documentation page.
+
     """
     import nolds
 
@@ -75,9 +78,8 @@ def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
 
 
 def hurst_exp(timeseries, nvals=None, nodata=-9999):
-    """Hurst exponent - Computes the H exponent by a standard \
+    """Computes the H exponent by a standard \
     rescaled range (R/S) approach.
-
     Hurst exponent is a self-similarity measure that assess long-range \
     dependence in a time series. It can be used to determine whether the \
     time series is more, less, or equally likely to increase if it has \
@@ -85,20 +87,19 @@ def hurst_exp(timeseries, nvals=None, nodata=-9999):
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-
     :param nvals: Sizes of subseries to use.
     :type nvals: int
+    :param nodata: nodata of the time series. Default is -9999.
+    :type nodata: int
 
     :return hurst: Hurst expoent.
-    .. Note::
-        This function was adapted from the package Nolds.
 
+    .. Note::
+
+        This function was adapted from the package Nolds.
         Due to time series carachteristcs we use by default the 'RANSAC' \
         fitting method as it is more robust to outliers.
-
-        For more details regarding the hurst implementation, check nolds \
-        documentation page: \
-        https://cschoel.github.io/nolds/_modules/nolds/measures.html#hurst_rs
+        For more details regarding the hurst implementation.
     """
     import nolds
     ts = fixseries(timeseries, nodata)
@@ -106,7 +107,7 @@ def hurst_exp(timeseries, nvals=None, nodata=-9999):
     return truncate(nolds.hurst_rs(ts, nvals))
 
 
-def katz_fd(timeseries, nodata):
+def katz_fd(timeseries, nodata=-9999):
     """Katz fractal dimension.
 
     It is defined by:
@@ -118,6 +119,8 @@ def katz_fd(timeseries, nodata):
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
+    :param nodata: nodata of the time series. Default is -9999.
+    :type nodata: int
 
     :return kfd: Katz fractal dimension.
 

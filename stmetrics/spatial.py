@@ -30,6 +30,13 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
     :type output: string
 
     :returns segmentation: Shapefile containing superpixels produced.
+
+    ..Note::
+
+        Reference: Soares, A. R., Körting, T. S., Fonseca, L. M. G., Bendini, \
+        H. N. `Simple Nonlinear Iterative Temporal Clustering. \
+        <https://ieeexplore.ieee.org/document/9258957>`_ \
+        IEEE Transactions on Geoscience and Remote, 2020 (Early Access).
     """
     print('Simple Non-Linear Iterative Temporal Clustering V 1.4')
 
@@ -362,7 +369,8 @@ def write_pandas(segmentation, transform, crs):
 
 @njit(fastmath=True)
 def init_cluster_hex(rows, columns, ki, img, bands):
-    """This function initialize the clusters for SNITC using a hexagonal pattern.
+    """This function initialize the clusters for SNITC\
+    using a hexagonal pattern.
 
     :param rows: Number of rows of image.
     :type rows: int
@@ -518,7 +526,8 @@ def init_cluster_regular(rows, columns, ki, img, bands):
     return C, S, labelled, d, kk
 
 
-def seg_metrics(dataframe, bands, metrics_dict, features=['mean'], num_cores=-1):
+def seg_metrics(dataframe, bands, metrics_dict, features=['mean'],
+                num_cores=-1):
     """This function compute time series metrics from a geopandas \
     with time features.
     Currently, basic, polar and fractal metrics are extracted. but you can \
@@ -530,18 +539,16 @@ def seg_metrics(dataframe, bands, metrics_dict, features=['mean'], num_cores=-1)
     :param bands: Pandas DataFrame with time series information.
     :type bands: list
 
-    :param: Dictionary of metrics to be computed
-    :type: dictionary
+    :param metrics_dict: Dictionary of metrics to be computed.
+    :type metrics_dict: dictionary
 
     :param features: List of features to be used for computation. \
     This parameter allows you to use the features extracted with \
     ``extract_features`` function and compute metrics over image features \
-    (mean, max, min, std and mode). If it is None, the code expect that
-    the DataFrame has only one variable.
+    (mean, max, min, std and mode). If it is None, the code expect that the DataFrame has only one variable.
     :type features: list
 
     :returns out_dataframe: Geopandas dataframe with the features added.
-    :rtype out_dataframe: geopandas.Dataframe
     """
     import pandas
     from .utils import list_metrics
@@ -553,38 +560,40 @@ def seg_metrics(dataframe, bands, metrics_dict, features=['mean'], num_cores=-1)
         df = dataframe.filter(regex=band)
 
         if features is not None:
-                series = df.filter(regex=f)
+            series = df.filter(regex=f)
 
-                for f in features:
+            for f in features:
 
-                    metricas = _seg_ex_metrics(series.to_numpy().astype(float), 
-                                               metrics_dict,
-                                               num_cores)
-
-                    header = list_metrics()
-
-                    names = [i + '_' + j + '_' + k
-                             for i, j, k in zip([band] * len(header),
-                                                [f] * len(header),
-                                                header)]
-
-                    metricsdf = pandas.DataFrame(metricas, columns=names)
-
-                out_dataframe = pandas.concat([out_dataframe, metricsdf], axis=1)
-        else:
-            metricas = _seg_ex_metrics(df.to_numpy().astype(float), 
+                metricas = _seg_ex_metrics(series.to_numpy().astype(float),
                                            metrics_dict,
                                            num_cores)
+
+                header = list_metrics()
+
+                names = [i + '_' + j + '_' + k
+                         for i, j, k in zip([band] * len(header),
+                                            [f] * len(header),
+                                            header)]
+
+                metricsdf = pandas.DataFrame(metricas, columns=names)
+
+            out_dataframe = pandas.concat([out_dataframe, metricsdf],
+                                          axis=1)
+        else:
+            metricas = _seg_ex_metrics(df.to_numpy().astype(float),
+                                       metrics_dict,
+                                       num_cores)
 
             header = list_metrics()
 
             names = [i + '_' + k
                      for i, k in zip([band] * len(header),
-                                        header)]
+                                     header)]
 
             metricsdf = pandas.DataFrame(metricas, columns=names)
 
-            out_dataframe = pandas.concat([out_dataframe, metricsdf], axis=1)
+            out_dataframe = pandas.concat([out_dataframe, metricsdf],
+                                          axis=1)
 
     return out_dataframe
 
@@ -645,7 +654,6 @@ def extract_features(dataset, segmentation,
     :type nodata: int
 
     :returns segmentation: Geopandas dataframe with the features.
-    :rtype segmentation: geopandas.Dataframe
     """
     import os
     import pandas
@@ -960,7 +968,7 @@ def rectangular_fit(geom):
 
     :returns rectangular_fit: Polygon rectangular fit.
 
-    .. Tip:: 
+    .. Tip::
         To know more about it:
 
         Sun, Z., Fang, H., Deng, M., Chen, A., Yue, P. and Di, L. "Regular \
@@ -1001,8 +1009,9 @@ def length(geom):
 
     return maxy - miny
 
-def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None, 
-               max_step=None, max_length_diff=None, penalty=None, 
+
+def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None,
+               max_step=None, max_length_diff=None, penalty=None,
                psi=None, pruning=False):
     """This function performs a spatio-temporal filtering of datacube \
     using the DTW distance.
@@ -1016,7 +1025,7 @@ def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None,
     :param window: Only allow for maximal shifts from the two diagonals \
     smaller than this number. It includes the diagonal, meaning that an \
     Euclidean distance is obtained by setting window=1.
-    
+
     :param max_dist: Stop if the returned values will be larger than \
     this value.
 
@@ -1035,38 +1044,37 @@ def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None,
     """
     from dtaidistance import dtw
 
-    #initializer var image
+    # Initializer var image
     edge = numpy.zeros([dataset.shape[1], dataset.shape[2]])
 
-    #adjust kernel
+    # Adjust kernel
     ks = kernel_size-2
 
-    #Loop over original image
+    # Loop over original image
     for r in range(dataset.shape[1]):
         for c in range(dataset.shape[2]):
 
-            #slice over original image
+            # Slice over original image
             rmin = int(numpy.floor(max(r-ks, 0)))
             cmin = int(numpy.floor(max(c-ks, 0)))
             rmax = int(numpy.floor(min(r+ks, dataset.shape[1])))
             cmax = int(numpy.floor(min(c+ks, dataset.shape[2])))
             subim = dataset[:, rmin:rmax+1, cmin:cmax+1]
 
-            #Loop inside squared kernel
+            # Loop inside squared kernel
             tmp = 0
             for rs in range(subim.shape[1]):
                 for cs in range(subim.shape[2]):
                     dc = dtw.distance_fast(dataset[:, r, c].astype(float),
-                                           subim[:, rs, cs].astype(float), window=window,
-                                             max_dist=max_dist,
-                                             max_step=max_step,
-                                             max_length_diff=max_length_diff,
-                                             penalty=penalty,
-                                             psi=psi,
-                                             use_pruning=pruning)
+                                           subim[:, rs, cs].astype(float),
+                                           window=window, max_dist=max_dist,
+                                           max_step=max_step,
+                                           max_length_diff=max_length_diff,
+                                           penalty=penalty, psi=psi,
+                                           use_pruning=pruning)
                     tmp = dc + tmp
 
-            #Edge value
+            # Edge value
             edge[r][c] = tmp
 
     return edge
