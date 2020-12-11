@@ -1003,7 +1003,7 @@ def length(geom):
 
 def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None, 
                max_step=None, max_length_diff=None, penalty=None, 
-               psi=None, use_pruning=False):
+               psi=None, pruning=False):
     """This function performs a spatio-temporal filtering of datacube \
     using the DTW distance.
 
@@ -1011,7 +1011,25 @@ def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None,
     :type dataset: shapely.geometry.Polygon
 
     :param kernel_size: Size of convolutional kernel.
-    :type kernel_size: int.
+    :type kernel_size: int
+
+    :param window: Only allow for maximal shifts from the two diagonals \
+    smaller than this number. It includes the diagonal, meaning that an \
+    Euclidean distance is obtained by setting window=1.
+    
+    :param max_dist: Stop if the returned values will be larger than \
+    this value.
+
+    :param max_step: Do not allow steps larger than this value.
+
+    :param max_length_diff: Return infinity if length of two series is larger.
+
+    :param penalty: Penalty to add if compression or expansion is applied.
+
+    :param psi: Psi relaxation parameter (ignore start and end of matching).
+        Useful for cyclical series.
+
+    :param use_pruning: Prune values based on Euclidean distance.
 
     :returns edge: Edge image as numpy.ndarray.
     """
@@ -1039,7 +1057,13 @@ def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None,
             for rs in range(subim.shape[1]):
                 for cs in range(subim.shape[2]):
                     dc = dtw.distance_fast(dataset[:, r, c].astype(float),
-                                      subim[:, rs, cs].astype(float))
+                                           subim[:, rs, cs].astype(float), window=window,
+                                             max_dist=max_dist,
+                                             max_step=max_step,
+                                             max_length_diff=max_length_diff,
+                                             penalty=penalty,
+                                             psi=psi,
+                                             use_pruning=pruning)
                     tmp = dc + tmp
 
             #Edge value
