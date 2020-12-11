@@ -135,7 +135,8 @@ def _sits2metrics(image, metrics_dict=METRICS_DICT, num_cores=-1):
     metricas = numpy.vstack(X_m)
 
     # Reshape to image shape
-    return metricas.reshape(len(X_m[0]), image.shape[1], image.shape[2], order='F')
+    return metricas.reshape(len(X_m[0]), image.shape[1],
+                            image.shape[2], order='F')
 
 
 def _compute_from_xarray(dataset, metrics=METRICS_DICT, num_cores=-1):

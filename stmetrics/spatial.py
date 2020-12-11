@@ -1,12 +1,11 @@
 import numpy
 import xarray
 import rasterio
-from stmetrics import metrics
-from numba import njit, prange, jit
-from tqdm import tnrange, tqdm_notebook
+from numba import njit, prange
 
 
-def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal", output="shp"):
+def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
+          output="shp"):
     """This function create spatial-temporal superpixels using a Satellite \
     Image Time Series (SITS). Version 1.1
 
@@ -32,95 +31,101 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal", output="shp
 
     :returns segmentation: Shapefile containing superpixels produced.
     """
-    print('Simple Non-Linear Iterative Temporal Clustering V 1.3')
+    print('Simple Non-Linear Iterative Temporal Clustering V 1.4')
 
     if isinstance(dataset, rasterio.io.DatasetReader):
         try:
-            ##READ FILE
-            meta = dataset.profile #get image metadata
+            # READ FILE
+            meta = dataset.profile  # get image metadata
             transform = meta["transform"]
             crs = meta["crs"]
             img = dataset.read()
         except:
-            print('Sorry we could not read your dataset.')
+            Exception('Sorry we could not read your dataset.')
     elif isinstance(dataset, xarray.DataArray):
         try:
-            ##READ FILE
+            # READ FILE
             transform = dataset.transform
             crs = dataset.crs
             img = numpy.squeeze(dataset.values).astype(float)
         except:
-            print('Sorry we could not read your dataset.')
+            Exception('Sorry we could not read your dataset.')
     else:
-        print("Sorry we can't read this type of file. Please use Rasterio or xarray")
+        TypeError("Sorry we can't read this type of file. \
+                  Please use Rasterio or xarray")
 
-    
-    #Normalize data
+    # Normalize data
     for band in range(img.shape[0]):
         img[numpy.isnan(img)] = 0
-        img[band,:,:] = (img[band,:,:])/scale#*0.5+0.5
-    
-    #Get image dimensions
+        img[band, :, :] = (img[band, :, :])/scale
+
+    # Get image dimensions
     bands = img.shape[0]
     rows = img.shape[1]
     columns = img.shape[2]
 
     if pattern == "hexagonal":
-        C,S,l,d,k = init_cluster_hex(rows,columns,ki,img,bands)
+        C, S, l, d, k = init_cluster_hex(rows, columns, ki, img, bands)
     elif pattern == "regular":
-        C,S,l,d,k = init_cluster_regular(rows,columns,ki,img,bands)
+        C, S, l, d, k = init_cluster_regular(rows, columns, ki, img, bands)
     else:
         print("Unknow patter. We are using hexagonal")
-        C,S,l,d,k = init_cluster_hex(rows,columns,ki,img,bands)
-    
-    #Start clustering
+        C, S, l, d, k = init_cluster_hex(rows, columns, ki, img, bands)
+
+    # Start clustering
     for n in range(iter):
 
         for kk in prange(k):
             # Get subimage around cluster
-            rmin = int(numpy.floor(max(C[kk,bands]-S, 0)))
-            rmax = int(numpy.floor(min(C[kk,bands]+S, rows))+1)
-            cmin = int(numpy.floor(max(C[kk,bands+1]-S, 0)))
-            cmax = int(numpy.floor(min(C[kk,bands+1]+S, columns))+1)
+            rmin = int(numpy.floor(max(C[kk, bands]-S, 0)))
+            rmax = int(numpy.floor(min(C[kk, bands]+S, rows))+1)
+            cmin = int(numpy.floor(max(C[kk, bands+1]-S, 0)))
+            cmax = int(numpy.floor(min(C[kk, bands+1]+S, columns))+1)
 
-            #Create subimage 2D numpy.array
-            subim = img[:,rmin:rmax,cmin:cmax]
-            
-            #get cluster centres
-            c_series = C[kk, :subim.shape[0]]                       #Average time series
-            ic = int(numpy.floor(C[kk, subim.shape[0]])) - rmin       #X-coordinate
-            jc = int(numpy.floor(C[kk, subim.shape[0]+1])) - cmin     #Y-coordinate 
-            
-            #Calculate Spatio-temporal distance
+            # Create subimage 2D numpy.array
+            subim = img[:, rmin:rmax, cmin:cmax]
+
+            # get cluster centres
+            # Average time series
+            c_series = C[kk, :subim.shape[0]]
+            # X-coordinate
+            ic = int(numpy.floor(C[kk, subim.shape[0]])) - rmin
+            # Y-coordinate
+            jc = int(numpy.floor(C[kk, subim.shape[0]+1])) - cmin
+
+            # Calculate Spatio-temporal distance
             try:
-                D = distance_fast(c_series,ic,jc,subim,S,m,rmin,cmin)
+                D = distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin)
             except:
                 print('dtaidistance package is not properly installed.')
-                D = distance(C[kk, :], subim, S, m, rmin, cmin) #DTW regular
+                D = distance(C[kk, :], subim, S, m, rmin, cmin)  # DTW regular
 
-            subd = d[rmin:rmax,cmin:cmax]
-            subl = l[rmin:rmax,cmin:cmax]
-            
-            #Check if Distance from new cluster is smaller than previous
-            subl = numpy.where( D < subd, kk, subl)  
-            subd = numpy.where( D < subd, D, subd)       
-            
-            #Replace the pixels that had smaller difference
-            d[rmin:rmax,cmin:cmax] = subd
-            l[rmin:rmax,cmin:cmax] = subl
-            
-        C = update_cluster(img,l,rows,columns,bands,k)     #Update Clusters
+            subd = d[rmin:rmax, cmin:cmax]
+            subl = l[rmin:rmax, cmin:cmax]
 
-    labelled = postprocessing(l, S)     #Remove noise from segmentation
-    
+            # Check if Distance from new cluster is smaller than previous
+            subl = numpy.where(D < subd, kk, subl)
+            subd = numpy.where(D < subd, D, subd)
+
+            # Replace the pixels that had smaller difference
+            d[rmin:rmax, cmin:cmax] = subd
+            l[rmin:rmax, cmin:cmax] = subl
+
+        # Update Clusters
+        C = update_cluster(img, l, rows, columns, bands, k)
+
+    # Remove noise from segmentation
+    labelled = postprocessing(l, S)
+
     if output == "shp":
         segmentation = write_pandas(labelled, transform, crs)
         return segmentation
     else:
-        #Return labeled numpy.array for visualization on python
+        # Return labeled numpy.array for visualization on python
         return labelled
 
-def distance_fast(c_series,ic,jc,subim,S,m,rmin,cmin):
+
+def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin):
     """This function computes the spatial-temporal distance between \
     two pixels using the dtw distance with C implementation.
 
@@ -151,16 +156,17 @@ def distance_fast(c_series,ic,jc,subim,S,m,rmin,cmin):
     :returns D: ND-Array distance
     """
     from dtaidistance import dtw
-    
-    #Normalizing factor
+
+    # Normalizing factor
     m = m/10
-    
-    #Initialize submatrix
-    ds = numpy.zeros([subim.shape[1],subim.shape[2]])
-    
+
+    # Initialize submatrix
+    ds = numpy.zeros([subim.shape[1], subim.shape[2]])
+
     # Tranpose matrix to allow dtw fast computation with dtaidistance
-    linear = subim.transpose(1,2,0).reshape(subim.shape[1]*subim.shape[2],subim.shape[0])
-    merge  = numpy.vstack((linear,c_series))
+    linear = subim.transpose(1, 2, 0).reshape(subim.shape[1]*subim.shape[2],
+                                              subim.shape[0])
+    merge = numpy.vstack((linear, c_series))
 
     # Compute dtw distances
     c = dtw.distance_matrix_fast(merge, block=((0, merge.shape[0]),
@@ -172,13 +178,16 @@ def distance_fast(c_series,ic,jc,subim,S,m,rmin,cmin):
     x = numpy.arange(subim.shape[1])
     y = numpy.arange(subim.shape[2])
     xx, yy = numpy.meshgrid(x, y, sparse=True, indexing='ij')
-    ds = (((xx-ic)**2 + (yy-jc)**2)**0.5)    # Calculate Spatial Distance
-    D =  (dc)/m + (ds/S)     #Calculate SPatial-temporal distance
 
-             
+    # Calculate Spatial Distance
+    ds = (((xx-ic)**2 + (yy-jc)**2)**0.5)
+    # Calculate SPatial-temporal distance
+    D = (dc)/m+(ds/S)
+
     return D
 
-def distance(c_series,ic,jc,subim,S,m,rmin,cmin):
+
+def distance(c_series, ic, jc, subim, S, m, rmin, cmin):
     """This function computes the spatial-temporal distance between \
     two pixels using the DTW distance.
 
@@ -209,31 +218,35 @@ def distance(c_series,ic,jc,subim,S,m,rmin,cmin):
     :returns D: ND-Array distance
     """
     from dtaidistance import dtw
-    
-    #Normalizing factor
+
+    # Normalizing factor
     m = m/10
 
-    #Initialize submatrix
-    dc = numpy.zeros([subim.shape[1],subim.shape[2]])
-    ds = numpy.zeros([subim.shape[1],subim.shape[2]])
-            
+    # Initialize submatrix
+    dc = numpy.zeros([subim.shape[1], subim.shape[2]])
+    ds = numpy.zeros([subim.shape[1], subim.shape[2]])
+
     # Critical Loop - need parallel implementation
     for u in range(subim.shape[1]):
         for v in range(subim.shape[2]):
-            a1 = subim[:,u,v]                                              # Get pixel time series 
-            dc[u,v] = dtw.distance(a1.astype(float),c_series.astype(float))      # Compute DTW distance
-    
+            # Get pixel time series
+            a1 = subim[:, u, v]
+            # Compute DTW distance
+            dc[u, v] = dtw.distance(a1.astype(float), c_series.astype(float))
+
     x = numpy.arange(subim.shape[1])
     y = numpy.arange(subim.shape[2])
     xx, yy = numpy.meshgrid(x, y, sparse=True, indexing='ij')
-    ds = (((xx-ic)**2 + (yy-jc)**2)**0.5)                       # Calculate Spatial Distance
-    
-    D =  (dc)/m + (ds/S)   #Calculate SPatial-temporal distance
-          
+    # Calculate Spatial Distance
+    ds = (((xx-ic)**2 + (yy-jc)**2)**0.5)
+    # Calculate SPatial-temporal distance
+    D = (dc)/m+(ds/S)
+
     return D
 
-@njit(parallel = True,fastmath=True)
-def update_cluster(img,la,rows,columns,bands,k):
+
+@njit(parallel=True, fastmath=True)
+def update_cluster(img, la, rows, columns, bands, k):
     """This function update clusters.
 
     :param img: Input image.
@@ -256,28 +269,28 @@ def update_cluster(img,la,rows,columns,bands,k):
 
     :returns C_new: ND-array containing updated cluster centres information.
     """
-    c_shape = (k,bands+3)
-    
-    #Allocate array info for centres
-    C_new = numpy.zeros(c_shape) 
-    
-    #Update cluster centres with mean values
+    c_shape = (k, bands+3)
+
+    # Allocate array info for centres
+    C_new = numpy.zeros(c_shape)
+
+    # Update cluster centres with mean values
     for r in prange(rows):
         for c in range(columns):
-            tmp = numpy.append(img[:,r,c],numpy.array([r,c,1]))
-            kk = int(la[r,c])
-            C_new[kk,:] = C_new[kk,:] + tmp
-    
-    #Compute mean
+            tmp = numpy.append(img[:, r, c], numpy.array([r, c, 1]))
+            kk = int(la[r, c])
+            C_new[kk, :] = C_new[kk, :] + tmp
+
+    # Compute mean
     for kk in prange(k):
-        C_new[kk,:] = C_new[kk,:]/C_new[kk,bands+2]
-    
+        C_new[kk, :] = C_new[kk, :]/C_new[kk, bands+2]
+
     tmp = None
-    
+
     return C_new
 
 
-def postprocessing(raster,S):
+def postprocessing(raster, S):
     """Post processing function to force conectivity.
 
     :param raster: Labelled image
@@ -294,25 +307,26 @@ def postprocessing(raster,S):
     import cc3d
     import fastremap
     from rasterio import features
-    
+
     for i in range(10):
-        
+
         raster, remapping = fastremap.renumber(raster, in_place=True)
 
-        #Remove spourious regions generated during segmentation
+        # Remove spourious regions generated during segmentation
         cc = cc3d.connected_components(raster.astype(dtype=numpy.uint16),
-                                        connectivity=6,
-                                        out_dtype=numpy.uint32)
+                                       connectivity=6,
+                                       out_dtype=numpy.uint32)
 
-        T = int((S**2)/2) 
+        T = int((S**2)/2)
 
-        #Use Connectivity as 4 to avoid undesired connections     
-        raster = features.sieve(cc.astype(dtype=rasterio.int32),T,
+        # Use Connectivity as 4 to avoid undesired connections
+        raster = features.sieve(cc.astype(dtype=rasterio.int32), T,
                                 out=numpy.zeros(cc.shape,
-                                                dtype = rasterio.int32),
-                                connectivity = 4)
-    
+                                                dtype=rasterio.int32),
+                                connectivity=4)
+
     return raster
+
 
 def write_pandas(segmentation, transform, crs):
     """This function creates the shapefile of the segmentation produced.
@@ -328,29 +342,28 @@ def write_pandas(segmentation, transform, crs):
 
     :returns gdf: Segmentation as a geopandas geodataframe.
     """
-    import numpy
     import geopandas
     import rasterio.features
-    from shapely.geometry import shape   
-    import geopandas
+    from shapely.geometry import shape
 
-    mypoly=[]
+    mypoly = []
 
-    #Loop to oconvert raster conneted components to 
-    #polygons using rasterio features
-    for vec in rasterio.features.shapes(segmentation.astype(dtype = numpy.float32),
-                                        transform = transform):
+    # Loop to oconvert raster conneted components to
+    # polygons using rasterio features
+    seg = segmentation.astype(dtype=numpy.float32)
+    for vec in rasterio.features.shapes(seg, transform=transform):
         mypoly.append(shape(vec[0]))
-        
-    gdf = geopandas.GeoDataFrame(geometry=mypoly,crs=crs)
+
+    gdf = geopandas.GeoDataFrame(geometry=mypoly, crs=crs)
     gdf.crs = crs
 
     mypoly = None
 
     return gdf
 
+
 @njit(fastmath=True)
-def init_cluster_hex(rows,columns,ki,img,bands):
+def init_cluster_hex(rows, columns, ki, img, bands):
     """This function initialize the clusters using a hexagonal pattern.
 
     :param rows: Number of rows of image.
@@ -379,14 +392,14 @@ def init_cluster_hex(rows,columns,ki,img,bands):
     :returns k: Number of superpixels that will be produced.
     """
     N = rows * columns
-    
-    #Setting up SNITC
+
+    # Setting up SNITC
     S = (rows*columns / (ki * (3**0.5)/2))**0.5
-    
-    #Get nodes per row allowing a half column margin at one end that alternates
+
+    # Get nodes per row allowing a half column margin
     nodeColumns = round(columns/S - 0.5)
 
-    #Given an integer number of nodes per row recompute S
+    # Given an integer number of nodes per row recompute S
     S = columns/(nodeColumns + 0.5)
 
     # Get number of rows of nodes allowing 0.5 row margin top and bottom
@@ -395,16 +408,20 @@ def init_cluster_hex(rows,columns,ki,img,bands):
 
     # Recompute k
     k = nodeRows * nodeColumns
-    c_shape = (k,bands+3)
-    # Allocate memory and initialise clusters, labels and distances.
-    C = numpy.zeros(c_shape)                 # Cluster centre data  1:times is mean on each band of series
-                                                 # times+1 and times+2 is row, col of centre, times+3 is No of pixels
-    l = -numpy.ones(img[0,:,:].shape)              # Matrix labels.
-    d = numpy.full(img[0,:,:].shape, numpy.inf)    # Pixel distance matrix from cluster centres.
+    c_shape = (k, bands+3)
+    # Allocate memory and initialise clusters, labels and distances
+    # Cluster centre data  1:times is mean on each band of series
+    # times+1 and times+2 is row, col of centre, times+3 is No of pixels
+    C = numpy.zeros(c_shape)
+    # Matrix labels.
+    labelled = -numpy.ones(img[0, :, :].shape)
+
+    # Pixel distance matrix from cluster centres.
+    d = numpy.full(img[0, :, :].shape, numpy.inf)
 
     # Initialise grid
-    kk = 0;
-    r = vSpacing/2;
+    kk = 0
+    r = vSpacing/2
     for ri in prange(nodeRows):
         x = ri
         if x % 2:
@@ -413,23 +430,25 @@ def init_cluster_hex(rows,columns,ki,img,bands):
             c = S
 
         for ci in range(nodeColumns):
-            cc = int(numpy.floor(c)); rr = int(numpy.floor(r))
-            ts = img[:,rr,cc]
-            st = numpy.append(ts,[rr,cc,0])
+            cc = int(numpy.floor(c))
+            rr = int(numpy.floor(r))
+            ts = img[:, rr, cc]
+            st = numpy.append(ts, [rr, cc, 0])
             C[kk, :] = st
             c = c+S
             kk = kk+1
 
         r = r+vSpacing
-    
+
     st = None
-    #Cast S
+    # Cast S
     S = round(S)
-    
-    return C,S,l,d,k
+
+    return C, S, labelled, d, k
+
 
 @njit(fastmath=True)
-def init_cluster_regular(rows,columns,ki,img,bands):
+def init_cluster_regular(rows, columns, ki, img, bands):
     """This function initialize the clusters using a square pattern.
 
     :param rows: Number of rows of image.
@@ -458,44 +477,47 @@ def init_cluster_regular(rows,columns,ki,img,bands):
     :returns k: Number of superpixels that will be produced.
     """
     N = rows * columns
-    
-    #Setting up SLIC    
-    S = int((N/ki)**0.5)    
+
+    # Setting up SLIC
+    S = int((N/ki)**0.5)
     base = int(S/2)
-    
+
     # Recompute k
     k = numpy.floor(rows/base)*numpy.floor(columns/base)
 
-    c_shape = (k,bands+3)
+    c_shape = (k, bands+3)
+
     # Allocate memory and initialise clusters, labels and distances.
     # Cluster centre data  1:times is mean on each band of series
     # times+1 and times+2 is row, col of centre, times+3 is No of pixels
-    C = numpy.zeros(c_shape)     
+    C = numpy.zeros(c_shape)
 
     # Matrix labels.
-    l = -numpy.ones(img[0,:,:].shape)
-    # Pixel distance matrix from cluster centres.           
-    d = numpy.full(img[0,:,:].shape, numpy.inf)
+    labelled = -numpy.ones(img[0, :, :].shape)
+
+    # Pixel distance matrix from cluster centres.
+    d = numpy.full(img[0, :, :].shape, numpy.inf)
 
     vSpacing = int(numpy.floor(rows / ki**0.5))
     hSpacing = int(numpy.floor(columns / ki**0.5))
 
-    kk=0
+    kk = 0
 
     # Initialise grid
     for x in range(base, rows, vSpacing):
         for y in range(base, columns, hSpacing):
-            cc = int(numpy.floor(y)); rr = int(numpy.floor(x))
-            ts = img[:,int(x),int(y)]
-            st = numpy.append(ts,[int(x),int(y),0])
+            cc = int(numpy.floor(y))
+            rr = int(numpy.floor(x))
+            ts = img[:, int(x), int(y)]
+            st = numpy.append(ts, [int(x), int(y), 0])
             C[kk, :] = st
             kk = kk+1
-            
+
         w = S/2
-    
+
     st = None
 
-    return C,S,l,d,kk
+    return C, S, labelled, d, kk
 
 
 def seg_metrics(dataframe, bands, features=['mean']):
@@ -513,60 +535,74 @@ def seg_metrics(dataframe, bands, features=['mean']):
     :rtype out_dataframe: geopandas.Dataframe
     """
     import pandas
-    from . import utils
-    
+    from .utils import list_metrics
+
     out_dataframe = dataframe.copy()
 
     for band in bands:
-        
+
         df = dataframe.filter(regex=band)
 
         for f in features:
-            
+
             series = df.filter(regex=f)
-            
+
             metricas = _seg_ex_metrics(series.to_numpy().astype(float))
 
-            header = utils.list_metrics()
+            header = list_metrics()
 
-            names = [i + '_' + j + '_' + k \
-                        for i, j, k in zip([band] * len(header),
-                                            [f] * len(header),
-                                            header)]
-            
+            names = [i + '_' + j + '_' + k
+                     for i, j, k in zip([band] * len(header),
+                                        [f] * len(header),
+                                        header)]
+
             metricsdf = pandas.DataFrame(metricas, columns=names)
 
-        out_dataframe = pandas.concat([ out_dataframe, metricsdf], axis=1)
+        out_dataframe = pandas.concat([out_dataframe, metricsdf], axis=1)
 
     return out_dataframe
 
 
-def _seg_ex_metrics(series):
+def _seg_ex_metrics(series, metrics_dict, num_cores=-1):
     """This function performs the computation of the metrics using \
     multiprocessing.
 
     :param series: Array of time series. (Series  x Time)
     :type series: numpy.array
 
+    :param metrics_dict: Dictionary with metrics to be computed.
+    :type metrics_dict: dictionary
+
+    :param num_cores: Number of cores to be used. \
+    Value -1 means all cores available.
+    :type num_cores: integer \
+
     :returns image:  Numpy matrix of metrics and/or image.
     """
     import multiprocessing as mp
-    from . import metrics
-    
+    from .metrics import _getmetrics
+
+    # Check core parameter
+    if num_cores == -1:
+        num_cores = mp.cpu_count()
+    elif num_cores == 0:
+        num_cores = 1
+
     # Initialize pool
     pool = mp.Pool(mp.cpu_count())
 
-    # use pool to compute metrics for each pixel
-    # return a list of arrays
-    metricas = pool.map(metrics._getmetrics,[serie for serie in series])
+    # Use pool to compute metrics for each pixel
+    # Return a list of arrays
+    X_m = pool.starmap(_getmetrics, [(serie.astype(float), metrics_dict)
+                                     for serie in series])
 
     # close pool
     pool.close()
 
     # Conver list to numpy array
-    X_m = numpy.vstack(metricas)
+    metricas = numpy.hstack(X_m).T
 
-    return X_m
+    return metricas
 
 
 def extract_features(dataset, segmentation,
@@ -612,27 +648,33 @@ def extract_features(dataset, segmentation,
         features.remove('perimeter')
 
     if 'ratio' in features:
-        segmentation["ratio"] = segmentation['geometry'].apply(lambda g: aspect_ratio(g))
+        segmentation["ratio"] = segmentation['geometry'].apply(lambda g:
+                                                               aspect_ratio(g))
         features.remove('ratio')
 
     if 'symmetry' in features:
-        segmentation["symmetry"] = segmentation['geometry'].apply(lambda g: symmetry(g))
+        segmentation["symmetry"] = segmentation['geometry'].apply(lambda g:
+                                                                  symmetry(g))
         features.remove('symmetry')
 
     if 'compactness' in features:
-        segmentation["compactness"] = segmentation['geometry'].apply(lambda g: reock_compactness(g))
+        segmentation["compactness"] = segmentation['geometry'].apply(lambda g:
+                                                                     reock_compactness(g))
         features.remove('compactness')
 
     if 'rectangular_fit' in features:
-        segmentation["rectangular_fit"] = segmentation['geometry'].apply(lambda g: rectangular_fit(g))
+        segmentation["rectangular_fit"] = segmentation['geometry'].apply(lambda g:
+                                                                         rectangular_fit(g))
         features.remove('rectangular_fit')
 
     if 'width' in features:
-        segmentation["width"] = segmentation['geometry'].apply(lambda g: width(g))
+        segmentation["width"] = segmentation['geometry'].apply(lambda g:
+                                                               width(g))
         features.remove('width')
 
     if 'length' in features:
-        segmentation["length"] = segmentation['geometry'].apply(lambda g: length(g))
+        segmentation["length"] = segmentation['geometry'].apply(lambda g:
+                                                                length(g))
         features.remove('length')
 
     if isinstance(dataset, rasterio.io.DatasetReader):
@@ -664,9 +706,6 @@ def extract_features(dataset, segmentation,
 
 
 def _exRasterio(dataset, segmentation, features, nodata):
-    """This function is used to extract features from images \
-    that are stored in a rasterio object.
-    """
     import os
     import pandas
     import rasterstats
@@ -694,9 +733,6 @@ def _exRasterio(dataset, segmentation, features, nodata):
 
 
 def _extract_xray(dataset, segmentation, features, nodata):
-    """This function is used to extract features from images \
-    that are stored in a xarray.
-    """
     import pandas
     import rasterstats
     from affine import Affine
@@ -727,18 +763,14 @@ def _extract_xray(dataset, segmentation, features, nodata):
 
             stats.columns = names
             segmentation = pandas.concat([segmentation, stats], axis=1)
-    
+
     c = None
     names = None
-    
+
     return segmentation
 
 
 def _extract_from_path(path, segmentation, features, nodata):
-    """This function is used to extract features from images that\
-     are stored in a folder.
-    """
-
     import os
     import re
     import glob
@@ -757,7 +789,7 @@ def _extract_from_path(path, segmentation, features, nodata):
 
         # find datetime and att
         key = os.path.basename(f).split('.')[0]
-        
+
         stats = fx2parallel(dataset.read(1),
                             geoms, features,
                             dataset.transform,
@@ -777,13 +809,13 @@ def _extract_from_path(path, segmentation, features, nodata):
 
 
 def _chunks(data, n):
-    """Yield successive n-sized chunks from a slice-able iterable."""
+    # Yield successive n-sized chunks from a slice-able iterable
     for i in range(0, len(data), n):
         yield data[i:i+n]
 
 
 def _zonal_stats_wrapper(raster, stats, affine, nodata):
-    """Wrapper for zonal stats, takes a list of features"""
+    # Wrapper for zonal stats, takes a list of features
     from rasterstats import zonal_stats
     import functools
 
@@ -792,7 +824,7 @@ def _zonal_stats_wrapper(raster, stats, affine, nodata):
 
 
 def fx2parallel(dataset, geoms, features, transform, nodata):
-    """This functions allow the extraction of features."""
+    # This functions allow the extraction of features
     import pandas
     import itertools
     import multiprocessing
@@ -843,8 +875,7 @@ def aspect_ratio(geom):
 
 
 def symmetry(geom):
-    """
-    This function computes the symmetry of a given geometry.
+    """This function computes the symmetry of a given geometry.
 
     Symmetry is calculated by dividing the overlapping area AO, between \
     a polygon and its reflection across the horizontal axis by the area of \
@@ -881,10 +912,10 @@ def reock_compactness(geom):
     :type geom: shapely.geometry.Polygon
 
     :returns reock: Polygon reock compactness.
-    
+
     .. Tip:: To know more about it:
 
-        Reock, Ernest C. 1961. “A note: Measuring compactness as a requirement \
+        Reock, Ernest C. 1961. “A note: Measuring compactness as a requirement\
         of legislative apportionment.” Midwest Journal of Political Science \
         1(5), 70–74.
     """
@@ -915,10 +946,10 @@ def rectangular_fit(geom):
 
     .. Tip:: To know more about it:
 
-        Sun, Z., Fang, H., Deng, M., Chen, A., Yue, P. and Di, L.. "Regular \
-        Shape Similarity Index: A Novel Index for Accurate Extraction of Regular \
-        Objects From Remote Sensing Images," IEEE Transactions on Geoscience and \
-        Remote Sensing, v.53, 2015, p. 3737. doi:10.1109/TGRS.2014.2382566
+        Sun, Z., Fang, H., Deng, M., Chen, A., Yue, P. and Di, L. "Regular \
+        Shape Similarity Index:Novel Index for Accurate Extraction of Regular \
+        Objects From Remote Sensing Images," IEEE Transactions on Geoscience \
+        and Remote Sensing, v.53, 2015, p. 3737. doi:10.1109/TGRS.2014.2382566
     """
 
     mrc = geom.minimum_rotated_rectangle
