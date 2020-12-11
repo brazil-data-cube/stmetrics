@@ -606,15 +606,18 @@ def _seg_ex_metrics(series, metrics_dict, num_cores=-1):
 
 
 def extract_features(dataset, segmentation,
-                     features=['mean', 'std', 'min', 'max',
+                     features=['mean', 'std', 'min', 'max', 'majority',
                                'area', 'perimeter', 'width',
-                               'length', 'ratio', 'symmetry',
+                               'length', 'aspect_ratio', 'symmetry',
                                'compactness', 'rectangular_fit'],
                      nodata=-9999):
-    """This function extracts features using polygons.
-    Mean, Standard Deviation, Minimum, Maximum, Area, Perimeter, \
-    Lenght/With ratio, Symmetry and Compactness are extracted \
-    for each polygon.
+    """This function computes features using polygon geometries.
+
+    Regarding image features, this function computes 5 features: \
+    Mean, Standard Deviation, Minimum, Maximum and Majority (mode).
+    Along side with the image features, 8 shape features can be computed \
+    for each polygon: Area, Perimeter, Width, Length, Aspect Ratio ratio, \
+    Symmetry, Compactness and Rectangular fit.
 
     :param dataset: Images or path were images that compose time series are.
     :type dataset: Rasterio, Xarray.Dataset or string
@@ -648,9 +651,9 @@ def extract_features(dataset, segmentation,
         features.remove('perimeter')
 
     if 'ratio' in features:
-        segmentation["ratio"] = segmentation['geometry'].apply(lambda g:
+        segmentation["aspect_ratio"] = segmentation['geometry'].apply(lambda g:
                                                                aspect_ratio(g))
-        features.remove('ratio')
+        features.remove('aspect_ratio')
 
     if 'symmetry' in features:
         segmentation["symmetry"] = segmentation['geometry'].apply(lambda g:
@@ -743,7 +746,7 @@ def _extract_xray(dataset, segmentation, features, nodata):
 
     # Fix affine transformation
     # Function from_gdal swap positions we need to fix this in a brute \
-    # force approach.
+    # Force approach
     c = list(dataset[band_list[0]].transform)
     affine = Affine.from_gdal(*(c[2], c[0], c[1], c[5], c[3], c[4]))
 
@@ -829,6 +832,7 @@ def fx2parallel(dataset, geoms, features, transform, nodata):
     import itertools
     import multiprocessing
 
+    # Using all cores
     cores = multiprocessing.cpu_count()
     p = multiprocessing.Pool(cores)
 
@@ -848,9 +852,8 @@ def fx2parallel(dataset, geoms, features, transform, nodata):
 def aspect_ratio(geom):
     """This function computes the aspect ratio of a given geometry.
 
-    The Length-Width Ratio (LW) is the ratio of the length \
-    (LMBR) and the width (WMBR) of the minimum bounding \
-    rectangle of a polygon.
+    The Aspect Ratio is the ratio of the length \
+    and the width of the minimum bounding rectangle of a polygon.
 
     :param geom: Polygon geometry
     :type geom: shapely.geometry.Polygon
@@ -878,8 +881,8 @@ def symmetry(geom):
     """This function computes the symmetry of a given geometry.
 
     Symmetry is calculated by dividing the overlapping area AO, between \
-    a polygon and its reflection across the horizontal axis by the area of \
-    the original polygon P. The range of this score goes between [0,1] and a \
+    a polygon P and its reflection across the horizontal axis by the area of \
+    the polygon P. The range of this score falls between [0,1] and a \
     score closer to 1 indicates a more compact and regular geometry.
 
     .. math:: Symmetry = AO/A_p
@@ -901,10 +904,10 @@ def symmetry(geom):
 def reock_compactness(geom):
     """This function computes the reock compactness of a given geometry.
 
-    The Reock Score (R) is the ratio of the area of the polygon P to the \
-    area of a minimum bounding cirle (AMBC) that encloses the geometry. A \
-    polygon Reock score falls within the range of [0,1] and high values \
-    indicates a more compact district.
+    The Reock Score (R) is the ratio of the area of a polygon P to the \
+    area of a minimum bounding cirle (AMBC) that encloses the geometry. This \
+    score falls within the range of [0,1] and high values \
+    indicates a more compact geometry.
 
     .. math:: Reock = A_p/A_{MBC}
 
@@ -931,7 +934,7 @@ def reock_compactness(geom):
 
 def rectangular_fit(geom):
     """This functions computes the rectangular_fit of a geometry. \
-    Rectangular fit is defined as:
+    The rectangular fit is defined as:
 
     .. math:: RectFit = (AR - AD) / AO
 
@@ -944,7 +947,8 @@ def rectangular_fit(geom):
 
     :returns rectangular_fit: Polygon rectangular fit.
 
-    .. Tip:: To know more about it:
+    .. Tip:: 
+        To know more about it:
 
         Sun, Z., Fang, H., Deng, M., Chen, A., Yue, P. and Di, L. "Regular \
         Shape Similarity Index:Novel Index for Accurate Extraction of Regular \
