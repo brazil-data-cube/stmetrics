@@ -5,7 +5,8 @@ from numba import njit, prange
 
 
 def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
-          output="shp"):
+          output="shp", window=None, max_dist=None, max_step=None, 
+          max_length_diff=None, penalty=None, psi=None, use_pruning=False):
     """This function create spatial-temporal superpixels using a Satellite \
     Image Time Series (SITS). Version 1.4
 
@@ -22,12 +23,37 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
     :param iter: Number of iterations to be performed. Default = 10.
     :type iter: int
 
-    :param output: Type of output to be produced. Default is shp (Shapefile).
-    :type output: string
-
     :param pattern: Type of pattern initialization. Hexagonal (default) or\
     regular (as SLIC).
     :type pattern: int
+
+    :param output: Type of output to be produced. Default is shp (Shapefile).
+    :type output: string
+
+    :param window: Only allow for maximal shifts from the two diagonals \
+    smaller than this number. It includes the diagonal, meaning that an \
+    Euclidean distance is obtained by setting window=1.
+    :type output: int
+
+    :param max_dist: Stop if the returned values will be larger than \
+    this value.
+    :type output: int
+
+    :param max_step: Do not allow steps larger than this value.
+    :type output: int
+
+    :param max_length_diff: Return infinity if length of two series is larger.
+    :type output: int
+
+    :param penalty: Penalty to add if compression or expansion is applied.
+    :type output: int
+
+    :param psi: Psi relaxation parameter (ignore start and end of matching).
+        Useful for cyclical series.
+    :type output: int
+
+    :param use_pruning: Prune values based on Euclidean distance.
+    :type output: Boolean
 
     :returns segmentation: Shapefile containing superpixels produced.
     """
@@ -1000,3 +1026,67 @@ def length(geom):
     minx, miny, maxx, maxy = geom.bounds
 
     return maxy - miny
+
+def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None, 
+               max_step=None, max_length_diff=None, penalty=None, 
+               psi=None, use_pruning=False):
+    """This function performs a spatio-temporal filtering of datacube \
+    using the DTW distance.
+
+    :param dataset: SITS dataset.
+    :type dataset: shapely.geometry.Polygon
+
+    :param kernel_size: Size of convolutional kernel.
+    :type kernel_size: int
+
+    :param window: Only allow for maximal shifts from the two diagonals \
+    smaller than this number. It includes the diagonal, meaning that an \
+    Euclidean distance is obtained by setting window=1.
+    
+    :param max_dist: Stop if the returned values will be larger than \
+    this value.
+
+    :param max_step: Do not allow steps larger than this value.
+
+    :param max_length_diff: Return infinity if length of two series is larger.
+
+    :param penalty: Penalty to add if compression or expansion is applied.
+
+    :param psi: Psi relaxation parameter (ignore start and end of matching).
+        Useful for cyclical series.
+
+    :param use_pruning: Prune values based on Euclidean distance.
+
+    :returns edge: Edge image as numpy.ndarray.
+    """
+    from dtaidistance import dtw
+
+    #initializer var image
+    edge = numpy.zeros([dataset.shape[1], dataset.shape[2]])
+
+    #adjust kernel
+    ks = kernel_size-2
+
+    #Loop over original image
+    for r in range(dataset.shape[1]):
+        for c in range(dataset.shape[2]):
+
+            #slice over original image
+            rmin = int(numpy.floor(max(r-ks, 0)))
+            cmin = int(numpy.floor(max(c-ks, 0)))
+            rmax = int(numpy.floor(min(r+ks, dataset.shape[1])))
+            cmax = int(numpy.floor(min(c+ks, dataset.shape[2])))
+            subim = dataset[:, rmin:rmax+1, cmin:cmax+1]
+
+            #Loop inside squared kernel
+            tmp = 0
+            for rs in range(subim.shape[1]):
+                for cs in range(subim.shape[2]):
+                    dc = dtw.distance_fast(dataset[:, r, c].astype(float),
+                                      subim[:, rs, cs].astype(float))
+                    tmp = dc + tmp
+
+            #Edge value
+            edge[r][c] = tmp
+
+    return edge
