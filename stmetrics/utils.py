@@ -3,13 +3,17 @@ import numpy
 
 def fixseries(timeseries, nodata=-9999):
     """This function ajust the time series to polar transformation.
-    As some time series may have very significant noises. When coverted to \
-    polar space it may produce inconsistent polygons. To avoid this, this \
-    function remove this spikes.
+
+    As some time series may have very significant noises, when coverted to \
+    polar space it may produce an inconsistent geometry. To avoid this issue, \
+    this function remove this spikes.
+
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
+
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
+
     :return fixed_timeseries: Numpy array of time series without spikes.
     """
     # check input
@@ -43,11 +47,14 @@ def fixseries(timeseries, nodata=-9999):
 
 
 def create_polygon(timeseries):
-    """This function converts the time series to the polar space.
-    If the time series has lenght smaller than 3, it cannot be properly\
+    """This function converts a time series to the polar space.
+
+    If the time series has lenght smaller than 3, it can not be properly \
     converted to polar space.
+
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
+
     :return polygon: Shapely polygon of time series without spikes.
     """
     from shapely.geometry import Polygon
@@ -84,13 +91,15 @@ def create_polygon(timeseries):
 
 
 def get_list_of_points(timeseries):
-    """This function creates a list of angles based on the time series.
-    This list is used for convert the time series to a polygon.
+    """This function creates a list of angles based on the time series that \
+    is used to convert a time series to a geometry.
+
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
+
     :return list_of_observations: Numpy array of lists of observations after \
     polar transformation.
-    :r type list_of_observations: numpy.ndarray
+
     :return list_of_angles: Numpy array of lists of angles after polar \
     transformation.
     """
@@ -103,10 +112,12 @@ def get_list_of_points(timeseries):
 
 
 def check_input(timeseries):
-    """This function check the input and raise exception if it is too short\
+    """This function check the input and raise exception if it is too short \
     or has the wrong type.
+
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray.
+
     :raises ValueError: When ``timeseries`` is not valid.
     """
     dimensions = timeseries.ndim
@@ -171,13 +182,16 @@ def img2xarray(path, band):
 
 
 def bdc2xarray(cube_path, list_bands):
-    """This function read a path with BDC ARD data and create a xarray dataset.
+    """This function read a path with BDC ARD data and create a xarray \
+    dataset.
+
     :param cube_path: Path of folder with images.
     :type cube_path: string
+
     :param list_bands: List of bands that will be available on xarray.
     :type list_bands: list
+
     :return cube_dataset: Xarray dataset.
-    :rtype: xarray.dataset
     """
     import xarray
 
@@ -203,23 +217,23 @@ def error_basics():
         'abs_sum_ts': numpy.nan,
         'iqr_ts': numpy.nan,
         'fqr_ts': numpy.nan,
-        'tqr_ts': numpy.nan,
-        'sqr_ts': numpy.nan
+        'sqr_ts': numpy.nan,
+        'tqr_ts': numpy.nan
     }
     return basics
 
 
 def error_polar():
     polares = {
-        'ecc_metric': numpy.nan,
-        'gyration_radius': numpy.nan,
         'area_ts': numpy.nan,
-        'polar_balance': numpy.nan,
         'angle': numpy.nan,
         'area_q1': numpy.nan,
         'area_q2': numpy.nan,
         'area_q3': numpy.nan,
         'area_q4': numpy.nan,
+        'polar_balance': numpy.nan,
+        'ecc_metric': numpy.nan,
+        'gyration_radius': numpy.nan,
         'csi': numpy.nan
     }
     return polares

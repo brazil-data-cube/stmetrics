@@ -7,7 +7,7 @@ from numba import njit, prange
 def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
           output="shp"):
     """This function create spatial-temporal superpixels using a Satellite \
-    Image Time Series (SITS). Version 1.1
+    Image Time Series (SITS). Version 1.4
 
     :param image: SITS dataset.
     :type image: Rasterio dataset object or a xarray.DataArray.
@@ -153,7 +153,7 @@ def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin):
     :param cmin: Minimum column.
     :type cmin: int
 
-    :returns D: ND-Array distance
+    :returns D:  numpy.ndarray distance.
     """
     from dtaidistance import dtw
 
@@ -215,7 +215,7 @@ def distance(c_series, ic, jc, subim, S, m, rmin, cmin):
     :param cmin: Minimum column.
     :type cmin: int
 
-    :returns D: ND-Array distance
+    :returns D: numpy.ndarray distance.
     """
     from dtaidistance import dtw
 
@@ -291,16 +291,13 @@ def update_cluster(img, la, rows, columns, bands, k):
 
 
 def postprocessing(raster, S):
-    """Post processing function to force conectivity.
+    """Post processing function to enforce conectivity.
 
-    :param raster: Labelled image
+    :param raster: Labelled image.
     :type raster: numpy.ndarray
 
-    :param S: Spacing between superpixels
+    :param S: Spacing between superpixels.
     :type S: int
-
-    :param crs: Coordinate Reference Systems
-    :type crs: PROJ4 dict
 
     :returns final: Labelled image with connectivity enforced.
     """
@@ -329,15 +326,16 @@ def postprocessing(raster, S):
 
 
 def write_pandas(segmentation, transform, crs):
-    """This function creates the shapefile of the segmentation produced.
+    """This function creates a geopandas DataFrame \
+    of the segmentation.
 
-    :param segmentation: Segmentation array
+    :param segmentation: Segmentation numpy array.
     :type segmentation: numpy.ndarray
 
     :param transform: Transformation parameters.
     :type transform: list
 
-    :param crs: Coordinate Reference Systems
+    :param crs: Coordinate Reference System.
     :type crs: PROJ4 dict
 
     :returns gdf: Segmentation as a geopandas geodataframe.
@@ -364,7 +362,7 @@ def write_pandas(segmentation, transform, crs):
 
 @njit(fastmath=True)
 def init_cluster_hex(rows, columns, ki, img, bands):
-    """This function initialize the clusters using a hexagonal pattern.
+    """This function initialize the clusters for SNITC using a hexagonal pattern.
 
     :param rows: Number of rows of image.
     :type rows: int
@@ -449,7 +447,7 @@ def init_cluster_hex(rows, columns, ki, img, bands):
 
 @njit(fastmath=True)
 def init_cluster_regular(rows, columns, ki, img, bands):
-    """This function initialize the clusters using a square pattern.
+    """This function initialize the clusters for SNITC using a square pattern.
 
     :param rows: Number of rows of image.
     :type rows: int
@@ -537,7 +535,7 @@ def seg_metrics(dataframe, bands, metrics_dict, features=['mean'], num_cores=-1)
 
     :param features: List of features to be used for computation. \
     This parameter allows you to use the features extracted with \
-    extract_features function and compute metrics over image features \
+    ``extract_features`` function and compute metrics over image features \
     (mean, max, min, std and mode). If it is None, the code expect that
     the DataFrame has only one variable.
     :type features: list

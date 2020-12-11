@@ -4,16 +4,20 @@ from .utils import fixseries, truncate
 
 def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
     """This function compute 4 fractal dimensions and the hurst exponential.
-        - DFA: measures the Hurst parameter H, which is very similar to the \
+
+        - DFA: measures the Hurst parameter H, which is similar to the \
         Hurst exponent.
         - HE: self-similarity measure that assess long-range dependence in a \
         time series.
         - KFD: This algorirhm computes the FD using Katz algorithm.
+
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
+
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
-    :return out_metrics: Array of fractal metrics values
+
+    :return out_metrics: Dictionary with fractal metrics values.
     """
     out_metrics = dict()
 
@@ -34,7 +38,7 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
 
 
 def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
-    """dfa_fd - Detrended Fluctuation Analysis (DFA) - Measures the Hurst \
+    """Detrended Fluctuation Analysis (DFA) - Measures the Hurst \
     parameter H, which is very similar to the Hurst exponent.
     The main difference is that DFA can be used for non-stationary \
     time series.
@@ -71,7 +75,7 @@ def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
 
 
 def hurst_exp(timeseries, nvals=None, nodata=-9999):
-    """hurst_exp - Hurst exponent - Computes the H exponent by a standard \
+    """Hurst exponent - Computes the H exponent by a standard \
     rescaled range (R/S) approach.
 
     Hurst exponent is a self-similarity measure that assess long-range \
@@ -103,7 +107,7 @@ def hurst_exp(timeseries, nvals=None, nodata=-9999):
 
 
 def katz_fd(timeseries, nodata):
-    """katz_fd - Katz fractal dimension - Computes Katz fractal dimension.
+    """Katz fractal dimension.
 
     It is defined by:
     .. math:: K = \\frac{\\log_{10}(n)}{\\log_{10}(d/L)+\\log_{10}(n)}

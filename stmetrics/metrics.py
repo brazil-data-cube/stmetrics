@@ -8,10 +8,10 @@ METRICS_DICT = {
 
 
 def get_metrics(series, metrics_dict=METRICS_DICT, nodata=-9999, show=False):
-    """This function perform the computation and plot of the \
-    spectral-polar-fractal metrics available in the stmetrics package.
+    """This function perform the computation of the \
+    basic, polar and fractal metrics available in the stmetrics package.
 
-    :param timeseries: Your time series.
+    :param timeseries: Time series.
     :type timeseries: numpy.ndarray
 
     :param metrics_dict: Dictionary with metrics to be computed.
@@ -22,39 +22,38 @@ def get_metrics(series, metrics_dict=METRICS_DICT, nodata=-9999, show=False):
 
     :returns time_metrics: Dicitionary of metrics.
     """
-    from . import basics
-    from . import polar
-    from . import fractal
-    from . import utils
+    from .basics import ts_basics
+    from .polar import ts_polar
+    from .fractal import ts_fractal
 
     time_metrics = dict()
 
     # call functions
     if "basics" in metrics_dict:
-        time_metrics["basics"] = basics.ts_basics(series,
-                                                  metrics_dict["basics"],
-                                                  nodata)
+        time_metrics["basics"] = ts_basics(series,
+                                           metrics_dict["basics"],
+                                           nodata)
 
     if "polar" in metrics_dict:
-        time_metrics["polar"] = polar.ts_polar(series,
-                                               metrics_dict["polar"],
-                                               nodata, show)
+        time_metrics["polar"] = ts_polar(series,
+                                         metrics_dict["polar"],
+                                         nodata, show)
 
     if "fractal" in metrics_dict:
-        time_metrics["fractal"] = fractal.ts_fractal(series,
-                                                     metrics_dict["fractal"],
-                                                     nodata)
+        time_metrics["fractal"] = ts_fractal(series,
+                                             metrics_dict["fractal"],
+                                             nodata)
 
     return time_metrics
 
 
-def _getmetrics(timeseries, metrics):
+def _getmetrics(timeseries, metrics_dict=METRICS_DICT):
 
     # Setup empty numpy array
     metricas = numpy.array([])
 
     # Compute metrics based on dict
-    out_metrics = get_metrics(timeseries, metrics, show=False)
+    out_metrics = get_metrics(timeseries, metrics_dict, show=False)
 
     # Loop through dict keys and setup the array
     for key in out_metrics.keys():
@@ -73,7 +72,7 @@ def sits2metrics(dataset, metrics=METRICS_DICT, num_cores=-1):
     """This function performs the computation of the metrics using \
     multiprocessing.
 
-    :param dataset: Your time series.
+    :param dataset: Time series.
     :type dataset: rasterio dataset, numpy array (ZxMxN) - Z \
     is the time series lenght or xarray.Dataset
 
