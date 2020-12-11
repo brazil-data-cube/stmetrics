@@ -520,16 +520,27 @@ def init_cluster_regular(rows, columns, ki, img, bands):
     return C, S, labelled, d, kk
 
 
-def seg_metrics(dataframe, bands, features=['mean']):
-    """This function compute time metrics from a geopandas \
+def seg_metrics(dataframe, bands, metrics_dict, features=['mean'], num_cores=-1):
+    """This function compute time series metrics from a geopandas \
     with time features.
-    Currently, basic, polar and fractal metrics are extracted.
+    Currently, basic, polar and fractal metrics are extracted. but you can \
+    set the metrics you to compute using a dictionary.
 
-    :param dataframe: Images or path were images that compose time series are.
-    :type dataframe: geopandas.GeodAtaframe
+    :param dataframe: Pandas DataFrame with time series information.
+    :type dataframe: pandas DataFrame
 
-    :param segmentation: feature that will be used to compute the metrics.
-    :type segmentation: list
+    :param bands: Pandas DataFrame with time series information.
+    :type bands: list
+
+    :param: Dictionary of metrics to be computed
+    :type: dictionary
+
+    :param features: List of features to be used for computation. \
+    This parameter allows you to use the features extracted with \
+    extract_features function and compute metrics over image features \
+    (mean, max, min, std and mode). If it is None, the code expect that
+    the DataFrame has only one variable.
+    :type features: list
 
     :returns out_dataframe: Geopandas dataframe with the features added.
     :rtype out_dataframe: geopandas.Dataframe
@@ -543,42 +554,46 @@ def seg_metrics(dataframe, bands, features=['mean']):
 
         df = dataframe.filter(regex=band)
 
-        for f in features:
+        if features is not None:
+                series = df.filter(regex=f)
 
-            series = df.filter(regex=f)
+                for f in features:
 
-            metricas = _seg_ex_metrics(series.to_numpy().astype(float))
+                    metricas = _seg_ex_metrics(series.to_numpy().astype(float), 
+                                               metrics_dict,
+                                               num_cores)
+
+                    header = list_metrics()
+
+                    names = [i + '_' + j + '_' + k
+                             for i, j, k in zip([band] * len(header),
+                                                [f] * len(header),
+                                                header)]
+
+                    metricsdf = pandas.DataFrame(metricas, columns=names)
+
+                out_dataframe = pandas.concat([out_dataframe, metricsdf], axis=1)
+        else:
+            metricas = _seg_ex_metrics(df.to_numpy().astype(float), 
+                                           metrics_dict,
+                                           num_cores)
 
             header = list_metrics()
 
-            names = [i + '_' + j + '_' + k
-                     for i, j, k in zip([band] * len(header),
-                                        [f] * len(header),
+            names = [i + '_' + k
+                     for i, k in zip([band] * len(header),
                                         header)]
 
             metricsdf = pandas.DataFrame(metricas, columns=names)
 
-        out_dataframe = pandas.concat([out_dataframe, metricsdf], axis=1)
+            out_dataframe = pandas.concat([out_dataframe, metricsdf], axis=1)
 
     return out_dataframe
 
 
 def _seg_ex_metrics(series, metrics_dict, num_cores=-1):
-    """This function performs the computation of the metrics using \
-    multiprocessing.
-
-    :param series: Array of time series. (Series  x Time)
-    :type series: numpy.array
-
-    :param metrics_dict: Dictionary with metrics to be computed.
-    :type metrics_dict: dictionary
-
-    :param num_cores: Number of cores to be used. \
-    Value -1 means all cores available.
-    :type num_cores: integer \
-
-    :returns image:  Numpy matrix of metrics and/or image.
-    """
+    # This function performs the computation of the metrics using \
+    # multiprocessing.
     import multiprocessing as mp
     from .metrics import _getmetrics
 
