@@ -5,8 +5,7 @@ from numba import njit, prange
 
 
 def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
-          output="shp", window=None, max_dist=None, max_step=None, 
-          max_length_diff=None, penalty=None, psi=None, use_pruning=False):
+          output="shp"):
     """This function create spatial-temporal superpixels using a Satellite \
     Image Time Series (SITS). Version 1.4
 
@@ -29,31 +28,6 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
 
     :param output: Type of output to be produced. Default is shp (Shapefile).
     :type output: string
-
-    :param window: Only allow for maximal shifts from the two diagonals \
-    smaller than this number. It includes the diagonal, meaning that an \
-    Euclidean distance is obtained by setting window=1.
-    :type output: int
-
-    :param max_dist: Stop if the returned values will be larger than \
-    this value.
-    :type output: int
-
-    :param max_step: Do not allow steps larger than this value.
-    :type output: int
-
-    :param max_length_diff: Return infinity if length of two series is larger.
-    :type output: int
-
-    :param penalty: Penalty to add if compression or expansion is applied.
-    :type output: int
-
-    :param psi: Psi relaxation parameter (ignore start and end of matching).
-        Useful for cyclical series.
-    :type output: int
-
-    :param use_pruning: Prune values based on Euclidean distance.
-    :type output: Boolean
 
     :returns segmentation: Shapefile containing superpixels produced.
     """
@@ -1037,25 +1011,7 @@ def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None,
     :type dataset: shapely.geometry.Polygon
 
     :param kernel_size: Size of convolutional kernel.
-    :type kernel_size: int
-
-    :param window: Only allow for maximal shifts from the two diagonals \
-    smaller than this number. It includes the diagonal, meaning that an \
-    Euclidean distance is obtained by setting window=1.
-    
-    :param max_dist: Stop if the returned values will be larger than \
-    this value.
-
-    :param max_step: Do not allow steps larger than this value.
-
-    :param max_length_diff: Return infinity if length of two series is larger.
-
-    :param penalty: Penalty to add if compression or expansion is applied.
-
-    :param psi: Psi relaxation parameter (ignore start and end of matching).
-        Useful for cyclical series.
-
-    :param use_pruning: Prune values based on Euclidean distance.
+    :type kernel_size: int.
 
     :returns edge: Edge image as numpy.ndarray.
     """
