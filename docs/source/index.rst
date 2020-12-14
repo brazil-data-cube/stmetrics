@@ -52,4 +52,4 @@ Welcome to stmetrics's documentation!
 
 .. Note::
    This documentation is not finished. Parts of the description are \
-   incomplete and/or incorrect. Please, come back later for the definitive documentation.
+   incomplete and may need corrections. Please, come back later for the definitive documentation.
