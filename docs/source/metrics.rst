@@ -1,5 +1,5 @@
-Metric module
-=============
+Metrics module
+==============
 
 Module for computing metrics
 
