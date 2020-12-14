@@ -3,7 +3,7 @@ from .utils import fixseries, truncate
 
 
 def ts_basics(timeseries, funcs=["all"], nodata=-9999):
-    """This function compute 7 basic metrics:
+    """This function compute all basic metrics in a single call, returning a dictionary:
         - "Max" - Maximum value of the time series.
         - "Min" - Minimum value of the time series.
         - "Mean" - Average value of the time series.
