@@ -5,21 +5,35 @@ from .utils import fixseries, truncate
 def ts_basics(timeseries, funcs=["all"], nodata=-9999):
     """This function compute all basic metrics in a single call, returning a dictionary:
         - "Max" - Maximum value of the time series.
+
         - "Min" - Minimum value of the time series.
+
         - "Mean" - Average value of the time series.
+
         - "Std" - Standard deviation of the time series.
+
         - "Sum" - Sum of values over a cycle. Usually is an indicator of the \
             annual production of vegetation.
+
         - "Amplitude" - The difference between the time series’s maximum and \
             minimum values.
+
         - "MSE" - Mean Spectral Energy.
+
         - "First_slope" - Maximum value of the first slope of the cycle.
+
         - "Skew" - Measures the asymmetry of the time series.
+
         - "AMD" - Absolute mean derivative (AMD).
+
         - "AbsSum" - Absolute Sum of values over of the time series.
+
         - "IQR" - Interquaritle range (IQR) of the time series.
+
         - "FQR" - First quartile of the time series.
+        
         - "SQR" - Second quartile of the time series.
+
         - "TQR" - Third quaritle of the time series.
 
     :param timeseries: Time series.

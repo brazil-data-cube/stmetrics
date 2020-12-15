@@ -7,8 +7,10 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
 
         - DFA: measures the Hurst parameter H, which is similar to the \
         Hurst exponent.
+
         - HE: self-similarity measure that assess long-range dependence in a \
         time series.
+        
         - KFD: This algorirhm computes the FD using Katz algorithm.
 
     :param timeseries: Time series.
