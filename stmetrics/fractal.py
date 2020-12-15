@@ -3,7 +3,7 @@ from .utils import fixseries, truncate
 
 
 def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
-    """This function compute 4 fractal dimensions and the hurst exponential.
+    """This function computes 4 fractal dimensions and the hurst exponential.
 
         - DFA: measures the Hurst parameter H, which is similar to the \
         Hurst exponent.
@@ -39,7 +39,7 @@ def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
 
 def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
     """Detrended Fluctuation Analysis (DFA) measures the Hurst \
-    parameter H, which is very similar to the Hurst exponent.
+    parameter H, which is very similar to the Hurst Exponent (HE).
     The main difference is that DFA can be used for non-stationary \
     time series.
 
@@ -49,7 +49,7 @@ def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
     :param nvals: Sizes of subseries to use.
     :type nvals: int
 
-    :param overlap: if True, there will be a 50% overlap on windows\
+    :param overlap: if True, there will be a 50% overlap on windows \
     otherwise non-overlapping windows will be used.
     :type overlap: Boolean
 
@@ -63,10 +63,11 @@ def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
 
     .. Note::
 
-        This functions uses the dfa implementation from the Nolds package.
-        Due to time series carachteristcs we use by default the 'RANSAC' \
+        This function uses the Detrended Fluctuation Analysis (DFA) \
+        implementation from the Nolds package. Due to time series \
+        characteristcs we use by default the 'RANSAC' \
         fitting method as it is more robust to outliers.
-        For more details regarding the hurst implementation, check nolds \
+        For more details regarding the hurst implementation, check Nolds \
         documentation page.
 
     """
@@ -78,28 +79,31 @@ def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
 
 
 def hurst_exp(timeseries, nvals=None, nodata=-9999):
-    """Computes the H exponent by a standard \
+    """Computes the Hurst Exponent (HE) by a standard \
     rescaled range (R/S) approach.
-    Hurst exponent is a self-similarity measure that assess long-range \
+    HE is a self-similarity measure that assesses long-range \
     dependence in a time series. It can be used to determine whether the \
     time series is more, less, or equally likely to increase if it has \
     increased in previous steps.
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
+    
     :param nvals: Sizes of subseries to use.
     :type nvals: int
+    
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 
-    :return hurst: Hurst expoent.
+    :return hurst: The Hurst Expoent (HE).
 
     .. Note::
 
-        This function was adapted from the package Nolds.
-        Due to time series carachteristcs we use by default the 'RANSAC' \
+        This function was adapted from the package Nolds. Due to time series \
+        characteristcs we use by default the 'RANSAC' \
         fitting method as it is more robust to outliers.
-        For more details regarding the hurst implementation.
+        For more details regarding the hurst implementation, check Nolds \
+        documentation page.
     """
     import nolds
     ts = fixseries(timeseries, nodata)
@@ -113,12 +117,13 @@ def katz_fd(timeseries, nodata=-9999):
     It is defined by:
     .. math:: K = \\frac{\\log_{10}(n)}{\\log_{10}(d/L)+\\log_{10}(n)}
     where :math:`L` is the total length of the time series and :math:`d` \
-    is the Euclidean distancebetween the first point in the series and \
+    is the Euclidean distance between the first point in the series and \
     the point that provides the furthest distance with respect to \
     the first point.
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
+    
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 
