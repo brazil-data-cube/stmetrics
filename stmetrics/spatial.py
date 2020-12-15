@@ -136,22 +136,22 @@ def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin):
     """This function computes the spatial-temporal distance between \
     two pixels using the dtw distance with C implementation.
 
-    :param c_series: average time series of cluster
+    :param c_series: average time series of cluster.
     :type c_series: numpy.ndarray
 
-    :param ic: X coordinate of cluster center
+    :param ic: X coordinate of cluster center.
     :type ic: int
 
-    :param jc: Y coordinate of cluster center
+    :param jc: Y coordinate of cluster center.
     :type jc: int
 
-    :param subim: Block of image from the cluster under analysis .
+    :param subim: Block of image from the cluster under analysis.
     :type subim: int
 
     :param S: Pattern spacing value.
     :type S: int
 
-    :param m: Compactness value
+    :param m: Compactness value.
     :type m: float
 
     :param rmin: Minimum row.
@@ -198,22 +198,22 @@ def distance(c_series, ic, jc, subim, S, m, rmin, cmin):
     """This function computes the spatial-temporal distance between \
     two pixels using the DTW distance.
 
-    :param c_series: average time series of cluster
+    :param c_series: average time series of cluster.
     :type c_series: numpy.ndarray
 
-    :param ic: X coordinate of cluster center
+    :param ic: X coordinate of cluster center.
     :type ic: int
 
-    :param jc: Y coordinate of cluster center
+    :param jc: Y coordinate of cluster center.
     :type jc: int
 
-    :param subim: Block of image from the cluster under analysis .
+    :param subim: Block of image from the cluster under analysis.
     :type subim: int
 
     :param S: Pattern spacing value.
     :type S: int
 
-    :param m: Compactness value
+    :param m: Compactness value.
     :type m: float
 
     :param rmin: Minimum row.
@@ -268,7 +268,7 @@ def update_cluster(img, la, rows, columns, bands, k):
     :param columns: Number of columns of image.
     :type columns: int
 
-    :param bands: Number of bands (lenght of time series)
+    :param bands: Number of bands (lenght of time series).
     :type bands: int
 
     :param k: Number of superpixel.
@@ -298,7 +298,7 @@ def update_cluster(img, la, rows, columns, bands, k):
 
 
 def postprocessing(raster, S):
-    """Post processing function to enforce conectivity.
+    """Post processing function to enforce connectivity.
 
     :param raster: Labelled image.
     :type raster: numpy.ndarray
@@ -333,7 +333,7 @@ def postprocessing(raster, S):
 
 
 def write_pandas(segmentation, transform, crs):
-    """This function creates a geopandas DataFrame \
+    """This function creates a GeoPandas DataFrame \
     of the segmentation.
 
     :param segmentation: Segmentation numpy array.
@@ -384,7 +384,7 @@ def init_cluster_hex(rows, columns, ki, img, bands):
     :param img: Input image.
     :type img: numpy.ndarray
 
-    :param bands: Number of bands (lenght of time series)
+    :param bands: Number of bands (lenght of time series).
     :type bands: int
 
     :returns C: ND-array containing cluster centres information.
@@ -469,7 +469,7 @@ def init_cluster_regular(rows, columns, ki, img, bands):
     :param img: Input image.
     :type img: numpy.ndarray
 
-    :param bands: Number of bands (lenght of time series)
+    :param bands: Number of bands (lenght of time series).
     :type bands: int
 
     :returns C: ND-array containing cluster centres information.
@@ -641,7 +641,7 @@ def extract_features(dataset, segmentation,
     for each polygon: Area, Perimeter, Width, Length, Aspect Ratio ratio, \
     Symmetry, Compactness and Rectangular fit.
 
-    :param dataset: Images or path were images that compose time series are.
+    :param dataset: Images or path to images that compose time series.
     :type dataset: Rasterio, Xarray.Dataset or string
 
     :param segmentation: Spatio-temporal Segmentation.
@@ -653,7 +653,7 @@ def extract_features(dataset, segmentation,
     :param nodata: Nodata value
     :type nodata: int
 
-    :returns segmentation: Geopandas dataframe with the features.
+    :returns segmentation: GeoPandas DataFrame with the features.
     """
     import os
     import pandas
@@ -901,9 +901,9 @@ def aspect_ratio(geom):
 def symmetry(geom):
     """This function computes the symmetry of a given geometry.
 
-    Symmetry is calculated by dividing the overlapping area AO, between \
+    Symmetry is calculated by dividing the overlapping area (AO), between \
     a polygon P and its reflection across the horizontal axis by the area of \
-    the polygon P. The range of this score falls between [0,1] and a \
+    the polygon P (A_p). The range of this score falls between [0,1] and a \
     score closer to 1 indicates a more compact and regular geometry.
 
     .. math:: Symmetry = AO/A_p
@@ -932,7 +932,7 @@ def reock_compactness(geom):
 
     .. math:: Reock = A_p/A_{MBC}
 
-    :param geom: Polygon geometry
+    :param geom: Polygon geometry.
     :type geom: shapely.geometry.Polygon
 
     :returns reock: Polygon reock compactness.
@@ -954,7 +954,7 @@ def reock_compactness(geom):
 
 
 def rectangular_fit(geom):
-    """This functions computes the rectangular_fit of a geometry. \
+    """This function computes the rectangular fit of a geometry. \
     The rectangular fit is defined as:
 
     .. math:: RectFit = (AR - AD) / AO
@@ -983,9 +983,9 @@ def rectangular_fit(geom):
 
 
 def width(geom):
-    """This functions computes the width of a geometry.
+    """This function computes the width of a geometry.
 
-    :param geom: Polygon geometry
+    :param geom: Polygon geometry.
     :type geom: shapely.geometry.Polygon
 
     :returns width: Polygon width.
@@ -997,9 +997,9 @@ def width(geom):
 
 
 def length(geom):
-    """This functions computes the lenght of a geometry.
+    """This function computes the lenght of a geometry.
 
-    :param geom: Polygon geometry
+    :param geom: Polygon geometry.
     :type geom: shapely.geometry.Polygon
 
     :returns length: Polygon length.
