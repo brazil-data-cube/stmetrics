@@ -8,7 +8,7 @@ METRICS_DICT = {
 
 
 def get_metrics(series, metrics_dict=METRICS_DICT, nodata=-9999, show=False):
-    """This function perform the computation of the \
+    """This function performs the computation of the \
     basic, polar and fractal metrics available in the stmetrics package.
 
     :param timeseries: Time series.
