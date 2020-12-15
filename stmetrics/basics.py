@@ -64,7 +64,8 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
 
 
 def mean_ts(timeseries, nodata=-9999):
-    """Average value of the time series.
+    """Average value (mean) of the time series, considering only valid \
+    values. When nodata is found, it is not included in N value (for all functions). 
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
@@ -131,7 +132,8 @@ def std_ts(timeseries, nodata=-9999):
 def sum_ts(timeseries, nodata=-9999):
     """Sum of values of the time series.
 
-    Usually is an indicator of the annual production of vegetation.
+    When dealing with vegetation analysis, this value \
+    can be a proxy of the annual production of vegetation.
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
@@ -183,7 +185,8 @@ def fslope_ts(timeseries, nodata=-9999):
 
 
 def abs_sum_ts(timeseries, nodata=-9999):
-    """Absolute Sum of values of the time series.
+    """Sum of absolute values of the time series. All values are \
+    converted to absolute (positive) values, and are summed.
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
@@ -191,7 +194,7 @@ def abs_sum_ts(timeseries, nodata=-9999):
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 
-    :returns: Sum of absolute values of time series.
+    :returns: Sum of absolute values of the time series.
     """
 
     ts = fixseries(timeseries, nodata)
@@ -229,7 +232,7 @@ def amd_ts(timeseries, nodata=-9999):
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 
-    :returns: The absolute mean derivative of time series.
+    :returns: The mean of the absolute derivative of time series.
     """
     ts = fixseries(timeseries, nodata)
 
@@ -239,8 +242,8 @@ def amd_ts(timeseries, nodata=-9999):
 def mse_ts(timeseries, nodata=-9999):
     """Computes mean spectral energy of a time series.
 
-    Mean Energy spectral density computesthe energy of the time series that \
-    is distributed with frequency. High frequencies time series usually \
+    Mean spectral energy density computes the energy of the time series that \
+    is distributed with frequency. High frequency time series usually \
     have lower spectral energy.
 
     :param timeseries: Time series.
@@ -249,7 +252,7 @@ def mse_ts(timeseries, nodata=-9999):
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 
-    :returns: The absolute mean derivative of time series.
+    :returns: The mean spectral energy of the time series.
     """
 
     ts = fixseries(timeseries, nodata)
@@ -266,7 +269,7 @@ def fqr_ts(timeseries, nodata=-9999):
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 
-    :returns: The absolute mean derivative of time series.
+    :returns: The first quartile of the time series.
     """
 
     ts = fixseries(timeseries, nodata)
@@ -275,7 +278,7 @@ def fqr_ts(timeseries, nodata=-9999):
 
 
 def tqr_ts(timeseries, nodata=-9999):
-    """Computes the third quartileof a time series.
+    """Computes the third quartile of a time series.
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
@@ -283,7 +286,7 @@ def tqr_ts(timeseries, nodata=-9999):
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 
-    :returns: The absolute mean derivative of time series.
+    :returns: The third quartile of the time series.
     """
 
     ts = fixseries(timeseries, nodata)
@@ -292,7 +295,7 @@ def tqr_ts(timeseries, nodata=-9999):
 
 
 def sqr_ts(timeseries, nodata=-9999):
-    """Computes the second quartile the time series.
+    """Computes the second quartile of the time series.
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
@@ -300,7 +303,7 @@ def sqr_ts(timeseries, nodata=-9999):
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 
-    :returns: The interquaritle range of the time series.
+    :returns: The second quartile of the time series.
 
     """
     ts = fixseries(timeseries, nodata)
