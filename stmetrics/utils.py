@@ -2,11 +2,11 @@ import numpy
 
 
 def fixseries(timeseries, nodata=-9999):
-    """This function ajust the time series to polar transformation.
+    """This function ajusts the time series to polar transformation.
 
-    As some time series may have very significant noises, when coverted to \
+    As some time series may have very significant noises (such as spikes), when coverted to \
     polar space it may produce an inconsistent geometry. To avoid this issue, \
-    this function remove this spikes.
+    this function removes this spikes.
 
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
@@ -50,7 +50,7 @@ def create_polygon(timeseries):
     """This function converts a time series to the polar space.
 
     If the time series has lenght smaller than 3, it can not be properly \
-    converted to polar space.
+    converted to the polar space.
 
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
@@ -112,7 +112,7 @@ def get_list_of_points(timeseries):
 
 
 def check_input(timeseries):
-    """This function check the input and raise exception if it is too short \
+    """This function checks the input and raises one exception if it is too short \
     or has the wrong type.
 
     :param timeseries: Your time series.
@@ -182,13 +182,13 @@ def img2xarray(path, band):
 
 
 def bdc2xarray(cube_path, list_bands):
-    """This function read a path with BDC ARD data and create a xarray \
-    dataset.
+    """This function reads a path with BDC ARD (Brazil Data Cube Analysis Ready Data) \
+    and creates an xarray dataset.
 
     :param cube_path: Path of folder with images.
     :type cube_path: string
 
-    :param list_bands: List of bands that will be available on xarray.
+    :param list_bands: List of bands that will be available as xarray.
     :type list_bands: list
 
     :return cube_dataset: Xarray dataset.
@@ -249,7 +249,7 @@ def error_fractal():
 
 
 def list_metrics():
-    """This function list the available metrics in stmetrics.
+    """This function lists the available metrics in stmetrics.
     """
     import stmetrics
     metrics = [*error_basics().keys(),
