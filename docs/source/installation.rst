@@ -1,7 +1,7 @@
 Installation
 ==============
 
-**stmetrics** is mostly written in python, however, due to the spatial-temporal segmentation algorithm available it requires C++ compiler. Please, prior to install, check the required dependecies at :ref:`depend-opt`. Configuring this compiler is the critical step in getting the spatial-temporal algorithm running. 
+**stmetrics** is mostly written in python, however, due to the spatial-temporal segmentation algorithm available it requires C++ compiler. Please, prior to install, check the required dependecies at :ref:`depend-ref`. Configuring this compiler is the critical step in getting the spatial-temporal algorithm running. 
 
 ---------------------
  stmetrics on Windows

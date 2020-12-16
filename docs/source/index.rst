@@ -15,7 +15,7 @@ Welcome to stmetrics's documentation!
    about.rst
    license.rst
    contributors.rst
-   citation.rst
+   publications.rst
 
 
 .. toctree::
@@ -54,3 +54,15 @@ Welcome to stmetrics's documentation!
    This documentation is not finished. Parts of the description are \
    incomplete and may need corrections. Please, come back later for \
    the definitive documentation.
+
+**stmetrics** is a python package that aims at making the process of feature \
+extraction of state-of-the-art time-series as simple as possible.
+
+It provides functions to support time-series analyzes that includes not only \
+the feature extraction but also spatio-temporal analysis through a \
+spatio-temporal segmentation and filtering approaches that are a first step \
+to the full exploitation of the spatio-temporal information.
+
+The documentation presented here summarize the technical aspects of the \
+package. The methodoogical application of the package and it's methods are \
+available at the :ref:`publications-ref` section.

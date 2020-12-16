@@ -1,4 +1,4 @@
-.. _depend-opt:
+.. _depend-ref:
 
 Dependencies
 =============

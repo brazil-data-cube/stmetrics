@@ -1,5 +1,7 @@
-Citation and References
-=======================
+.. _publications-ref:
+
+Publications
+============
 
 Soares, A. R., Bendini, H. N., Vaz, D. V., Uehara, T. D., Neves, A. K., Lechler, S., Körting, T. S., Fonseca, L. M. G. `STMETRICS: A PYTHON PACKAGE FOR SATELLITE IMAGE TIME-SERIES FEATURE EXTRACTION. <http://brazildatacube.org/wp-content/uploads/2020/06/202008_IGARSS-2020_STMETRICS_Soares-etal.pdf>`_ Conference: 2020 IEEE International Geoscience and Remote Sensing Symposium (IGARSS 2020).
 
