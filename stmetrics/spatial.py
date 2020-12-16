@@ -4,8 +4,9 @@ import rasterio
 from numba import njit, prange
 
 
-def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
-          output="shp"):
+def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
+          output="shp", window=None, max_dist=None, max_step=None, 
+          max_diff=None, penalty=None, psi=None, pruning=False):
     """This function create spatial-temporal superpixels using a Satellite \
     Image Time Series (SITS). Version 1.4
 
@@ -14,6 +15,14 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
 
     :param k: Number or desired superpixels.
     :type k: int
+
+    :param m: Compactness value. Bigger values led to regular superpixels.
+    :type m: int
+
+    :param nodata: If you dataset contain nodata, it will be replace by \
+    this value. This value is necessary to be possible the use the \
+    DTW distance. Ideally your dataset must not contain nodata.
+    :type nodata: float
 
     :param scale: Adjust the time series, to 0-1. Necessary to distance \
     calculation.
@@ -28,6 +37,22 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
 
     :param output: Type of output to be produced. Default is shp (Shapefile).
     :type output: string
+
+    :param window: Only allow for maximal shifts from the two diagonals \
+    smaller than this number. It includes the diagonal, meaning that an \
+    Euclidean distance is obtained by setting window=1.
+
+    :param max_dist: Stop if the returned values will be larger than \
+    this value.
+
+    :param max_step: Do not allow steps larger than this value.
+
+    :param max_diff: Return infinity if length of two series is larger.
+
+    :param penalty: Penalty to add if compression or expansion is applied.
+
+    :param psi: Psi relaxation parameter (ignore start and end of matching). \
+    Useful for cyclical series.
 
     :returns segmentation: Shapefile containing superpixels produced.
 
@@ -54,7 +79,7 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
             # READ FILE
             transform = dataset.transform
             crs = dataset.crs
-            img = numpy.squeeze(dataset.values).astype(float)
+            img = numpy.squeeze(dataset.values)
         except:
             Exception('Sorry we could not read your dataset.')
     else:
@@ -63,7 +88,7 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
 
     # Normalize data
     for band in range(img.shape[0]):
-        img[numpy.isnan(img)] = 0
+        img[numpy.isnan(img)] = nodata
         img[band, :, :] = (img[band, :, :])/scale
 
     # Get image dimensions
@@ -102,10 +127,17 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
 
             # Calculate Spatio-temporal distance
             try:
-                D = distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin)
+                D = distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin, 
+                                  window=window, max_dist=max_dist,
+                                  max_step=max_step, 
+                                  max_diff=max_diff,
+                                  penalty=penalty, psi=psi)
             except:
                 print('dtaidistance package is not properly installed.')
-                D = distance(C[kk, :], subim, S, m, rmin, cmin)  # DTW regular
+                D = distance(C[kk, :], subim, S, m, rmin, cmin,
+                             window=window, max_dist=max_dist,
+                             max_step=max_step, max_diff=max_diff,
+                             penalty=penalty, psi=psi)  # DTW regular
 
             subd = d[rmin:rmax, cmin:cmax]
             subl = l[rmin:rmax, cmin:cmax]
@@ -132,7 +164,9 @@ def snitc(dataset, ki, m, scale=10000, iter=10, pattern="hexagonal",
         return labelled
 
 
-def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin):
+def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin,  
+                  window=None, max_dist=None, max_step=None, 
+                  max_diff=None, penalty=None, psi=None):
     """This function computes the spatial-temporal distance between \
     two pixels using the dtw distance with C implementation.
 
@@ -160,6 +194,22 @@ def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin):
     :param cmin: Minimum column.
     :type cmin: int
 
+    :param window: Only allow for maximal shifts from the two diagonals \
+    smaller than this number. It includes the diagonal, meaning that an \
+    Euclidean distance is obtained by setting window=1.
+
+    :param max_dist: Stop if the returned values will be larger than \
+    this value.
+
+    :param max_step: Do not allow steps larger than this value.
+
+    :param max_diff: Return infinity if length of two series is larger.
+
+    :param penalty: Penalty to add if compression or expansion is applied.
+
+    :param psi: Psi relaxation parameter (ignore start and end of matching).
+        Useful for cyclical series.
+
     :returns D:  numpy.ndarray distance.
     """
     from dtaidistance import dtw
@@ -173,12 +223,15 @@ def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin):
     # Tranpose matrix to allow dtw fast computation with dtaidistance
     linear = subim.transpose(1, 2, 0).reshape(subim.shape[1]*subim.shape[2],
                                               subim.shape[0])
-    merge = numpy.vstack((linear, c_series))
+    merge = numpy.vstack((linear, c_series)).astype(numpy.double)
 
     # Compute dtw distances
     c = dtw.distance_matrix_fast(merge, block=((0, merge.shape[0]),
                                  (merge.shape[0] - 1, merge.shape[0])),
-                                 compact=True, parallel=True)
+                                 compact=True, parallel=True, window=window, 
+                                 max_dist=max_dist, max_step=max_step,
+                                 max_length_diff=max_diff, penalty=penalty,
+                                 psi=psi)
     c1 = numpy.frombuffer(c)
     dc = c1.reshape(subim.shape[1], subim.shape[2])
 
@@ -194,7 +247,9 @@ def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin):
     return D
 
 
-def distance(c_series, ic, jc, subim, S, m, rmin, cmin):
+def distance(c_series, ic, jc, subim, S, m, rmin, cmin,
+             window=None, max_dist=None, max_step=None, 
+             max_diff=None, penalty=None, psi=None, pruning=False):
     """This function computes the spatial-temporal distance between \
     two pixels using the DTW distance.
 
@@ -221,6 +276,24 @@ def distance(c_series, ic, jc, subim, S, m, rmin, cmin):
 
     :param cmin: Minimum column.
     :type cmin: int
+
+    :param window: Only allow for maximal shifts from the two diagonals \
+    smaller than this number. It includes the diagonal, meaning that an \
+    Euclidean distance is obtained by setting window=1.
+
+    :param max_dist: Stop if the returned values will be larger than \
+    this value.
+
+    :param max_step: Do not allow steps larger than this value.
+
+    :param max_diff: Return infinity if length of two series is larger.
+
+    :param penalty: Penalty to add if compression or expansion is applied.
+
+    :param psi: Psi relaxation parameter (ignore start and end of matching).
+        Useful for cyclical series.
+
+    :param use_pruning: Prune values based on Euclidean distance.
 
     :returns D: numpy.ndarray distance.
     """
@@ -1031,7 +1104,7 @@ def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None,
 
     :param max_step: Do not allow steps larger than this value.
 
-    :param max_length_diff: Return infinity if length of two series is larger.
+    :param max_diff: Return infinity if length of two series is larger.
 
     :param penalty: Penalty to add if compression or expansion is applied.
 
@@ -1069,7 +1142,7 @@ def dtw_filter(dataset, kernel_size=3, window=None, max_dist=None,
                                            subim[:, rs, cs].astype(float),
                                            window=window, max_dist=max_dist,
                                            max_step=max_step,
-                                           max_length_diff=max_length_diff,
+                                           max_length_diff=max_diff,
                                            penalty=penalty, psi=psi,
                                            use_pruning=pruning)
                     tmp = dc + tmp
