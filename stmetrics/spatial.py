@@ -65,6 +65,14 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
     """
     print('Simple Non-Linear Iterative Temporal Clustering V 1.4')
 
+    fast = False
+    try:
+        from dtaidistance.dtw import dtw_cc_omp
+        fast = True
+    except ImportError:
+        logger.debug('DTAIDistance C-OMP library not available')
+        dtw_cc_omp = None
+
     if isinstance(dataset, rasterio.io.DatasetReader):
         try:
             # READ FILE
@@ -126,14 +134,13 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
             jc = int(numpy.floor(C[kk, subim.shape[0]+1])) - cmin
 
             # Calculate Spatio-temporal distance
-            
-            try:
+            if fast:
                 D = distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin, 
                                   window=window, max_dist=max_dist,
                                   max_step=max_step, 
                                   max_diff=max_diff,
                                   penalty=penalty, psi=psi)
-            except:
+            else:
                 D = distance(c_series, ic, jc, subim, S, m, rmin, cmin, 
                                   window=window, max_dist=max_dist,
                                   max_step=max_step, 
@@ -394,8 +401,7 @@ def postprocessing(raster, S):
 
         # Remove spourious regions generated during segmentation
         cc = cc3d.connected_components(raster.astype(dtype=numpy.uint16),
-                                       connectivity=6,
-                                       out_dtype=numpy.uint32)
+                                       connectivity=6)
 
         T = int((S**2)/2)
 
