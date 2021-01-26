@@ -304,16 +304,18 @@ def distance(c_series, ic, jc, subim, S, m, rmin, cmin,
     m = m/10
 
     # Initialize submatrix
-    dc = numpy.zeros([subim.shape[1], subim.shape[2]])
     ds = numpy.zeros([subim.shape[1], subim.shape[2]])
-
-    # Critical Loop - need parallel implementation
-    for u in range(subim.shape[1]):
-        for v in range(subim.shape[2]):
-            # Get pixel time series
-            a1 = subim[:, u, v]
-            # Compute DTW distance
-            dc[u, v] = dtw.distance(a1.astype(float), c_series.astype(float))
+    
+    # Tranpose matrix to allow dtw fast computation with dtaidistance
+    linear = subim.transpose(1, 2, 0).reshape(subim.shape[1]*subim.shape[2],
+                                              subim.shape[0])
+    merge = numpy.vstack((linear, c_series)).astype(numpy.double)
+    
+    c = dtw.distance_matrix(merge, block=((0, merge.shape[0]),
+                        (merge.shape[0] - 1, merge.shape[0])),
+                        compact=True, use_c=True, parallel=True, use_mp=True)
+    c1 = numpy.array(c)
+    dc = c1.reshape(subim.shape[1], subim.shape[2])
 
     x = numpy.arange(subim.shape[1])
     y = numpy.arange(subim.shape[2])
