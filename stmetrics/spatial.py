@@ -71,7 +71,7 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
         fast = True
     except ImportError:
         logger.debug('DTAIDistance C-OMP library not available')
-        dtw_cc_omp = None
+        fast = False
 
     if isinstance(dataset, rasterio.io.DatasetReader):
         try:
@@ -134,13 +134,13 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
             jc = int(numpy.floor(C[kk, subim.shape[0]+1])) - cmin
 
             # Calculate Spatio-temporal distance
-            if fast:
+            try:
                 D = distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin, 
                                   window=window, max_dist=max_dist,
                                   max_step=max_step, 
                                   max_diff=max_diff,
                                   penalty=penalty, psi=psi)
-            else:
+            except:
                 D = distance(c_series, ic, jc, subim, S, m, rmin, cmin, 
                                   window=window, max_dist=max_dist,
                                   max_step=max_step, 
