@@ -35,7 +35,8 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
     regular (as SLIC).
     :type pattern: int
 
-    :param output: Type of output to be produced. Default is shp (Shapefile).
+    :param output: Type of output to be produced. Default is shp (Shapefile).\
+    The two possible values are shp and matrix (returns a numpy array).
     :type output: string
 
     :param window: Only allow for maximal shifts from the two diagonals \
@@ -53,11 +54,10 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
 
     :param psi: Psi relaxation parameter (ignore start and end of matching). \
     Useful for cyclical series.
-
-    :returns segmentation: Shapefile containing superpixels produced.
+    
+    :returns segmentation: Segmentation produced.
 
     ..Note::
-
         Reference: Soares, A. R., Körting, T. S., Fonseca, L. M. G., Bendini, \
         H. N. `Simple Nonlinear Iterative Temporal Clustering. \
         <https://ieeexplore.ieee.org/document/9258957>`_ \
@@ -126,6 +126,7 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
             jc = int(numpy.floor(C[kk, subim.shape[0]+1])) - cmin
 
             # Calculate Spatio-temporal distance
+            
             try:
                 D = distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin, 
                                   window=window, max_dist=max_dist,
@@ -133,11 +134,11 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
                                   max_diff=max_diff,
                                   penalty=penalty, psi=psi)
             except:
-                print('dtaidistance package is not properly installed.')
-                D = distance(C[kk, :], subim, S, m, rmin, cmin,
-                             window=window, max_dist=max_dist,
-                             max_step=max_step, max_diff=max_diff,
-                             penalty=penalty, psi=psi)  # DTW regular
+                D = distance(c_series, ic, jc, subim, S, m, rmin, cmin, 
+                                  window=window, max_dist=max_dist,
+                                  max_step=max_step, 
+                                  max_diff=max_diff,
+                                  penalty=penalty, psi=psi)  # DTW regular
 
             subd = d[rmin:rmax, cmin:cmax]
             subl = l[rmin:rmax, cmin:cmax]
