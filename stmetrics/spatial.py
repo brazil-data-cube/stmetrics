@@ -608,8 +608,12 @@ def init_cluster_regular(rows, columns, ki, img, bands):
     return C, S, labelled, d, kk
 
 
-def seg_metrics(dataframe, bands, metrics_dict, features=['mean'],
-                num_cores=-1):
+def seg_metrics(dataframe, bands, metrics_dict=METRICS_DICT={
+                                                            "basics": ["all"],
+                                                            "polar": ["all"],
+                                                            "fractal": ["all"]}, 
+                                  features=['mean'],
+                                  num_cores=-1):
     """This function compute time series metrics from a geopandas \
     with time features.
     Currently, basic, polar and fractal metrics are extracted. but you can \
@@ -618,7 +622,7 @@ def seg_metrics(dataframe, bands, metrics_dict, features=['mean'],
     :param dataframe: Pandas DataFrame with time series information.
     :type dataframe: pandas DataFrame
 
-    :param bands: Pandas DataFrame with time series information.
+    :param bands: List of bands from which the metrics should be computed.
     :type bands: list
 
     :param metrics_dict: Dictionary of metrics to be computed.
@@ -680,7 +684,11 @@ def seg_metrics(dataframe, bands, metrics_dict, features=['mean'],
     return out_dataframe
 
 
-def _seg_ex_metrics(series, metrics_dict, num_cores=-1):
+def _seg_ex_metrics(series, metrics_dict=METRICS_DICT = {
+                                                        "basics": ["all"],
+                                                        "polar": ["all"],
+                                                        "fractal": ["all"]},
+                                                        num_cores=-1):
     # This function performs the computation of the metrics using \
     # multiprocessing.
     import multiprocessing as mp
@@ -844,8 +852,15 @@ def _extract_xray(dataset, segmentation, features, nodata):
     from affine import Affine
 
     band_list = list(dataset.data_vars)
-    dates = dataset.time.values
     geoms = segmentation.geometry.tolist()
+
+    #try to get dates
+    try:
+        dates = dataset.time.values
+    except:
+        rang = dataset[band_list[0]].values.shape[0]
+        dates = numpy.arange(0,rang)
+    
 
     # Fix affine transformation
     # Function from_gdal swap positions we need to fix this in a brute \
