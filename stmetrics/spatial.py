@@ -608,10 +608,10 @@ def init_cluster_regular(rows, columns, ki, img, bands):
     return C, S, labelled, d, kk
 
 
-def seg_metrics(dataframe, bands, metrics_dict=METRICS_DICT={
-                                                            "basics": ["all"],
-                                                            "polar": ["all"],
-                                                            "fractal": ["all"]}, 
+def seg_metrics(dataframe, bands, metrics_dict={
+                                         "basics": ["all"],
+                                         "polar": ["all"],
+                                         "fractal": ["all"]}, 
                                   features=['mean'],
                                   num_cores=-1):
     """This function compute time series metrics from a geopandas \
@@ -684,11 +684,11 @@ def seg_metrics(dataframe, bands, metrics_dict=METRICS_DICT={
     return out_dataframe
 
 
-def _seg_ex_metrics(series, metrics_dict=METRICS_DICT = {
-                                                        "basics": ["all"],
-                                                        "polar": ["all"],
-                                                        "fractal": ["all"]},
-                                                        num_cores=-1):
+def _seg_ex_metrics(series, metrics_dict={
+                                         "basics": ["all"],
+                                         "polar": ["all"],
+                                         "fractal": ["all"]},
+                                         num_cores=-1):
     # This function performs the computation of the metrics using \
     # multiprocessing.
     import multiprocessing as mp
