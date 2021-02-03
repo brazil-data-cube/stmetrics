@@ -79,7 +79,7 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
             meta = dataset.profile  # get image metadata
             transform = meta["transform"]
             crs = meta["crs"]
-            img = dataset.read()
+            img = dataset.read(masked=True)
         except:
             Exception('Sorry we could not read your dataset.')
     elif isinstance(dataset, xarray.DataArray):
@@ -608,7 +608,7 @@ def init_cluster_regular(rows, columns, ki, img, bands):
     return C, S, labelled, d, kk
 
 
-def seg_metrics(dataframe, bands, metrics_dict={
+def seg_metrics(dataframe, bands=None, metrics_dict={
                                          "basics": ["all"],
                                          "polar": ["all"],
                                          "fractal": ["all"]}, 
@@ -641,14 +641,36 @@ def seg_metrics(dataframe, bands, metrics_dict={
 
     out_dataframe = dataframe.copy()
 
-    for band in bands:
+    if bands is None:
 
-        df = dataframe.filter(regex=band)
+        for f in features:
 
-        if features is not None:
-            series = df.filter(regex=f)
+            series = dataframe.filter(regex=f)
+
+            metricas = _seg_ex_metrics(series.to_numpy().astype(float),
+                                               metrics_dict,
+                                               num_cores)
+
+            header = list_metrics()
+
+            names = [j + '_' + k
+                     for j, k in zip([f] * len(header),
+                                     header)]
+
+            metricsdf = pandas.DataFrame(metricas, columns=names)
+
+        out_dataframe = pandas.concat([out_dataframe, metricsdf],
+                                      axis=1)
+
+    else:
+
+        for band in bands:
+
+            df = dataframe.filter(regex=band)
 
             for f in features:
+
+                series = df.filter(regex=f)
 
                 metricas = _seg_ex_metrics(series.to_numpy().astype(float),
                                            metrics_dict,
@@ -662,21 +684,6 @@ def seg_metrics(dataframe, bands, metrics_dict={
                                             header)]
 
                 metricsdf = pandas.DataFrame(metricas, columns=names)
-
-            out_dataframe = pandas.concat([out_dataframe, metricsdf],
-                                          axis=1)
-        else:
-            metricas = _seg_ex_metrics(df.to_numpy().astype(float),
-                                       metrics_dict,
-                                       num_cores)
-
-            header = list_metrics()
-
-            names = [i + '_' + k
-                     for i, k in zip([band] * len(header),
-                                     header)]
-
-            metricsdf = pandas.DataFrame(metricas, columns=names)
 
             out_dataframe = pandas.concat([out_dataframe, metricsdf],
                                           axis=1)
@@ -761,7 +768,7 @@ def extract_features(dataset, segmentation,
         segmentation["perimeter"] = segmentation['geometry'].length
         features.remove('perimeter')
 
-    if 'ratio' in features:
+    if 'aspect_ratio' in features:
         segmentation["aspect_ratio"] = segmentation['geometry'].apply(lambda g:
                                                                aspect_ratio(g))
         features.remove('aspect_ratio')
@@ -790,7 +797,7 @@ def extract_features(dataset, segmentation,
         segmentation["length"] = segmentation['geometry'].apply(lambda g:
                                                                 length(g))
         features.remove('length')
-
+    
     if isinstance(dataset, rasterio.io.DatasetReader):
 
         segmentation = _exRasterio(dataset, segmentation, features, nodata)
