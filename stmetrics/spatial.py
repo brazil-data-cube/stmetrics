@@ -80,7 +80,8 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
             transform = meta["transform"]
             crs = meta["crs"]
             img = dataset.read().astype(float)
-            img[img = dataset.nodata] = numpy.nan
+            img[img == dataset.nodata] = numpy.nan
+
         except:
             Exception('Sorry we could not read your dataset.')
     elif isinstance(dataset, xarray.DataArray):
