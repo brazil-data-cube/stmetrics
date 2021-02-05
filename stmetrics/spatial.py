@@ -80,7 +80,7 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
             transform = meta["transform"]
             crs = meta["crs"]
             img = dataset.read().astype(float)
-            img[img == dataset.nodata] = numpy.nan
+            img[img ==   dataset.nodata] = numpy.nan
 
         except:
             Exception('Sorry we could not read your dataset.')
@@ -950,7 +950,7 @@ def _zonal_stats_wrapper(raster, stats, affine, nodata):
     import functools
 
     return functools.partial(zonal_stats, raster=raster, stats=stats,
-                             affine=affine, nodata=nodata)
+                             affine=affine, nodata=nodata, all_touched=True)
 
 
 def fx2parallel(dataset, geoms, features, transform, nodata):
