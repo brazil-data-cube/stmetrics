@@ -1,7 +1,7 @@
 Utility functions
 =================
 
-Utility module for tsmetrics
+Utility module for stmetrics
 
 .. automodule:: stmetrics.utils
 	:members:
