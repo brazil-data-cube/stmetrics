@@ -643,51 +643,87 @@ def seg_metrics(dataframe, bands=None, metrics_dict={
 
     out_dataframe = dataframe.copy()
 
-    if bands is None:
-
-        for f in features:
-
-            series = dataframe.filter(regex=f)
-
-            metricas = _seg_ex_metrics(series.to_numpy().astype(float),
-                                               metrics_dict,
-                                               num_cores)
-
-            header = list_metrics()
-
-            names = [j + '_' + k
-                     for j, k in zip([f] * len(header),
-                                     header)]
-
-            metricsdf = pandas.DataFrame(metricas, columns=names)
-
-        out_dataframe = pandas.concat([out_dataframe, metricsdf],
-                                      axis=1)
-
-    else:
+    if bands is not None:
 
         for band in bands:
 
             df = dataframe.filter(regex=band)
 
+            if features is not None:
+
+                for f in features:
+
+                    series = dataframe.filter(regex=f)
+
+                    metricas = _seg_ex_metrics(series.to_numpy().astype(float),
+                                                       metrics_dict,
+                                                       num_cores)
+
+                    header = list_metrics()
+
+                    names = [j + '_' + k
+                             for j, k in zip([f] * len(header),
+                                             header)]
+
+                    metricsdf = pandas.DataFrame(metricas, columns=names)
+
+                out_dataframe = pandas.concat([out_dataframe, metricsdf],
+                                          axis=1)
+
+            else:   
+                metricas = _seg_ex_metrics(df.to_numpy().astype(float), 
+                                           metrics_dict,    
+                                           num_cores)   
+
+                header = list_metrics() 
+
+                names = [i + '_' + k    
+                         for i, k in zip([band] * len(header),  
+                                         header)]   
+
+                metricsdf = pandas.DataFrame(metricas, columns=names)   
+
+                out_dataframe = pandas.concat([out_dataframe, metricsdf],   
+                                              axis=1)
+    else:
+        
+        df = dataframe
+
+        if features is not None:
+
             for f in features:
 
-                series = df.filter(regex=f)
+                series = dataframe.filter(regex=f)
 
                 metricas = _seg_ex_metrics(series.to_numpy().astype(float),
-                                           metrics_dict,
-                                           num_cores)
+                                                   metrics_dict,
+                                                   num_cores)
 
                 header = list_metrics()
 
-                names = [i + '_' + j + '_' + k
-                         for i, j, k in zip([band] * len(header),
-                                            [f] * len(header),
-                                            header)]
+                names = [j + '_' + k
+                         for j, k in zip([f] * len(header),
+                                         header)]
 
                 metricsdf = pandas.DataFrame(metricas, columns=names)
 
             out_dataframe = pandas.concat([out_dataframe, metricsdf],
+                                      axis=1)
+
+        else:   
+            metricas = _seg_ex_metrics(df.to_numpy().astype(float), 
+                                       metrics_dict,    
+                                       num_cores)   
+
+            header = list_metrics() 
+
+            names = [i + '_' + k    
+                     for i, k in zip([band] * len(header),  
+                                     header)]   
+
+            metricsdf = pandas.DataFrame(metricas, columns=names)   
+
+            out_dataframe = pandas.concat([out_dataframe, metricsdf],   
                                           axis=1)
 
     return out_dataframe
