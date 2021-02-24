@@ -1085,11 +1085,11 @@ def reock_compactness(geom):
         of legislative apportionment.” Midwest Journal of Political Science \
         1(5), 70–74.
     """
-    import pointpats
     from shapely.geometry import Point
+    from pointpats.centrography import minimum_bounding_circle
 
     points = list(zip(*geom.minimum_rotated_rectangle.exterior.coords.xy))
-    (radius, center), _, _, _ = pointpats.skyum(points)
+    center, radius = minimum_bounding_circle(points)
     mbc_poly = Point(*center).buffer(radius)
 
     return geom.area/mbc_poly.area
