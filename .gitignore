@@ -91,3 +91,6 @@ ENV/
 
 # Ignore spatial and phenometrics
 ./stmetrics/spatial.py
+
+# Vs Code
+.vscode/
