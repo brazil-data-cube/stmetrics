@@ -80,7 +80,7 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
             transform = meta["transform"]
             crs = meta["crs"]
             img = dataset.read().astype(float)
-            img[img == dataset.nodata] = numpy.nan
+            img[img ==   dataset.nodata] = numpy.nan
 
         except:
             Exception('Sorry we could not read your dataset.')
@@ -643,51 +643,87 @@ def seg_metrics(dataframe, bands=None, metrics_dict={
 
     out_dataframe = dataframe.copy()
 
-    if bands is None:
-
-        for f in features:
-
-            series = dataframe.filter(regex=f)
-
-            metricas = _seg_ex_metrics(series.to_numpy().astype(float),
-                                               metrics_dict,
-                                               num_cores)
-
-            header = list_metrics()
-
-            names = [j + '_' + k
-                     for j, k in zip([f] * len(header),
-                                     header)]
-
-            metricsdf = pandas.DataFrame(metricas, columns=names)
-
-        out_dataframe = pandas.concat([out_dataframe, metricsdf],
-                                      axis=1)
-
-    else:
+    if bands is not None:
 
         for band in bands:
 
             df = dataframe.filter(regex=band)
 
+            if features is not None:
+
+                for f in features:
+
+                    series = dataframe.filter(regex=f)
+
+                    metricas = _seg_ex_metrics(series.to_numpy().astype(float),
+                                                       metrics_dict,
+                                                       num_cores)
+
+                    header = list_metrics()
+
+                    names = [j + '_' + k
+                             for j, k in zip([f] * len(header),
+                                             header)]
+
+                    metricsdf = pandas.DataFrame(metricas, columns=names)
+
+                out_dataframe = pandas.concat([out_dataframe, metricsdf],
+                                          axis=1)
+
+            else:   
+                metricas = _seg_ex_metrics(df.to_numpy().astype(float), 
+                                           metrics_dict,    
+                                           num_cores)   
+
+                header = list_metrics() 
+
+                names = [i + '_' + k    
+                         for i, k in zip([band] * len(header),  
+                                         header)]   
+
+                metricsdf = pandas.DataFrame(metricas, columns=names)   
+
+                out_dataframe = pandas.concat([out_dataframe, metricsdf],   
+                                              axis=1)
+    else:
+        
+        df = dataframe
+
+        if features is not None:
+
             for f in features:
 
-                series = df.filter(regex=f)
+                series = dataframe.filter(regex=f)
 
                 metricas = _seg_ex_metrics(series.to_numpy().astype(float),
-                                           metrics_dict,
-                                           num_cores)
+                                                   metrics_dict,
+                                                   num_cores)
 
                 header = list_metrics()
 
-                names = [i + '_' + j + '_' + k
-                         for i, j, k in zip([band] * len(header),
-                                            [f] * len(header),
-                                            header)]
+                names = [j + '_' + k
+                         for j, k in zip([f] * len(header),
+                                         header)]
 
                 metricsdf = pandas.DataFrame(metricas, columns=names)
 
             out_dataframe = pandas.concat([out_dataframe, metricsdf],
+                                      axis=1)
+
+        else:   
+            metricas = _seg_ex_metrics(df.to_numpy().astype(float), 
+                                       metrics_dict,    
+                                       num_cores)   
+
+            header = list_metrics() 
+
+            names = [i + '_' + k    
+                     for i, k in zip([band] * len(header),  
+                                     header)]   
+
+            metricsdf = pandas.DataFrame(metricas, columns=names)   
+
+            out_dataframe = pandas.concat([out_dataframe, metricsdf],   
                                           axis=1)
 
     return out_dataframe
@@ -950,7 +986,7 @@ def _zonal_stats_wrapper(raster, stats, affine, nodata):
     import functools
 
     return functools.partial(zonal_stats, raster=raster, stats=stats,
-                             affine=affine, nodata=nodata)
+                             affine=affine, nodata=nodata, all_touched=True)
 
 
 def fx2parallel(dataset, geoms, features, transform, nodata):
@@ -1049,11 +1085,11 @@ def reock_compactness(geom):
         of legislative apportionment.” Midwest Journal of Political Science \
         1(5), 70–74.
     """
-    import pointpats
     from shapely.geometry import Point
+    from pointpats.centrography import minimum_bounding_circle
 
     points = list(zip(*geom.minimum_rotated_rectangle.exterior.coords.xy))
-    (radius, center), _, _, _ = pointpats.skyum(points)
+    center, radius = minimum_bounding_circle(points)
     mbc_poly = Point(*center).buffer(radius)
 
     return geom.area/mbc_poly.area

@@ -144,8 +144,6 @@ def _compute_from_xarray(dataset, metrics=METRICS_DICT, num_cores=-1):
 
     band_list = list(dataset.data_vars)
 
-    metrics = xarray.Dataset()
-
     for key in band_list:
 
         series = numpy.squeeze(dataset[key].values)
