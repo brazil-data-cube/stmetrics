@@ -32,7 +32,7 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show=False):
 
     - CSI - This is a dimensionless quantitative measure of morphology, \
     that characterize the standard deviation of an object from a circle.
-    
+
     To visualize the time series on polar space use: ts_polar(timeseries,\
      show=True)
 
@@ -56,7 +56,7 @@ def ts_polar(timeseries, funcs=["all"], nodata=-9999, show=False):
     """
     out_metrics = dict()
 
-    metrics_count = 9
+    # metrics_count = 9
 
     if "all" in funcs:
         funcs = [
@@ -161,7 +161,7 @@ def polar_plot(timeseries, nodata=-9999):
     """
     import matplotlib.pyplot as plt
     from descartes import PolygonPatch
-    from matplotlib.ticker import FormatStrFormatter
+    # from matplotlib.ticker import FormatStrFormatter
 
     # filter time series
     ts = fixseries(timeseries, nodata)
@@ -175,7 +175,7 @@ def polar_plot(timeseries, nodata=-9999):
     maxY = numpy.max(numpy.abs(y))
 
     # get season rings
-    ringTopLeft, ringTopRight,\
+    ringTopLeft, ringTopRight, \
         ringBottomLeft, ringBottomRight = get_seasons(x, y)
 
     # setup plot
