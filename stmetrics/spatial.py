@@ -5,9 +5,9 @@ from numba import njit, prange
 
 
 def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
-          output="shp", window=None, max_dist=None, max_step=None, 
+          output="shp", window=None, max_dist=None, max_step=None,
           max_diff=None, penalty=None, psi=None, pruning=False):
-    """This function create spatial-temporal superpixels using a Satellite \
+    """This function create spatial-temporal superpixels using a Satellite
     Image Time Series (SITS). Version 1.4
 
     :param image: SITS dataset.
@@ -19,31 +19,31 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
     :param m: Compactness value. Bigger values led to regular superpixels.
     :type m: int
 
-    :param nodata: If you dataset contain nodata, it will be replace by \
-    this value. This value is necessary to be possible the use the \
+    :param nodata: If you dataset contain nodata, it will be replace by
+    this value. This value is necessary to be possible the use the
     DTW distance. Ideally your dataset must not contain nodata.
     :type nodata: float
 
-    :param scale: Adjust the time series, to 0-1. Necessary to distance \
+    :param scale: Adjust the time series, to 0-1. Necessary to distance
     calculation.
     :type scale: int
 
     :param iter: Number of iterations to be performed. Default = 10.
     :type iter: int
 
-    :param pattern: Type of pattern initialization. Hexagonal (default) or\
+    :param pattern: Type of pattern initialization. Hexagonal (default) or
     regular (as SLIC).
     :type pattern: int
 
-    :param output: Type of output to be produced. Default is shp (Shapefile).\
+    :param output: Type of output to be produced. Default is shp (Shapefile).
     The two possible values are shp and matrix (returns a numpy array).
     :type output: string
 
-    :param window: Only allow for maximal shifts from the two diagonals \
-    smaller than this number. It includes the diagonal, meaning that an \
+    :param window: Only allow for maximal shifts from the two diagonals
+    smaller than this number. It includes the diagonal, meaning that an
     Euclidean distance is obtained by setting window=1.
 
-    :param max_dist: Stop if the returned values will be larger than \
+    :param max_dist: Stop if the returned values will be larger than
     this value.
 
     :param max_step: Do not allow steps larger than this value.
@@ -52,26 +52,26 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
 
     :param penalty: Penalty to add if compression or expansion is applied.
 
-    :param psi: Psi relaxation parameter (ignore start and end of matching). \
+    :param psi: Psi relaxation parameter (ignore start and end of matching).
     Useful for cyclical series.
-    
+
     :returns segmentation: Segmentation produced.
 
     ..Note::
-        Reference: Soares, A. R., Körting, T. S., Fonseca, L. M. G., Bendini, \
-        H. N. `Simple Nonlinear Iterative Temporal Clustering. \
-        <https://ieeexplore.ieee.org/document/9258957>`_ \
+        Reference: Soares, A. R., Körting, T. S., Fonseca, L. M. G., Bendini,
+        H. N. `Simple Nonlinear Iterative Temporal Clustering.
+        <https://ieeexplore.ieee.org/document/9258957>`_
         IEEE Transactions on Geoscience and Remote, 2020 (Early Access).
     """
     print('Simple Non-Linear Iterative Temporal Clustering V 1.4')
 
-    fast = False
-    try:
-        from dtaidistance.dtw import dtw_cc_omp
-        fast = True
-    except ImportError:
-        logger.debug('DTAIDistance C-OMP library not available')
-        fast = False
+    # fast = False
+    # try:
+    #     from dtaidistance.dtw import dtw_cc_omp
+    #     fast = True
+    # except ImportError:
+    #     logger.debug('DTAIDistance C-OMP library not available')
+    #     fast = False
 
     if isinstance(dataset, rasterio.io.DatasetReader):
         try:
@@ -80,7 +80,7 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
             transform = meta["transform"]
             crs = meta["crs"]
             img = dataset.read().astype(float)
-            img[img ==   dataset.nodata] = numpy.nan
+            img[img == dataset.nodata] = numpy.nan
 
         except:
             Exception('Sorry we could not read your dataset.')
@@ -93,8 +93,8 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
         except:
             Exception('Sorry we could not read your dataset.')
     else:
-        TypeError("Sorry we can't read this type of file. \
-                  Please use Rasterio or xarray")
+        TypeError("Sorry we can't read this type of file.\n"
+                  "Please use Rasterio or xarray")
 
     # Normalize data
     for band in range(img.shape[0]):
@@ -137,17 +137,17 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
 
             # Calculate Spatio-temporal distance
             try:
-                D = distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin, 
+                D = distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin,
                                   window=window, max_dist=max_dist,
-                                  max_step=max_step, 
+                                  max_step=max_step,
                                   max_diff=max_diff,
                                   penalty=penalty, psi=psi)
             except:
-                D = distance(c_series, ic, jc, subim, S, m, rmin, cmin, 
-                                  window=window, max_dist=max_dist,
-                                  max_step=max_step, 
-                                  max_diff=max_diff,
-                                  penalty=penalty, psi=psi)  # DTW regular
+                D = distance(c_series, ic, jc, subim, S, m, rmin, cmin,
+                             window=window, max_dist=max_dist,
+                             max_step=max_step,
+                             max_diff=max_diff,
+                             penalty=penalty, psi=psi)  # DTW regular
 
             subd = d[rmin:rmax, cmin:cmax]
             subl = l[rmin:rmax, cmin:cmax]
@@ -174,8 +174,8 @@ def snitc(dataset, ki, m, nodata=0, scale=10000, iter=10, pattern="hexagonal",
         return labelled
 
 
-def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin,  
-                  window=None, max_dist=None, max_step=None, 
+def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin,
+                  window=None, max_dist=None, max_step=None,
                   max_diff=None, penalty=None, psi=None):
     """This function computes the spatial-temporal distance between \
     two pixels using the dtw distance with C implementation.
@@ -238,7 +238,7 @@ def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin,
     # Compute dtw distances
     c = dtw.distance_matrix_fast(merge, block=((0, merge.shape[0]),
                                  (merge.shape[0] - 1, merge.shape[0])),
-                                 compact=True, parallel=True, window=window, 
+                                 compact=True, parallel=True, window=window,
                                  max_dist=max_dist, max_step=max_step,
                                  max_length_diff=max_diff, penalty=penalty,
                                  psi=psi)
@@ -258,7 +258,7 @@ def distance_fast(c_series, ic, jc, subim, S, m, rmin, cmin,
 
 
 def distance(c_series, ic, jc, subim, S, m, rmin, cmin,
-             window=None, max_dist=None, max_step=None, 
+             window=None, max_dist=None, max_step=None,
              max_diff=None, penalty=None, psi=None, pruning=False):
     """This function computes the spatial-temporal distance between \
     two pixels using the DTW distance.
@@ -314,15 +314,16 @@ def distance(c_series, ic, jc, subim, S, m, rmin, cmin,
 
     # Initialize submatrix
     ds = numpy.zeros([subim.shape[1], subim.shape[2]])
-    
+
     # Tranpose matrix to allow dtw fast computation with dtaidistance
     linear = subim.transpose(1, 2, 0).reshape(subim.shape[1]*subim.shape[2],
                                               subim.shape[0])
     merge = numpy.vstack((linear, c_series)).astype(numpy.double)
-    
+
     c = dtw.distance_matrix(merge, block=((0, merge.shape[0]),
-                        (merge.shape[0] - 1, merge.shape[0])),
-                        compact=True, use_c=True, parallel=True, use_mp=True)
+                            (merge.shape[0] - 1, merge.shape[0])),
+                            compact=True, use_c=True, parallel=True,
+                            use_mp=True)
     c1 = numpy.array(c)
     dc = c1.reshape(subim.shape[1], subim.shape[2])
 
@@ -481,7 +482,7 @@ def init_cluster_hex(rows, columns, ki, img, bands):
 
     :returns k: Number of superpixels that will be produced.
     """
-    N = rows * columns
+    # N = rows * columns
 
     # Setting up SNITC
     S = (rows*columns / (ki * (3**0.5)/2))**0.5
@@ -596,29 +597,30 @@ def init_cluster_regular(rows, columns, ki, img, bands):
     # Initialise grid
     for x in range(base, rows, vSpacing):
         for y in range(base, columns, hSpacing):
-            cc = int(numpy.floor(y))
-            rr = int(numpy.floor(x))
+            # cc = int(numpy.floor(y))
+            # rr = int(numpy.floor(x))
             ts = img[:, int(x), int(y)]
             st = numpy.append(ts, [int(x), int(y), 0])
             C[kk, :] = st
             kk = kk+1
 
-        w = S/2
+        # w = S/2
 
     st = None
 
     return C, S, labelled, d, kk
 
 
-def seg_metrics(dataframe, bands=None, metrics_dict={
-                                         "basics": ["all"],
-                                         "polar": ["all"],
-                                         "fractal": ["all"]}, 
-                                  features=['mean'],
-                                  num_cores=-1):
-    """This function compute time series metrics from a geopandas \
+def seg_metrics(dataframe,
+                bands=None,
+                metrics_dict={"basics": ["all"],
+                              "polar": ["all"],
+                              "fractal": ["all"]},
+                features=['mean'],
+                num_cores=-1):
+    """This function compute time series metrics from a geopandas
     with time features.
-    Currently, basic, polar and fractal metrics are extracted. but you can \
+    Currently, basic, polar and fractal metrics are extracted. but you can
     set the metrics you to compute using a dictionary.
 
     :param dataframe: Pandas DataFrame with time series information.
@@ -633,7 +635,9 @@ def seg_metrics(dataframe, bands=None, metrics_dict={
     :param features: List of features to be used for computation. \
     This parameter allows you to use the features extracted with \
     ``extract_features`` function and compute metrics over image features \
-    (mean, max, min, std and mode). If it is None, the code expect that the DataFrame has only one variable.
+    (mean, max, min, std and mode). If it is None, the code expect that the
+    DataFrame has only one variable.
+
     :type features: list
 
     :returns out_dataframe: Geopandas dataframe with the features added.
@@ -656,8 +660,8 @@ def seg_metrics(dataframe, bands=None, metrics_dict={
                     series = dataframe.filter(regex=f)
 
                     metricas = _seg_ex_metrics(series.to_numpy().astype(float),
-                                                       metrics_dict,
-                                                       num_cores)
+                                               metrics_dict,
+                                               num_cores)
 
                     header = list_metrics()
 
@@ -668,25 +672,24 @@ def seg_metrics(dataframe, bands=None, metrics_dict={
                     metricsdf = pandas.DataFrame(metricas, columns=names)
 
                 out_dataframe = pandas.concat([out_dataframe, metricsdf],
-                                          axis=1)
+                                              axis=1)
 
-            else:   
-                metricas = _seg_ex_metrics(df.to_numpy().astype(float), 
-                                           metrics_dict,    
-                                           num_cores)   
+            else:
+                metricas = _seg_ex_metrics(df.to_numpy().astype(float),
+                                           metrics_dict,
+                                           num_cores)
 
-                header = list_metrics() 
+                header = list_metrics()
 
-                names = [i + '_' + k    
-                         for i, k in zip([band] * len(header),  
-                                         header)]   
+                names = [i + '_' + k
+                         for i, k in zip([band] * len(header), header)]
 
-                metricsdf = pandas.DataFrame(metricas, columns=names)   
+                metricsdf = pandas.DataFrame(metricas, columns=names)
 
-                out_dataframe = pandas.concat([out_dataframe, metricsdf],   
+                out_dataframe = pandas.concat([out_dataframe, metricsdf],
                                               axis=1)
     else:
-        
+
         df = dataframe
 
         if features is not None:
@@ -696,8 +699,8 @@ def seg_metrics(dataframe, bands=None, metrics_dict={
                 series = dataframe.filter(regex=f)
 
                 metricas = _seg_ex_metrics(series.to_numpy().astype(float),
-                                                   metrics_dict,
-                                                   num_cores)
+                                           metrics_dict,
+                                           num_cores)
 
                 header = list_metrics()
 
@@ -708,32 +711,29 @@ def seg_metrics(dataframe, bands=None, metrics_dict={
                 metricsdf = pandas.DataFrame(metricas, columns=names)
 
             out_dataframe = pandas.concat([out_dataframe, metricsdf],
-                                      axis=1)
-
-        else:   
-            metricas = _seg_ex_metrics(df.to_numpy().astype(float), 
-                                       metrics_dict,    
-                                       num_cores)   
-
-            header = list_metrics() 
-
-            names = [i + '_' + k    
-                     for i, k in zip([band] * len(header),  
-                                     header)]   
-
-            metricsdf = pandas.DataFrame(metricas, columns=names)   
-
-            out_dataframe = pandas.concat([out_dataframe, metricsdf],   
                                           axis=1)
+
+        else:
+            metricas = _seg_ex_metrics(df.to_numpy().astype(float),
+                                       metrics_dict,
+                                       num_cores)
+
+            header = list_metrics()
+
+            names = [i + '_' + k for i, k in zip([band] * len(header), header)]
+
+            metricsdf = pandas.DataFrame(metricas, columns=names)
+
+            out_dataframe = pandas.concat([out_dataframe, metricsdf], axis=1)
 
     return out_dataframe
 
 
-def _seg_ex_metrics(series, metrics_dict={
-                                         "basics": ["all"],
-                                         "polar": ["all"],
-                                         "fractal": ["all"]},
-                                         num_cores=-1):
+def _seg_ex_metrics(series,
+                    metrics_dict={"basics": ["all"],
+                                  "polar": ["all"],
+                                  "fractal": ["all"]},
+                    num_cores=-1):
     # This function performs the computation of the metrics using \
     # multiprocessing.
     import multiprocessing as mp
@@ -791,8 +791,8 @@ def extract_features(dataset, segmentation,
     :returns segmentation: GeoPandas DataFrame with the features.
     """
     import os
-    import pandas
-    import rasterstats
+    # import pandas
+    # import rasterstats
     import xarray
 
     # Performing buffer to solve possible invalid polygons
@@ -807,35 +807,35 @@ def extract_features(dataset, segmentation,
         features.remove('perimeter')
 
     if 'aspect_ratio' in features:
-        segmentation["aspect_ratio"] = segmentation['geometry'].apply(lambda g:
-                                                               aspect_ratio(g))
+        segmentation["aspect_ratio"] = segmentation['geometry'].apply(
+            lambda g: aspect_ratio(g))
         features.remove('aspect_ratio')
 
     if 'symmetry' in features:
-        segmentation["symmetry"] = segmentation['geometry'].apply(lambda g:
-                                                                  symmetry(g))
+        segmentation["symmetry"] = segmentation['geometry'].apply(
+            lambda g: symmetry(g))
         features.remove('symmetry')
 
     if 'compactness' in features:
-        segmentation["compactness"] = segmentation['geometry'].apply(lambda g:
-                                                                     reock_compactness(g))
+        segmentation["compactness"] = segmentation['geometry'].apply(
+            lambda g: reock_compactness(g))
         features.remove('compactness')
 
     if 'rectangular_fit' in features:
-        segmentation["rectangular_fit"] = segmentation['geometry'].apply(lambda g:
-                                                                         rectangular_fit(g))
+        segmentation["rectangular_fit"] = segmentation['geometry'].apply(
+            lambda g: rectangular_fit(g))
         features.remove('rectangular_fit')
 
     if 'width' in features:
-        segmentation["width"] = segmentation['geometry'].apply(lambda g:
-                                                               width(g))
+        segmentation["width"] = segmentation['geometry'].apply(
+            lambda g: width(g))
         features.remove('width')
 
     if 'length' in features:
-        segmentation["length"] = segmentation['geometry'].apply(lambda g:
-                                                                length(g))
+        segmentation["length"] = segmentation['geometry'].apply(
+            lambda g: length(g))
         features.remove('length')
-    
+
     if isinstance(dataset, rasterio.io.DatasetReader):
 
         segmentation = _exRasterio(dataset, segmentation, features, nodata)
@@ -865,9 +865,9 @@ def extract_features(dataset, segmentation,
 
 
 def _exRasterio(dataset, segmentation, features, nodata):
-    import os
+    # import os
     import pandas
-    import rasterstats
+    # import rasterstats
 
     geoms = segmentation.geometry.tolist()
 
@@ -893,19 +893,18 @@ def _exRasterio(dataset, segmentation, features, nodata):
 
 def _extract_xray(dataset, segmentation, features, nodata):
     import pandas
-    import rasterstats
+    # import rasterstats
     from affine import Affine
 
     band_list = list(dataset.data_vars)
     geoms = segmentation.geometry.tolist()
 
-    #try to get dates
+    # try to get dates
     try:
         dates = dataset.time.values
     except:
         rang = dataset[band_list[0]].values.shape[0]
-        dates = numpy.arange(0,rang)
-    
+        dates = numpy.arange(0, rang)
 
     # Fix affine transformation
     # Function from_gdal swap positions we need to fix this in a brute \
@@ -938,11 +937,11 @@ def _extract_xray(dataset, segmentation, features, nodata):
 
 def _extract_from_path(path, segmentation, features, nodata):
     import os
-    import re
+    # import re
     import glob
     import pandas
     import rasterio
-    import rasterstats
+    # import rasterstats
 
     # Read images and sort
     f_path = glob.glob(path+"*.tif")
@@ -951,7 +950,7 @@ def _extract_from_path(path, segmentation, features, nodata):
 
     for f in f_path:
         dataset = rasterio.open(f)
-        affine = dataset.transform
+        # affine = dataset.transform
 
         # find datetime and att
         key = os.path.basename(f).split('.')[0]

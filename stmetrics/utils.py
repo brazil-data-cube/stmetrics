@@ -4,9 +4,9 @@ import numpy
 def fixseries(timeseries, nodata=-9999):
     """This function ajusts the time series to polar transformation.
 
-    As some time series may have very significant noises (such as spikes), when coverted to \
-    polar space it may produce an inconsistent geometry. To avoid this issue, \
-    this function removes this spikes.
+    As some time series may have very significant noises (such as spikes), when
+    coverted to polar space it may produce an inconsistent geometry.
+    To avoid this issue, this function removes this spikes.
 
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray
@@ -100,7 +100,7 @@ def get_list_of_points(timeseries):
     :return list_of_observations: Numpy array of lists of observations after \
     polar transformation.
 
-    :return list_of_angles: Numpy array of lists of angles after polar \
+    :return list_of_angles: Numpy array of lists of angles after polar
     transformation.
     """
 
@@ -112,8 +112,8 @@ def get_list_of_points(timeseries):
 
 
 def check_input(timeseries):
-    """This function checks the input and raises one exception if it is too short \
-    or has the wrong type.
+    """This function checks the input and raises one exception if it is too
+    short or has the wrong type.
 
     :param timeseries: Your time series.
     :type timeseries: numpy.ndarray.
@@ -126,7 +126,7 @@ def check_input(timeseries):
         if timeseries.shape[0] > timeseries.shape[1]:
             dim = 0
         else:
-            dim =1
+            dim = 1
     elif dimensions == 1:
         dim = 0
     else:
@@ -147,13 +147,13 @@ def check_input(timeseries):
 
 def file_to_da(filepath):
     import re
-    import pandas
-    import rasterio
+    # import pandas
+    # import rasterio
     import xarray
 
     # Open image
     da = xarray.open_rasterio(filepath)
-    transform = da.attrs['transform']
+    # transform = da.attrs['transform']
 
     # find datetime
     match = re.findall(r'\d{4}-\d{2}-\d{2}', filepath)[-1]
@@ -182,8 +182,8 @@ def img2xarray(path, band):
 
 
 def bdc2xarray(cube_path, list_bands):
-    """This function reads a path with BDC ARD (Brazil Data Cube Analysis Ready Data) \
-    and creates an xarray dataset.
+    """This function reads a path with BDC ARD (Brazil Data Cube Analysis
+    Ready Data) and creates an xarray dataset.
 
     :param cube_path: Path of folder with images.
     :type cube_path: string
@@ -251,7 +251,7 @@ def error_fractal():
 def list_metrics():
     """This function lists the available metrics in stmetrics.
     """
-    import stmetrics
+    # import stmetrics
     metrics = [*error_basics().keys(),
                *error_polar().keys(),
                *error_fractal().keys()]

@@ -94,3 +94,9 @@ ENV/
 
 # Vs Code
 .vscode/
+
+# Poetry
+poetry.lock
+
+# others
+TODO
