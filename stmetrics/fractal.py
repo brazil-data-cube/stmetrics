@@ -1,16 +1,16 @@
 import numpy
-from .utils import fixseries, truncate
+from stmetrics.utils import fixseries, truncate
 
 
 def ts_fractal(timeseries, funcs=['all'], nodata=-9999):
     """This function computes 4 fractal dimensions and the hurst exponential.
 
-        - DFA: measures the Hurst parameter H, which is similar to the \
+        - DFA: measures the Hurst parameter H, which is similar to the
         Hurst exponent.
 
-        - HE: self-similarity measure that assess long-range dependence in a \
+        - HE: self-similarity measure that assess long-range dependence in a
         time series.
-        
+
         - KFD: This algorirhm computes the FD using Katz algorithm.
 
     :param timeseries: Time series.
@@ -65,11 +65,11 @@ def dfa_fd(timeseries, nvals=None,  overlap=True, order=1, nodata=-9999):
 
     .. Note::
 
-        This function uses the Detrended Fluctuation Analysis (DFA) \
-        implementation from the Nolds package. Due to time series \
-        characteristcs we use by default the 'RANSAC' \
+        This function uses the Detrended Fluctuation Analysis (DFA)
+        implementation from the Nolds package. Due to time series
+        characteristcs we use by default the 'RANSAC'
         fitting method as it is more robust to outliers.
-        For more details regarding the hurst implementation, check Nolds \
+        For more details regarding the hurst implementation, check Nolds
         documentation page.
 
     """
@@ -90,10 +90,10 @@ def hurst_exp(timeseries, nvals=None, nodata=-9999):
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-    
+
     :param nvals: Sizes of subseries to use.
     :type nvals: int
-    
+
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 
@@ -125,7 +125,7 @@ def katz_fd(timeseries, nodata=-9999):
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
-    
+
     :param nodata: nodata of the time series. Default is -9999.
     :type nodata: int
 

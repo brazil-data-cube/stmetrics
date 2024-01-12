@@ -1,9 +1,11 @@
 import numpy
-from .utils import fixseries, truncate
+from stmetrics.utils import fixseries, truncate
 
 
 def ts_basics(timeseries, funcs=["all"], nodata=-9999):
-    """This function compute all basic metrics in a single call, returning a dictionary:
+    """This function compute all basic metrics in a single call, returning a
+    dictionary:
+
         - "Max" - Maximum value of the time series.
 
         - "Min" - Minimum value of the time series.
@@ -31,7 +33,7 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
         - "IQR" - Interquaritle range (IQR) of the time series.
 
         - "FQR" - First quartile of the time series.
-        
+
         - "SQR" - Second quartile of the time series.
 
         - "TQR" - Third quaritle of the time series.
@@ -47,7 +49,7 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
 
     out_metrics = dict()
 
-    metrics_count = 15
+    # metrics_count = 15
 
     if "all" in funcs:
         funcs = [
@@ -78,8 +80,8 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
 
 
 def mean_ts(timeseries, nodata=-9999):
-    """Average value (mean) of the time series, considering only valid \
-    values. When nodata is found, it is not included in N value (for all functions). 
+    """Average value (mean) of the time series, considering only valid values.
+    When nodata is found, it is not included in N value (for all functions).
 
     :param timeseries: Time series.
     :type timeseries: numpy.ndarray
